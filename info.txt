@@ -1,0 +1,130 @@
+!!! TENTO SOUBOR OBSAHUJE DŮLEŽITÉ INFO OHLEDNĚ PROJEKTU. SLOUŽÍ POUZE PRO ČLENY TÝMU, NEBUDE SE ODEVZDÁVAT !!! 
+
+-----------------------------------------------------------------------------------------------------------------
+
+DOKUMENTACE{
+
+    Omezení
+    !   
+        Rozsah 3 - 5 stran 
+        Nepopisovat záležitosti obecně známé či přednášené na fakultě, chtějí náš postup, naše řešení.  
+        Nepoužívat obrázky, které nejsou naše.
+        V rámci dokumentace bude rovněž vzat v úvahu stav kódu jako jeho čitelnost, srozumitelnost a dostatečné, ale nikoli přehnané komentáře.
+    !
+
+
+    Nutný obsah dokumentace  (povinné tabulky a diagramy se nezapočítávají do doporučeného rozsahu){
+        |
+        |-----1. strana: jména, příjmení a přihlašovací jména řešitelů (označení vedoucího) + údaje
+        |       o rozdělení bodů, identifikace varianty zadání ve tvaru “Tým login_vedoucího,
+        |       varianta 𝑋” a výčet identifikátorů implementovaných rozšíření.
+        |
+        |-----Rozdělení práce mezi členy týmu (uvedení kdo a jak se podílel na jednotlivých částech
+        |       projektu; povinně zdůvodnit odchylky od rovnoměrného rozdělení bodů).
+        |
+        |-----Diagram konečného automatu, který specifikuje lexikální analyzátor.
+        |
+        |-----LL-gramatika, LL-tabulka a precedenční tabulka, podle kterých jsme implementovali
+        |       náš syntaktický analyzátor
+        |
+        |-----Stručný popis členění implementačního řešení včetně názvů souborů, kde jsou jednotlivé části 
+        |       včetně povinných implementovaných metod překladače k nalezení.
+
+
+    }
+
+    Hlavní témata dokumentace{
+
+        Popis návrhu
+            |
+            |-----Části překladače
+            |
+            |-----Předávání informací mezi jednotlivými částmi překladače
+            |
+        Implementace
+            |
+            |-----Použité datové struktury
+            |
+            |-----Tabulka symbolů
+            |
+            |-----Generování kódu
+            |
+        Others
+            |
+            |-----Vývojový cyklus
+            |
+            |-----Způsob práce v týmu
+            |
+            |-----Speciální použité techniky a algoritmy, různé odchylky od přednášené látky / tradičních přístupů
+            |
+            |-----Citace literatury, reference na čerpané zdroje včetně správné citace převzatých částí (obrázky, magické konstanty, vzorce)
+    }
+
+}
+
+-----------------------------------------------------------------------------------------------------------------
+
+BODOVÉ ROZDĚLENÍ{
+    
+    Je definováno v souboru 'rozdeleni'
+    Jedná se o procentuální přidělení bodů
+    Soubor bude vypadat nějak takto:
+    
+        NUM...procentuální rozdělení bodů v rozmezí 0 - 25
+         ___________________
+        |                   |
+        |   xlogin00:NUM    |
+        |   xlogin00:NUM    |
+        |   xlogin00:NUM    |
+        |   xlogin00:NUM    |
+        |___________________|
+    
+        Za každým NUM je potřeba udělat UNIXové odřádkování, nikoli Windowsovské
+        Mezi dvojtečkou a levou/pravou stranou není žádná mezera
+}
+
+-----------------------------------------------------------------------------------------------------------------
+
+ODEVZDÁNÍ{
+
+    Projekt odevzdává leader
+    Všechny odevzdané soubory budou zkomprimovány ZIP, TAR+GZIP nebo TAR+BZIP do jediného archivu
+
+    Výsledný soubor tedy bude jedním z těchto formátů:
+
+         ___________________
+        |                   |
+        |   xlogin00.zip    |
+        |   xlogin00.tgz    |
+        |   xlogin00.tbz    |    
+        |___________________|
+    
+    Archiv nesmí obsahovat adresářovou strukturu ani speciální či spustitelné soubory
+        
+        
+}
+
+-----------------------------------------------------------------------------------------------------------------
+
+PŘEKLAD + TESTY + SOUBORY{
+
+    Bude se překládat pomocí gcc
+    Hodnocení proběhne na Merlinovi
+    Řešení musí obsahovat 'Makefile'
+
+
+    Úvod všech zdrojových textů musí obsahovat zakomentovaný název projektu, přihlašovací jména a 
+        jména studentů, kteří se na daném souboru skutečně autorsky podíleli
+
+    Veškerá chybová hlášení vzniklá v průběhu činnosti překladače budou vždy vypisována na 
+        standardní chybový výstup
+
+    Veškeré texty tištěné řídicím programem budou vypisovány na standardní výstup, pokud není 
+        explicitně řečeno jinak
+
+    Kromě chybových/ladicích hlášení vypisovaných na standardní chybový výstup nebude generovaný 
+        mezikód přikazovat výpis žádných znaků či dokonce celých textů, které nejsou přímo předepsány 
+        řídicím programem
+}
+
+-----------------------------------------------------------------------------------------------------------------
