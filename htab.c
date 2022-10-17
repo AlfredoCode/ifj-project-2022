@@ -1,3 +1,11 @@
+/*
+ * =================================================== *
+ * Name:       htab.c                                  *
+ * Authors:    xsafar27                                * 
+ * Last modif: 10/17/2022                              *
+ * =================================================== *
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
