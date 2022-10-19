@@ -16,11 +16,6 @@
 #include <string.h>     // size_t
 #include <stdbool.h>    // bool
 
-// Tabulka:
-struct htab;                    // neúplná deklarace struktury - uživatel nevidí obsah
-typedef struct htab htab_t;     // typedef podle zadání
-
-// Typy:
 typedef const char * htab_key_t;        // typ klíče
 typedef int htab_value_t;               // typ hodnoty
 
@@ -30,6 +25,17 @@ typedef struct htab_pair {
     htab_value_t  value;        // asociovaná hodnota
 } htab_pair_t;                  // typedef podle zadání
 
+// Struktury
+typedef struct htab_item {
+    htab_pair_t *pair;
+    struct htab_item *next;
+} htab_item;
+
+typedef struct htab {
+    int size;
+    int arr_size;
+    htab_item **arr_ptr;
+} htab_t;
 // Rozptylovací (hash) funkce (stejná pro všechny tabulky v programu)
 // Pokud si v programu definujete stejnou funkci, použije se ta vaše.
 size_t htab_hash_function(htab_key_t str);
@@ -52,16 +58,4 @@ void htab_for_each(const htab_t * t, void (*f)(htab_pair_t *data));
 
 void htab_clear(htab_t * t);    // ruší všechny záznamy
 void htab_free(htab_t * t);     // destruktor tabulky
-
-// Struktury
-typedef struct htab_item {
-    htab_pair_t *pair;
-    struct htab_item *next;
-} htab_item;
-
-typedef struct htab {
-    int size;
-    int arr_size;
-    htab_item **arr_ptr;
-} htab_t;
 #endif // __HTAB_H__
