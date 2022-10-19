@@ -155,6 +155,7 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
         ptr = item;
     }
 
+    /* commented out unused resize
     int sum = 0;
     int amn = 0;
     htab_item *currentPtr = NULL;
@@ -169,8 +170,9 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
         }
     }
     if (sum/amn > AVG_MAX){
-        // htab_resize(t, t->arr_size * 2);
+        htab_resize(t, t->arr_size * 2);
     }
+    */
 
     return ptr->pair;
 }
@@ -179,16 +181,15 @@ bool htab_erase(htab_t *t, htab_key_t key)
 {
     size_t index = htab_hash_function(key) % htab_bucket_count(t);
     
-    htab_item *currentPtr = t->arr_ptr[index];
-    htab_item *secondaryPtr;
-    while(currentPtr){
-        if(currentPtr->pair->key == key){
-            secondaryPtr = currentPtr;
-            currentPtr = currentPtr->next;
-            secondaryPtr->next = currentPtr->next;
-            free(currentPtr->pair);
-            free(currentPtr);
+    htab_item *delItem = t->arr_ptr[index];
 
+    while(delItem){
+        if(!strcmp(delItem->pair->key, key)){
+            t->arr_ptr[index] = delItem->next;
+            free(delItem->pair);
+            free(delItem);
+
+            /* commented out unused resize
             int tmp = 0;
             int sum = 0;
             htab_item *currentPtr;
@@ -206,13 +207,14 @@ bool htab_erase(htab_t *t, htab_key_t key)
             }
 
             if (sum/tmp < AVG_MIN){
-                // htab_resize(t, t->arr_size/2);
+                htab_resize(t, t->arr_size/2);
                 return htab_find(t, key);
             }
+            */
 
             return true;
         }
-        currentPtr = currentPtr->next;
+        delItem = delItem->next;
     }
     return false;
 }
