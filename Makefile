@@ -1,3 +1,11 @@
+#
+# =================================================== #
+# Name:       Makefile                                # 
+# Authors:    xsafar27                                #
+# Last modif: 10/19/2022                              #
+# =================================================== #
+#
+
 testFile = run_test
 CC = gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -lm -fcommon -g

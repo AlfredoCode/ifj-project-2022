@@ -1,3 +1,11 @@
+/*
+ * =================================================== *
+ * Name:       run_test.c                              *
+ * Authors:    xsafar27                                * 
+ * Last modif: 10/19/2022                              *
+ * =================================================== *
+ */
+
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
