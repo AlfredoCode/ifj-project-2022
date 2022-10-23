@@ -15,6 +15,7 @@
 
 #include <string.h>     // size_t
 #include <stdbool.h>    // bool
+#include "scanner.h"
 
 typedef const char * htab_key_t;        // typ klíče
 typedef int htab_value_t;               // typ hodnoty
@@ -27,15 +28,16 @@ typedef struct htab_pair {
 
 // Struktury
 typedef struct htab_item {
-    htab_pair_t *pair;
+    htab_pair_t pair;
     struct htab_item *next;
-} htab_item;
+} htab_item_t;
 
 typedef struct htab {
     int size;
     int arr_size;
-    htab_item **arr_ptr;
+    htab_item_t **arr_ptr;
 } htab_t;
+
 // Rozptylovací (hash) funkce (stejná pro všechny tabulky v programu)
 // Pokud si v programu definujete stejnou funkci, použije se ta vaše.
 size_t htab_hash_function(htab_key_t str);

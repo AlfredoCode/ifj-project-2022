@@ -15,7 +15,7 @@
 
 #include "htab.h"
 
-#define HTABSIZE 20
+#define HTABSIZE 5
 
 static int htab_setup(void **state)
 {
@@ -48,6 +48,7 @@ void htab_insert_test(void **state)
 
 void htab_insert_multiple_test(void **state)
 {
+    htab_lookup_add(*state, "Ananas");
     htab_lookup_add(*state, "Broskev");
     htab_lookup_add(*state, "Mandarinka");
     htab_lookup_add(*state, "Mango");
@@ -58,18 +59,35 @@ void htab_insert_multiple_test(void **state)
 
     pair = htab_find(*state, "Ananas");
     assert_string_equal(pair->key, "Ananas");
+    assert_int_equal(pair->value, 2);
 }
 
 void htab_erase_test(void **state)
 {
-    htab_pair_t *pair = htab_find(*state, "Mandarinka");
-    assert_string_equal(pair->key, "Mandarinka");
-
     bool erase = htab_erase(*state, "Mandarinka");
     assert_true(erase);
+}
 
-    pair = htab_find(*state, "Mandarinka");
-    assert_null(pair);
+void htab_resize_up_test(void **state)
+{
+    htab_lookup_add(*state, "Rajce");
+    htab_lookup_add(*state, "Jablko");
+    htab_lookup_add(*state, "Hruska");
+    htab_lookup_add(*state, "Pomeranc");
+    htab_lookup_add(*state, "Tresen");
+    htab_lookup_add(*state, "Visne");
+    htab_lookup_add(*state, "Svestka");
+    htab_lookup_add(*state, "Bluma");
+    htab_lookup_add(*state, "Sliva");
+    htab_lookup_add(*state, "Mirabelka");
+    htab_lookup_add(*state, "Broskev");
+    htab_lookup_add(*state, "Oskeruse");
+    htab_lookup_add(*state, "Mandle");
+    htab_lookup_add(*state, "Boruvka");
+    htab_lookup_add(*state, "Kastan");
+    htab_lookup_add(*state, "Brusinka");
+    
+    assert_int_equal(htab_bucket_count(*state), 5);
 }
 
 int main (void)
@@ -79,6 +97,7 @@ int main (void)
         cmocka_unit_test(htab_insert_test),
         cmocka_unit_test(htab_insert_multiple_test),
         cmocka_unit_test(htab_erase_test),
+        cmocka_unit_test(htab_resize_up_test),
     };
 
     cmocka_run_group_tests(htab, htab_setup, htab_teardown);

@@ -8,7 +8,7 @@
 
 testFile = run_test
 CC = gcc
-CFLAGS=-std=c99 -Wall -Wextra -pedantic -lm -fcommon -g
+CFLAGS=-std=c99 -Wall -Wextra -pedantic -g -O0
 
 # TESTS
 test:
