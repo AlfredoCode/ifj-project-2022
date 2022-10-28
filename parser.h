@@ -9,7 +9,7 @@ enum stat_type {
 };
 
 typedef struct statement {
-    stat_type type;
+    enum stat_type type;
     char* name;
     char* value;
 } stat_t;
