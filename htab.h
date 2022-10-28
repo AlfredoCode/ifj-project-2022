@@ -41,7 +41,7 @@ size_t htab_hash_function(htab_key_t str);
 htab_t *htab_init(size_t n);                    // konstruktor tabulky
 size_t htab_size(const htab_t * t);             // počet záznamů v tabulce
 size_t htab_bucket_count(const htab_t * t);     // velikost pole
-void htab_resize(htab_t *t, size_t newn);       // změna velikosti pole
+// void htab_resize(htab_t *t, size_t newn);       // změna velikosti pole
                                                 // (umožňuje rezervaci místa)
 
 stat_t * htab_find(htab_t * t, htab_key_t key);  // hledání

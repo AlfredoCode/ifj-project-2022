@@ -12,7 +12,6 @@
 #include <stdint.h>
 
 #include "htab.h"
-#include "scanner.h"
 
 #define AVG_MIN 3
 #define AVG_MAX 5
@@ -70,6 +69,7 @@ size_t htab_bucket_count(const htab_t *t)
  * Somehow, this thing segfaults no matter what I try.
  * Lets hope we wont need to resize the htab.
  */
+/* 
 void htab_resize(htab_t *t, size_t newn)
 {
     htab_t *newTab = htab_init(newn);
@@ -90,23 +90,23 @@ void htab_resize(htab_t *t, size_t newn)
     
     free(t);
     *t = *newTab;
-}
+} */
 
-htab_pair_t *htab_find(htab_t *t, htab_key_t key)
+stat_t *htab_find(htab_t *t, htab_key_t key)
 {
     size_t index = htab_hash_function(key) % htab_bucket_count(t);
 
     htab_item_t *currentPtr = t->arr_ptr[index];
     while(currentPtr){
-        if(!strcmp(currentPtr->pair.key, key)){
-            return &currentPtr->pair;
+        if(!strcmp(currentPtr->statement.name, key)){
+            return &currentPtr->statement;
         }
         currentPtr = currentPtr->next;
     }
     return NULL;
 }
 
-htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
+stat_t *htab_lookup_add(htab_t *t, htab_key_t key)
 {
     size_t index = htab_hash_function(key) % t->arr_size;
 
@@ -171,7 +171,7 @@ bool htab_erase(htab_t *t, htab_key_t key)
     return false;
 }
 
-void htab_for_each(const htab_t *t, void (*f)(htab_pair_t *data))
+void htab_for_each(const htab_t *t, void (*f)(stat_t *data))
 {
     for(int i = 0; i < t->arr_size; i++){
         if (t->arr_ptr[i] == NULL){
