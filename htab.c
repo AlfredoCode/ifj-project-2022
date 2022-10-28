@@ -106,16 +106,16 @@ stat_t *htab_find(htab_t *t, htab_key_t key)
     return NULL;
 }
 
-stat_t *htab_lookup_add(htab_t *t, htab_key_t key)
+stat_t *htab_lookup_add(htab_t *t, htab_key_t name)
 {
-    size_t index = htab_hash_function(key) % t->arr_size;
+    size_t index = htab_hash_function(name) % t->arr_size;
 
     htab_item_t *ptr = t->arr_ptr[index];
     
     while(ptr){
-        if(!strcmp(ptr->pair.key, key)){
-            ptr->pair.value++;
-            return &ptr->pair;
+        if(!strcmp(ptr->statement.name, name)){
+            fprintf(stderr, "Statement of the name already inserted!");
+            return NULL;
         }
         ptr = ptr->next;
     }
@@ -128,10 +128,8 @@ stat_t *htab_lookup_add(htab_t *t, htab_key_t key)
 
     ptr->next = t->arr_ptr[index];
     t->arr_ptr[index] = ptr;
-    ptr->pair.key = malloc(strlen(key) + 1);
-    strcpy((char*) ptr->pair.key, key);
-
-    ptr->pair.value = 1;
+    ptr->statement.name = malloc(strlen(name) + 1);
+    strcpy((char*) ptr->statement.name, name);
 
     t->size++;
 
@@ -141,18 +139,18 @@ stat_t *htab_lookup_add(htab_t *t, htab_key_t key)
     }
     */
 
-    return &ptr->pair;
+    return &ptr->statement;
 }
 
-bool htab_erase(htab_t *t, htab_key_t key)
+bool htab_erase(htab_t *t, htab_key_t name)
 {
-    size_t index = htab_hash_function(key) % t->arr_size;
+    size_t index = htab_hash_function(name) % t->arr_size;
     htab_item_t *item = t->arr_ptr[index];
 
     while (item) {
-        if (!strcmp(item->pair.key, key)){
+        if (!strcmp(item->statement.name, name)){
             t->arr_ptr[index] = item->next;
-            free((char*) item->pair.key);
+            free((char*) item->statement.name);
             free(item);
 
             t->size--;
@@ -181,7 +179,7 @@ void htab_for_each(const htab_t *t, void (*f)(stat_t *data))
         htab_item_t *current_ptr = t->arr_ptr[i];
 
         while(current_ptr){
-            f(&current_ptr->pair);
+            f(&current_ptr->statement);
             current_ptr = current_ptr->next;
         }
     }
@@ -200,7 +198,7 @@ void htab_clear(htab_t *t)
         while(current_ptr){
             to_remove = current_ptr;
             current_ptr = current_ptr->next;
-            free((void* const)to_remove->pair.key);
+            free((void* const)to_remove->statement.name);
             free(to_remove);
         }
 
