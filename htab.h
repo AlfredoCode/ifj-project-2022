@@ -18,12 +18,11 @@
 #include "parser.h"
 
 typedef const char * htab_key_t;        // typ klíče
-typedef int htab_value_t;               // typ hodnoty
 
 
 // Struktury
 typedef struct htab_item {
-    stat_t statement;
+    stat_t *statement;
     struct htab_item *next;
 } htab_item_t;
 
@@ -44,8 +43,8 @@ size_t htab_bucket_count(const htab_t * t);     // velikost pole
 // void htab_resize(htab_t *t, size_t newn);       // změna velikosti pole
                                                 // (umožňuje rezervaci místa)
 
-stat_t * htab_find(htab_t * t, htab_key_t key);  // hledání
-stat_t * htab_lookup_add(htab_t * t, htab_key_t key);
+stat_t * htab_find(htab_t *t, htab_key_t key);  // hledání
+stat_t * htab_lookup_add(htab_t *t, htab_key_t key);
 
 bool htab_erase(htab_t * t, htab_key_t key);    // ruší zadaný záznam
 
