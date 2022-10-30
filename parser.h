@@ -34,7 +34,7 @@ typedef struct statement {
 
 typedef struct tokenElement{
     int type;
-    char* data;
+    void* attribute;
     struct tokenElement *next;
     struct tokenElement *previous;
 }token_El;
@@ -50,8 +50,8 @@ typedef enum {
 }tokenTypes;
 
 void init(token_T *tokenList);
-int getToken(token_T *tokenList);
-void insertToken(token_T *tokenList, int type);
+token_El *getToken(token_T *tokenList);
+void insertToken(token_T *tokenList, int type, void *attrib);
 
 
 

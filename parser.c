@@ -13,6 +13,7 @@
 #include "parser.h"
 #include "scanner.h"
 
+
 token_T tokenList;
 
 
@@ -24,7 +25,7 @@ void init(token_T *tokenList){
     
 }
 
-void insertToken(token_T *tokenList, int type){
+void insertToken(token_T *tokenList, int type, void *attrib){
     token_El *token = (token_El *)malloc(sizeof(*token));
     if(token == NULL){
         fprintf(stderr,"Memmory allocation failure\n");
@@ -32,22 +33,36 @@ void insertToken(token_T *tokenList, int type){
     }
     token->type = type;  
     token->next = tokenList->firstElement;
+
+    
+    
+    token->attribute = attrib;
+
+    // THIS SHIT IS CURSED
+    // printf("INSIDE Token type: %d with data: %s on address %p\n", token->type, *(char **)&token->attribute, token->attribute);
+    
+    
     token->previous = NULL;
     if(tokenList->lastElement != NULL){
        tokenList->firstElement->previous = token;  
     }
     else{
         tokenList->lastElement = token;
-        tokenList->activeElement = token;
+        
     } 
+    tokenList->activeElement = token;
     tokenList->firstElement = token;   
+    
 }
 
-int getToken(token_T *tokenList){
+token_El *getToken(token_T *tokenList){
     // We will not lose any token if we change activeElement only
     token_El *token = tokenList->activeElement;
-    tokenList->activeElement = token->previous;
-    return token->type;
+    if(token->previous != NULL){
+        tokenList->activeElement = token->previous;
+    }
+    
+    return token;
 }
 
 int prologCheck(){
@@ -60,22 +75,27 @@ int main(){
     
     init(&tokenList);
     
-    int token;
+    token_El *token;
 
+
+    // LEXER
+    // For int
+        int val = 5;
+    //For string
+        char *str = "SuperID";
+
+        char* empty = "";
 
     // SIMULATION OF TOKEN LIST
-    insertToken(&tokenList, DOLLAR);
-    insertToken(&tokenList, ID);
-    insertToken(&tokenList, EQ);
-    insertToken(&tokenList, INT);
-    insertToken(&tokenList, COMMA);
-    insertToken(&tokenList, TOK_EOF);
+    insertToken(&tokenList, DOLLAR, &empty);
+    insertToken(&tokenList, ID, &str); 
+    insertToken(&tokenList, EQ, &empty);    
+    insertToken(&tokenList, INT, &val);
+    insertToken(&tokenList, COMMA, &empty);
+    insertToken(&tokenList, TOK_EOF, &empty);
 
     token = getToken(&tokenList); // GETING THE FIRST TOKEN
 
-    switch(token){
-
-    }
 
 
 
@@ -93,9 +113,26 @@ int main(){
 
 
     tokenList.activeElement = tokenList.lastElement;
-    // while((token = getToken(&tokenList)) != TOK_EOF){
-    //     printf("Token Type %d\n", token);
-    // }
+    while((token = getToken(&tokenList))){
+
+        if(token->type == TOK_EOF){
+            break;
+        }
+        
+        switch(token->type){
+            case ID: case DOLLAR: case EQ: case COMMA:
+                printf("Token type: %d\t Data: %s Memory %p\n", token->type, *(char**)token->attribute, token->attribute);
+                break;
+            case INT:
+                
+                printf("Token type: %d\t Data: %d Memory %p\n", token->type, *(int*)token->attribute, token->attribute);
+                break;
+
+            default:
+                break;
+        }
+
+    }
    
     
     
