@@ -2,7 +2,8 @@
  * =================================================== *
  * Name:       parser.h                                *
  * Authors:    xsafar27                                * 
- * Last modif: 10/24/2022                              *
+ *             xhofma11                                *
+ * Last modif: 10/29/2022                              *
  * =================================================== *
  */
 
@@ -10,12 +11,12 @@
 #define __PARSER_H__
 
 // Enum for statement types
-enum stat_type {
+typedef enum {
     t_fun,
     t_int,
     t_float,
     t_str,
-};
+}stat_type;
 
 // Internal structure used to store variables and functions inside htab
 typedef struct statement {
@@ -23,6 +24,44 @@ typedef struct statement {
     char* name;
     char* value;
 } stat_t;
+
+
+
+
+
+// FOR INSERTING TOKENS PURPOSE UNTIL LEXER IS DONE
+
+
+typedef struct tokenElement{
+    int type;
+    char* data;
+    struct tokenElement *next;
+    struct tokenElement *previous;
+}token_El;
+
+typedef struct {
+	token_El* firstElement;
+    token_El* lastElement;
+    token_El* activeElement;
+} token_T;
+
+typedef enum {
+    DOLLAR, ID, EQ, INT, COMMA, TOK_EOF, TOK_FUNCTION, LBRACKET, RBRACKET
+}tokenTypes;
+
+void init(token_T *tokenList);
+int getToken(token_T *tokenList);
+void insertToken(token_T *tokenList, int type);
+
+
+
+
+// ACTUAL FUNCTIONS USED IN PARSER
+
+
+int prog(); // Entry point to LL grammar rules
+int prologCheck(); // First token has to be prolog
+
 
 #endif  // __PARSER_H__
 
