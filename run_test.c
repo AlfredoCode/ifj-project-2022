@@ -2,7 +2,7 @@
  * =================================================== *
  * Name:       run_test.c                              *
  * Authors:    xsafar27                                * 
- * Last modif: 10/19/2022                              *
+ * Last modif: 10/31/2022                              *
  * =================================================== *
  */
 
@@ -59,6 +59,28 @@ void htab_erase_test(void **state)
     assert_false(htab_erase(*state, "$broskev"));
 }
 
+void htab_find_existing_test(void **state)
+{
+    stat_t *retStat = htab_find(*state, "$ananas");
+    assert_string_equal("$ananas", retStat->name);
+}
+
+void htab_find_nonexisting_test(void **state)
+{
+    stat_t *retStat = htab_find(*state, "$okurka");
+    assert_null(retStat);
+}
+
+void print_stat(stat_t *data)
+{
+    printf("%s\n", data->name);
+}
+
+void htab_for_each_test(void **state)
+{
+    htab_for_each(*state, *print_stat);
+}
+
 int main (void)
 {
     const struct CMUnitTest htab[] = {
@@ -66,6 +88,9 @@ int main (void)
         cmocka_unit_test(htab_insert_again_test),
         cmocka_unit_test(htab_insert_second_test),
         cmocka_unit_test(htab_erase_test),
+        cmocka_unit_test(htab_find_existing_test),
+        cmocka_unit_test(htab_find_nonexisting_test),
+        cmocka_unit_test(htab_for_each_test)
     };
 
     cmocka_run_group_tests(htab, htab_setup, htab_teardown);
