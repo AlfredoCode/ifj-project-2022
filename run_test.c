@@ -71,6 +71,21 @@ void htab_find_nonexisting_test(void **state)
     assert_null(retStat);
 }
 
+void htab_insert_lots(void **state)
+{
+    htab_lookup_add(*state, "$jablko");
+    htab_lookup_add(*state, "$okurka");
+    htab_lookup_add(*state, "$feferonka");
+    htab_lookup_add(*state, "$pazitka");
+    htab_lookup_add(*state, "$avokado");
+    htab_lookup_add(*state, "$celer");
+    htab_lookup_add(*state, "$mrkev");
+    htab_lookup_add(*state, "$brambora");
+    htab_lookup_add(*state, "$tresen");
+
+    assert_int_equal(10, htab_size(*state));
+}
+
 void print_stat(stat_t *data)
 {
     printf("%s\n", data->name);
@@ -90,6 +105,7 @@ int main (void)
         cmocka_unit_test(htab_erase_test),
         cmocka_unit_test(htab_find_existing_test),
         cmocka_unit_test(htab_find_nonexisting_test),
+        cmocka_unit_test(htab_insert_lots),
         cmocka_unit_test(htab_for_each_test)
     };
 
