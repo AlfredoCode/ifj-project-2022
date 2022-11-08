@@ -161,7 +161,8 @@ bool htab_erase(htab_t *t, htab_key_t name)
                 prev->next = item->next;
             }
             
-            free((char*) item->statement->name);
+            free(item->statement->name);
+            free(item->statement);
             free(item);
 
             t->size--;
