@@ -2,7 +2,7 @@
  * =================================================== *
  * Name:       htab.c                                  *
  * Authors:    xsafar27                                * 
- * Last modif: 10/23/2022                              *
+ * Last modif: 11/08/2022                              *
  * =================================================== *
  */
 
@@ -34,12 +34,12 @@ htab_t *htab_init(size_t n)
 
     if(items == NULL){
         fprintf(stderr, "Failed to malloc items in htab_init.c");
-        return NULL;
+        exit(99);
     }
 
     if(htab == NULL){
         fprintf(stderr, "Failed to malloc htab in htab_init.c");
-        return NULL;
+        exit(99);
     }
 
     htab->arr_ptr = items;
@@ -114,8 +114,7 @@ stat_t *htab_lookup_add(htab_t *t, htab_key_t name)
     
     while(ptr){
         if(!strcmp(ptr->statement->name, name)){
-            fprintf(stderr, "Statement of the name already inserted!\n");
-            return NULL;
+            return ptr->statement;
         }
         ptr = ptr->next;
     }
@@ -123,7 +122,7 @@ stat_t *htab_lookup_add(htab_t *t, htab_key_t name)
     ptr = malloc(sizeof(htab_item_t));
     if (!ptr) {
         fprintf(stderr, "Failed to alloc ptr in htab_lookup_add\n");
-        return NULL;
+        exit(99);
     }
 
     stat_t *statement = malloc(sizeof(stat_t));
@@ -151,10 +150,17 @@ bool htab_erase(htab_t *t, htab_key_t name)
 {
     size_t index = htab_hash_function(name) % t->arr_size;
     htab_item_t *item = t->arr_ptr[index];
+    htab_item_t *prev = NULL;
 
     while (item) {
         if (!strcmp(item->statement->name, name)){
-            t->arr_ptr[index] = item->next;
+            
+            if (!prev) {
+                t->arr_ptr[index] = item->next;
+            } else {
+                prev->next = item->next;
+            }
+            
             free((char*) item->statement->name);
             free(item);
 
@@ -169,6 +175,7 @@ bool htab_erase(htab_t *t, htab_key_t name)
             */
         return true;
         }
+        prev = item;
         item = item->next;
     }
     return false;

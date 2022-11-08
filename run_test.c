@@ -44,7 +44,7 @@ void htab_insert_test(void **state)
 void htab_insert_again_test(void **state)
 {
     stat_t *retStat = htab_lookup_add(*state, "$ananas");
-    assert_null(retStat);
+    assert_string_equal("$ananas", retStat->name);
 }
 
 void htab_insert_second_test(void **state)
