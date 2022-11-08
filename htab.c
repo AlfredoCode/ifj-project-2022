@@ -2,7 +2,7 @@
  * =================================================== *
  * Name:       htab.c                                  *
  * Authors:    xsafar27                                * 
- * Last modif: 10/23/2022                              *
+ * Last modif: 11/08/2022                              *
  * =================================================== *
  */
 
@@ -12,7 +12,6 @@
 #include <stdint.h>
 
 #include "htab.h"
-#include "scanner.h"
 
 #define AVG_MIN 3
 #define AVG_MAX 5
@@ -35,12 +34,12 @@ htab_t *htab_init(size_t n)
 
     if(items == NULL){
         fprintf(stderr, "Failed to malloc items in htab_init.c");
-        return NULL;
+        exit(99);
     }
 
     if(htab == NULL){
         fprintf(stderr, "Failed to malloc htab in htab_init.c");
-        return NULL;
+        exit(99);
     }
 
     htab->arr_ptr = items;
@@ -70,6 +69,7 @@ size_t htab_bucket_count(const htab_t *t)
  * Somehow, this thing segfaults no matter what I try.
  * Lets hope we wont need to resize the htab.
  */
+/* 
 void htab_resize(htab_t *t, size_t newn)
 {
     htab_t *newTab = htab_init(newn);
@@ -90,48 +90,50 @@ void htab_resize(htab_t *t, size_t newn)
     
     free(t);
     *t = *newTab;
-}
+} */
 
-htab_pair_t *htab_find(htab_t *t, htab_key_t key)
+stat_t *htab_find(htab_t *t, htab_key_t key)
 {
     size_t index = htab_hash_function(key) % htab_bucket_count(t);
 
     htab_item_t *currentPtr = t->arr_ptr[index];
     while(currentPtr){
-        if(!strcmp(currentPtr->pair.key, key)){
-            return &currentPtr->pair;
+        if(!strcmp(currentPtr->statement->name, key)){
+            return currentPtr->statement;
         }
         currentPtr = currentPtr->next;
     }
     return NULL;
 }
 
-htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
+stat_t *htab_lookup_add(htab_t *t, htab_key_t name)
 {
-    size_t index = htab_hash_function(key) % t->arr_size;
+    size_t index = htab_hash_function(name) % t->arr_size;
 
     htab_item_t *ptr = t->arr_ptr[index];
     
     while(ptr){
-        if(!strcmp(ptr->pair.key, key)){
-            ptr->pair.value++;
-            return &ptr->pair;
+        if(!strcmp(ptr->statement->name, name)){
+            return ptr->statement;
         }
         ptr = ptr->next;
     }
     
     ptr = malloc(sizeof(htab_item_t));
     if (!ptr) {
-        fprintf(stderr, "Failed to alloc ptr in htab_lookup_add");
-        return NULL;
+        fprintf(stderr, "Failed to alloc ptr in htab_lookup_add\n");
+        exit(99);
     }
 
+    stat_t *statement = malloc(sizeof(stat_t));
+
+    statement->name = malloc(strlen(name) + 1);
+    strcpy(statement->name, name);
+
+    ptr->statement = statement;
     ptr->next = t->arr_ptr[index];
     t->arr_ptr[index] = ptr;
-    ptr->pair.key = malloc(strlen(key) + 1);
-    strcpy((char*) ptr->pair.key, key);
 
-    ptr->pair.value = 1;
 
     t->size++;
 
@@ -141,18 +143,26 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
     }
     */
 
-    return &ptr->pair;
+    return ptr->statement;
 }
 
-bool htab_erase(htab_t *t, htab_key_t key)
+bool htab_erase(htab_t *t, htab_key_t name)
 {
-    size_t index = htab_hash_function(key) % t->arr_size;
+    size_t index = htab_hash_function(name) % t->arr_size;
     htab_item_t *item = t->arr_ptr[index];
+    htab_item_t *prev = NULL;
 
     while (item) {
-        if (!strcmp(item->pair.key, key)){
-            t->arr_ptr[index] = item->next;
-            free((char*) item->pair.key);
+        if (!strcmp(item->statement->name, name)){
+            
+            if (!prev) {
+                t->arr_ptr[index] = item->next;
+            } else {
+                prev->next = item->next;
+            }
+            
+            free(item->statement->name);
+            free(item->statement);
             free(item);
 
             t->size--;
@@ -166,12 +176,13 @@ bool htab_erase(htab_t *t, htab_key_t key)
             */
         return true;
         }
+        prev = item;
         item = item->next;
     }
     return false;
 }
 
-void htab_for_each(const htab_t *t, void (*f)(htab_pair_t *data))
+void htab_for_each(const htab_t *t, void (*f)(stat_t *data))
 {
     for(int i = 0; i < t->arr_size; i++){
         if (t->arr_ptr[i] == NULL){
@@ -181,7 +192,7 @@ void htab_for_each(const htab_t *t, void (*f)(htab_pair_t *data))
         htab_item_t *current_ptr = t->arr_ptr[i];
 
         while(current_ptr){
-            f(&current_ptr->pair);
+            f(current_ptr->statement);
             current_ptr = current_ptr->next;
         }
     }
@@ -200,7 +211,8 @@ void htab_clear(htab_t *t)
         while(current_ptr){
             to_remove = current_ptr;
             current_ptr = current_ptr->next;
-            free((void* const)to_remove->pair.key);
+            free((void* const)to_remove->statement->name);
+            free(to_remove->statement);
             free(to_remove);
         }
 

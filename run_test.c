@@ -2,7 +2,7 @@
  * =================================================== *
  * Name:       run_test.c                              *
  * Authors:    xsafar27                                * 
- * Last modif: 10/19/2022                              *
+ * Last modif: 10/31/2022                              *
  * =================================================== *
  */
 
@@ -12,10 +12,12 @@
 #include <cmocka.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "htab.h"
+#include "parser.h"
 
-#define HTABSIZE 5
+#define HTABSIZE 10
 
 static int htab_setup(void **state)
 {
@@ -23,7 +25,6 @@ static int htab_setup(void **state)
     if (htab == NULL) { return -1; }
 
     *state = htab;
-
     return 0;
 }
 
@@ -34,70 +35,78 @@ static int htab_teardown(void **state)
 }
 
 
-void null_test_success(void **state)
-{
-}
-
-
 void htab_insert_test(void **state)
 {
-    htab_lookup_add(*state, "Ananas");
-    htab_pair_t *pair = htab_find(*state, "Ananas");
-    assert_string_equal(pair->key, "Ananas");
+    stat_t *retStat = htab_lookup_add(*state, "$ananas");
+    assert_string_equal("$ananas", retStat->name);
 }
 
-void htab_insert_multiple_test(void **state)
+void htab_insert_again_test(void **state)
 {
-    htab_lookup_add(*state, "Ananas");
-    htab_lookup_add(*state, "Broskev");
-    htab_lookup_add(*state, "Mandarinka");
-    htab_lookup_add(*state, "Mango");
-    htab_lookup_add(*state, "Hrozen");
+    stat_t *retStat = htab_lookup_add(*state, "$ananas");
+    assert_string_equal("$ananas", retStat->name);
+}
 
-    htab_pair_t *pair = htab_find(*state, "Mandarinka");
-    assert_string_equal(pair->key, "Mandarinka");
-
-    pair = htab_find(*state, "Ananas");
-    assert_string_equal(pair->key, "Ananas");
-    assert_int_equal(pair->value, 2);
+void htab_insert_second_test(void **state)
+{
+    stat_t *retStat = htab_lookup_add(*state, "$feferonka");
+    assert_string_equal("$feferonka", retStat->name);
 }
 
 void htab_erase_test(void **state)
 {
-    bool erase = htab_erase(*state, "Mandarinka");
-    assert_true(erase);
+    assert_true(htab_erase(*state, "$feferonka"));
+    assert_false(htab_erase(*state, "$broskev"));
 }
 
-void htab_resize_up_test(void **state)
+void htab_find_existing_test(void **state)
 {
-    htab_lookup_add(*state, "Rajce");
-    htab_lookup_add(*state, "Jablko");
-    htab_lookup_add(*state, "Hruska");
-    htab_lookup_add(*state, "Pomeranc");
-    htab_lookup_add(*state, "Tresen");
-    htab_lookup_add(*state, "Visne");
-    htab_lookup_add(*state, "Svestka");
-    htab_lookup_add(*state, "Bluma");
-    htab_lookup_add(*state, "Sliva");
-    htab_lookup_add(*state, "Mirabelka");
-    htab_lookup_add(*state, "Broskev");
-    htab_lookup_add(*state, "Oskeruse");
-    htab_lookup_add(*state, "Mandle");
-    htab_lookup_add(*state, "Boruvka");
-    htab_lookup_add(*state, "Kastan");
-    htab_lookup_add(*state, "Brusinka");
-    
-    assert_int_equal(htab_bucket_count(*state), 5);
+    stat_t *retStat = htab_find(*state, "$ananas");
+    assert_string_equal("$ananas", retStat->name);
+}
+
+void htab_find_nonexisting_test(void **state)
+{
+    stat_t *retStat = htab_find(*state, "$okurka");
+    assert_null(retStat);
+}
+
+void htab_insert_lots(void **state)
+{
+    htab_lookup_add(*state, "$jablko");
+    htab_lookup_add(*state, "$okurka");
+    htab_lookup_add(*state, "$feferonka");
+    htab_lookup_add(*state, "$pazitka");
+    htab_lookup_add(*state, "$avokado");
+    htab_lookup_add(*state, "$celer");
+    htab_lookup_add(*state, "$mrkev");
+    htab_lookup_add(*state, "$brambora");
+    htab_lookup_add(*state, "$tresen");
+
+    assert_int_equal(10, htab_size(*state));
+}
+
+void print_stat(stat_t *data)
+{
+    printf("%s\n", data->name);
+}
+
+void htab_for_each_test(void **state)
+{
+    htab_for_each(*state, *print_stat);
 }
 
 int main (void)
 {
     const struct CMUnitTest htab[] = {
-        cmocka_unit_test(null_test_success),
         cmocka_unit_test(htab_insert_test),
-        cmocka_unit_test(htab_insert_multiple_test),
+        cmocka_unit_test(htab_insert_again_test),
+        cmocka_unit_test(htab_insert_second_test),
         cmocka_unit_test(htab_erase_test),
-        cmocka_unit_test(htab_resize_up_test),
+        cmocka_unit_test(htab_find_existing_test),
+        cmocka_unit_test(htab_find_nonexisting_test),
+        cmocka_unit_test(htab_insert_lots),
+        cmocka_unit_test(htab_for_each_test)
     };
 
     cmocka_run_group_tests(htab, htab_setup, htab_teardown);
