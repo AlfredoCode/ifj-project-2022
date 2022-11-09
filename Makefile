@@ -12,7 +12,7 @@ CFLAGS := -std=c99 -Wall -Wextra -pedantic -g -O0
 
 # TESTS
 
-test: htab.o $(testFile).o
+test: $(testFile).o htab.o prec_stack.o
 	$(CC) $(CFLAGS) $^ -o $@ -l cmocka -L /usr/bin/lib
 
 test_run: test
@@ -22,9 +22,11 @@ test_verbose: test
 	./test
 
 # FILES
+$(testFile).o: $(testFile).c
+
 htab.o: htab.c
 
-$(testFile).o: $(testFile).c
+prec_stack.o: prec_stack.c
 
 # CLEANUP
 clean:
