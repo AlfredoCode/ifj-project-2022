@@ -2,7 +2,7 @@
  * =================================================== *
  * Name:       run_test.c                              *
  * Authors:    xsafar27                                * 
- * Last modif: 10/31/2022                              *
+ * Last modif: 11/09/2022                              *
  * =================================================== *
  */
 
@@ -15,14 +15,18 @@
 #include <stdlib.h>
 
 #include "htab.h"
+#include "prec_stack.h"
+#include "scanner.h"
 #include "parser.h"
 
 #define HTABSIZE 10
+#define PRECSTACKSIZE 50
 
+// SETUP & TEARDOWN
 static int htab_setup(void **state)
 {
     htab_t *htab = htab_init(HTABSIZE);
-    if (htab == NULL) { return -1; }
+    if (!htab) return -1;
 
     *state = htab;
     return 0;
@@ -34,7 +38,27 @@ static int htab_teardown(void **state)
     return 0;
 }
 
+static int prec_stack_setup(void **state)
+{
+    stack_t *stack = stackInit(PRECSTACKSIZE);
+    if (!stack) return -1;
 
+    *state = stack;
+    return 0;
+}
+
+static int prec_stack_teardown(void **state)
+{
+    while (!stackEmpty(*state)){
+        free(stackPop(*state));
+    }
+
+    stackClear(*state);
+    return 0; 
+}
+
+
+// HTAB
 void htab_insert_test(void **state)
 {
     stat_t *retStat = htab_lookup_add(*state, "$ananas");
@@ -96,6 +120,19 @@ void htab_for_each_test(void **state)
     htab_for_each(*state, *print_stat);
 }
 
+// PREC_STACK
+void prec_stack_push_test(void **state)
+{
+    token_t *token = malloc(sizeof(token_t));
+    token->attribute = "Auto";
+    token->type = 0;
+
+    stackPush(*state, token);
+    assert_string_equal(stackPeek(*state, 0)->attribute, "Auto");
+}
+
+
+// MAIN
 int main (void)
 {
     const struct CMUnitTest htab[] = {
@@ -106,9 +143,14 @@ int main (void)
         cmocka_unit_test(htab_find_existing_test),
         cmocka_unit_test(htab_find_nonexisting_test),
         cmocka_unit_test(htab_insert_lots),
-        cmocka_unit_test(htab_for_each_test)
+        // cmocka_unit_test(htab_for_each_test)
+    };
+
+    const struct CMUnitTest prec_stack[] = {
+        cmocka_unit_test(prec_stack_push_test),
     };
 
     cmocka_run_group_tests(htab, htab_setup, htab_teardown);
+    cmocka_run_group_tests(prec_stack, prec_stack_setup, prec_stack_teardown);
     return 0;
 }
