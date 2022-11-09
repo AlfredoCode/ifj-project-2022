@@ -51,7 +51,7 @@ typedef enum {
 
 void init(token_T *tokenList);
 token_El *getToken(token_T *tokenList);
-void insertToken(token_T *tokenList, int type, void *attrib);
+void insertToken(token_T *tokenList, int type, char *attrib);
 
 
 

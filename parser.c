@@ -25,7 +25,7 @@ void init(token_T *tokenList){
     
 }
 
-void insertToken(token_T *tokenList, int type, void *attrib){
+void insertToken(token_T *tokenList, int type, char *attrib){
     token_El *token = (token_El *)malloc(sizeof(*token));
     if(token == NULL){
         fprintf(stderr,"Memmory allocation failure\n");
@@ -36,7 +36,7 @@ void insertToken(token_T *tokenList, int type, void *attrib){
 
     
 
-    token->attribute = *(char**)attrib;   // Tokens will always be char*
+    token->attribute = attrib;   // Tokens will always be char*
     // printf("%s\n", token->attribute); // DEBUG
         
     
@@ -85,12 +85,12 @@ int main(){
         char* empty = "";
 
     // SIMULATION OF TOKEN LIST
-    insertToken(&tokenList, DOLLAR, &empty);
-    insertToken(&tokenList, ID, &str); 
-    insertToken(&tokenList, EQ, &empty);    
-    insertToken(&tokenList, INT, &val);
-    insertToken(&tokenList, COMMA, &empty);
-    insertToken(&tokenList, TOK_EOF, &empty);
+    insertToken(&tokenList, DOLLAR, empty);
+    insertToken(&tokenList, ID, str); 
+    insertToken(&tokenList, EQ, empty);    
+    insertToken(&tokenList, INT, val);
+    insertToken(&tokenList, COMMA, empty);
+    insertToken(&tokenList, TOK_EOF, empty);
 
     token = getToken(&tokenList); // GETING THE FIRST TOKEN
 
