@@ -35,12 +35,10 @@ void insertToken(token_T *tokenList, int type, void *attrib){
     token->next = tokenList->firstElement;
 
     
-    
-    token->attribute = attrib;
 
-    // THIS SHIT IS CURSED
-    // printf("INSIDE Token type: %d with data: %s on address %p\n", token->type, *(char **)&token->attribute, token->attribute);
-    
+    token->attribute = *(char**)attrib;   // Tokens will always be char*
+    // printf("%s\n", token->attribute); // DEBUG
+        
     
     token->previous = NULL;
     if(tokenList->lastElement != NULL){
@@ -80,7 +78,7 @@ int main(){
 
     // LEXER
     // For int
-        int val = 5;
+        char* val = "5";
     //For string
         char *str = "SuperID";
 
@@ -121,11 +119,11 @@ int main(){
         
         switch(token->type){
             case ID: case DOLLAR: case EQ: case COMMA:
-                printf("Token type: %d\t Data: %s Memory %p\n", token->type, *(char**)token->attribute, token->attribute);
+                printf("Token type: %d\t Data: %s Memory %p\n", token->type, token->attribute, token->attribute);
                 break;
             case INT:
                 
-                printf("Token type: %d\t Data: %d Memory %p\n", token->type, *(int*)token->attribute, token->attribute);
+                printf("Token type: %d\t Data: %s Memory %p\n", token->type, token->attribute, token->attribute);
                 break;
 
             default:

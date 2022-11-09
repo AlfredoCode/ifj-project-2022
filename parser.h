@@ -34,7 +34,7 @@ typedef struct statement {
 
 typedef struct tokenElement{
     int type;
-    void* attribute;
+    char* attribute;
     struct tokenElement *next;
     struct tokenElement *previous;
 }token_El;
