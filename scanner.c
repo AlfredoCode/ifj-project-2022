@@ -245,7 +245,6 @@ bool GetToken(token_t *token){
             token->type = LESS;
             return true;
         }
-        
         if(state == OPENMARK){
             c = getchar();
             if(c == 'p')
@@ -273,7 +272,6 @@ bool GetToken(token_t *token){
                 return true;
             }
         }
-
         if(state == GREAT_S){
             if(c == '='){
                 token->type = GREAT_EQ;
