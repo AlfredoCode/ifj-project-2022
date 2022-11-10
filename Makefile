@@ -6,11 +6,14 @@
 # =================================================== #
 #
 
-testFile := run_test
-CC := gcc
-CFLAGS := -std=c99 -Wall -Wextra -pedantic -g -O0 
+testFile = parser
+CC = gcc
+CFLAGS=-std=c99 -Wall -Wextra -pedantic -g -O0
 
 # TESTS
+test:
+	$(CC) $(CFLAGS) parser.c -o $(testFile) 
+
 
 test: htab.o $(testFile).o
 	$(CC) $(CFLAGS) $^ -o $@ -l cmocka -L /usr/bin/lib
