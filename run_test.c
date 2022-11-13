@@ -2,7 +2,7 @@
  * =================================================== *
  * Name:       run_test.c                              *
  * Authors:    xsafar27                                * 
- * Last modif: 11/09/2022                              *
+ * Last modif: 11/13/2022                              *
  * =================================================== *
  */
 
@@ -49,10 +49,6 @@ static int prec_stack_setup(void **state)
 
 static int prec_stack_teardown(void **state)
 {
-    while (!stackEmpty(*state)){
-        free(stackPop(*state));
-    }
-
     stackClear(*state);
     return 0; 
 }
@@ -124,11 +120,33 @@ void htab_for_each_test(void **state)
 void prec_stack_push_test(void **state)
 {
     token_t *token = malloc(sizeof(token_t));
-    token->attribute = "Auto";
+    token->strings = "Auto";
     token->type = 0;
 
     stackPush(*state, token);
-    assert_string_equal(stackPeek(*state, 0)->attribute, "Auto");
+    assert_string_equal(stackPeek(*state, 0)->strings, "Auto");
+}
+
+void prec_stack_push_more_test(void **state)
+{
+    token_t *token = malloc(sizeof(token_t));
+    token->strings = "Orangutan";
+    token->type = 0;
+    stackPush(*state, token);
+
+    token = malloc(sizeof(token_t));
+    token->strings = "Banan";
+    token->type = 0;
+    stackPush(*state, token);
+
+    assert_string_equal(stackPeek(*state, 0)->strings, "Banan");
+    assert_string_equal(stackPeek(*state, 1)->strings, "Orangutan");
+}
+
+void prec_stack_pop_test(void **state)
+{
+    token_t *token = stackPop(*state);
+    assert_string_equal(token->strings, "Banan"); 
 }
 
 
@@ -148,6 +166,8 @@ int main (void)
 
     const struct CMUnitTest prec_stack[] = {
         cmocka_unit_test(prec_stack_push_test),
+        cmocka_unit_test(prec_stack_push_more_test),
+        cmocka_unit_test(prec_stack_pop_test),
     };
 
     cmocka_run_group_tests(htab, htab_setup, htab_teardown);
