@@ -11,10 +11,51 @@
 
 #include "scanner.h"
 
+typedef enum {
+    sym_add,
+    sym_sub,
+    sym_mul,
+    sym_div,
+    sym_con,
+    sym_lt,
+    sym_gt,
+    sym_lte,
+    sym_gte,
+    sym_eq,
+    sym_neq,
+    sym_lbr,
+    sym_rbr,
+    sym_dollar,
+    sym_id,
+    sym_int,
+    sym_float,
+    sym_str,
+    sym_end,
+    term_add,
+    term_sub,
+    term_mul,
+    term_div,
+    term_con,
+    term_lt,
+    term_gt,
+    term_lte,
+    term_gte,
+    term_eq,
+    term_neq,
+    term_bracket,
+    term_id,
+    term_int,
+    term_float,
+    term_str,
+    err_uhoh
+} p_symbol;
+
 typedef struct stack_token {
     token_t *token;
+    p_symbol symbol;
     struct stack_token *next;
 } stack_token_t;
+
 
 typedef struct prec_stack {
     int size;
@@ -40,7 +81,7 @@ void stackPush(stack_t *stack, token_t *item);
  * @param   Stack to pop from
  * @return  Ptr to poped item
  */
-token_t *stackPop(stack_t *stack);
+stack_token_t *stackPop(stack_t *stack);
 
 /**
  * @brief   Returns item on stack
@@ -51,7 +92,7 @@ token_t *stackPop(stack_t *stack);
  * Index 0 means stack->top
  * You peak on stack->top - index
  */
-token_t *stackPeek(stack_t *stack, int index);
+stack_token_t *stackPeek(stack_t *stack, int index);
 
 /**
  * @brief   Clears and frees stack

@@ -2,7 +2,7 @@
  * =================================================== *
  * Name:       prec_stack.c                            *
  * Authors:    xsafar27                                * 
- * Last modif: 11/13/2022                              *
+ * Last modif: 11/14/2022                              *
  * =================================================== *
  */
 
@@ -10,25 +10,16 @@
 #include <stdio.h>
 
 #include "prec_stack.h"
+#include "error.h"
 
 stack_t *stackInit(int size)
 {
     stack_t *stack = malloc(sizeof(stack_t));
-
-    if (!stack) {
-        fprintf(stderr, "Failed to malloc stack in stackInit");
-        exit(99);
-    }
+    if (!stack) err_msg(INTERNAL_ERR, "Failed to malloc stack in stackInit");
 
     stack->size = size;
-    stack->arr = malloc(sizeof(token_t) * size);
-
-    if (!stack->arr) {
-        fprintf(stderr, "Failed to malloc stack->arr in stackInit");
-        exit(99);
-
-    }
-
+    stack->arr = NULL;
+      
     return stack;
 }
 
@@ -36,27 +27,29 @@ stack_t *stackInit(int size)
 void stackPush(stack_t *stack, token_t *item)
 {
     stack_token_t *token = malloc(sizeof(stack_token_t));
+    if (!token) err_msg(INTERNAL_ERR, "Failed to malloc token in stackPush");
+
     token->token = item;
     token->next = stack->arr;
     stack->arr = token;
 }
 
 
-token_t *stackPop(stack_t *stack)
+stack_token_t *stackPop(stack_t *stack)
 {
     stack_token_t *ret = stack->arr;
     stack->arr = stack->arr->next;
-    return ret->token;
+    return ret;
 }
 
 
-token_t *stackPeek(stack_t *stack, int index)
+stack_token_t *stackPeek(stack_t *stack, int index)
 {
     stack_token_t *ret = stack->arr;
     while(index--) {
         ret = ret->next;
     }
-    return ret->token;
+    return ret;
 }
 
 

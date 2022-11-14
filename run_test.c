@@ -121,32 +121,31 @@ void prec_stack_push_test(void **state)
 {
     token_t *token = malloc(sizeof(token_t));
     token->strings = "Auto";
-    token->type = 0;
 
     stackPush(*state, token);
-    assert_string_equal(stackPeek(*state, 0)->strings, "Auto");
+    assert_string_equal(stackPeek(*state, 0)->token->strings, "Auto");
 }
 
 void prec_stack_push_more_test(void **state)
 {
     token_t *token = malloc(sizeof(token_t));
     token->strings = "Orangutan";
-    token->type = 0;
     stackPush(*state, token);
 
     token = malloc(sizeof(token_t));
     token->strings = "Banan";
-    token->type = 0;
     stackPush(*state, token);
 
-    assert_string_equal(stackPeek(*state, 0)->strings, "Banan");
-    assert_string_equal(stackPeek(*state, 1)->strings, "Orangutan");
+    assert_string_equal(stackPeek(*state, 0)->token->strings, "Banan");
+    assert_string_equal(stackPeek(*state, 1)->token->strings, "Orangutan");
 }
 
 void prec_stack_pop_test(void **state)
 {
-    token_t *token = stackPop(*state);
-    assert_string_equal(token->strings, "Banan"); 
+    stack_token_t *token = stackPop(*state);
+    assert_string_equal(token->token->strings, "Banan"); 
+    free(token->token);
+    free(token);
 }
 
 
