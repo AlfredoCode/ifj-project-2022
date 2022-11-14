@@ -11,7 +11,7 @@ CC = gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -g -O0
 
 # TESTS
-test: htab.o $(testFile).o
+test: symtable.o $(testFile).o
 	$(CC) $(CFLAGS) $^ -o $@ -l cmocka -L /usr/bin/lib
 
 test_run: test
@@ -21,7 +21,7 @@ test_verbose: test
 	./test
 
 # FILES
-htab.o: htab.c
+symtable.o: symtable.c
 
 $(testFile).o: $(testFile).c
 

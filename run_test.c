@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "htab.h"
+#include "symtable.h"
 #include "parser.h"
 
 #define HTABSIZE 10
