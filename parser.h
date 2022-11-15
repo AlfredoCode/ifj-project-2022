@@ -28,34 +28,6 @@ typedef struct statement {
 
 
 
-
-// FOR INSERTING TOKENS PURPOSE UNTIL LEXER IS DONE
-
-
-typedef struct tokenElement{
-    int type;
-    char* attribute;
-    struct tokenElement *next;
-    struct tokenElement *previous;
-}token_El;
-
-typedef struct {
-	token_El* firstElement;
-    token_El* lastElement;
-    token_El* activeElement;
-} token_T;
-
-typedef enum {
-    DOLLAR, ID, EQ, INT, COMMA, TOK_EOF, TOK_FUNCTION, LBRACKET, RBRACKET
-}tokenTypes;
-
-void init(token_T *tokenList);
-token_El *getToken(token_T *tokenList);
-void insertToken(token_T *tokenList, int type, char *attrib);
-
-
-
-
 // ACTUAL FUNCTIONS USED IN PARSER
 
 
