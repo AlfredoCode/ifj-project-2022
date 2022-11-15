@@ -85,18 +85,43 @@ token_res = GetToken(&token);       // levá závorka
     }
     
     return SUCCESS_ERR;
-
 }
+
+/********************************PARSING SECTION********************************************************/
 
 int parse(){
 
     
     
-    token_res = GetToken(&token);   
-    if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
-    }
+    token_El *token;
+
+
+    // LEXER
+    // For int
+        char* val = "5";
+    //For string
+        char *str = "SuperID";
+
+        char* empty = "";
+
+    // SIMULATION OF TOKEN LIST
+    insertToken(&tokenList, DOLLAR, empty);
+    insertToken(&tokenList, ID, str); 
+    insertToken(&tokenList, EQ, empty);    
+    insertToken(&tokenList, INT, val);
+    insertToken(&tokenList, COMMA, empty);
+    insertToken(&tokenList, TOK_EOF, empty);
+
+    token = getToken(&tokenList); // GETING THE FIRST TOKEN
+
+
+    // printf("----------------------------------------\n");
+
+    // RESET the activeElement
+
+
+    tokenList.activeElement = tokenList.lastElement;
+    while((token = getToken(&tokenList))){
 
     switch(token.type){
         case EOF_T:
@@ -109,9 +134,10 @@ int parse(){
             fprintf(stderr,"Syntax error ---> MISSING PROLOG <---\n");
             return SYNTAX_ERR;  // EMPTY FILE 
         
-    }
+        }
 
     return SUCCESS_ERR;
+    }
 }
 
 int prog(){
@@ -121,7 +147,7 @@ int prog(){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
-
+    parse();
     switch(token.type){
         case ID:
             res = declareCheck();
