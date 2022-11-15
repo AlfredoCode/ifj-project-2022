@@ -10,7 +10,7 @@
 #define __PREC_PARSER_H__
 
 #include "scanner.h"
-#include "prec_stack.h"
+#include "expr_stack.h"
 
 typedef enum {
     ret_bool,
@@ -36,7 +36,7 @@ p_symbol tokenToSymbol(token_t *token);
  *
  * Returns next non-terminal token from stack.
  */
-stack_token_t nextNonTerm(stack_t *stack);
+stack_token_t *nextNonTerm(stack_t *stack);
 
 /**
  * @brief   checks corectness of expression

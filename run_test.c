@@ -14,8 +14,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "htab.h"
-#include "prec_stack.h"
+#include "symtable.h"
+#include "expr_stack.h"
 #include "scanner.h"
 #include "parser.h"
 

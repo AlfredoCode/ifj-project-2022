@@ -1,6 +1,6 @@
 /*
  * =================================================== *
- * Name:       prec_stack.h                            *
+ * Name:       expr_stack.h                            *
  * Authors:    xsafar27                                * 
  * Last modif: 11/09/2022                              *
  * =================================================== *
@@ -47,6 +47,7 @@ typedef enum {
     term_int,
     term_float,
     term_str,
+    term_bool,
     err_uhoh
 } p_symbol;
 

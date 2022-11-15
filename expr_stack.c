@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "prec_stack.h"
+#include "expr_stack.h"
 #include "error.h"
 
 stack_t *stackInit(int size)
