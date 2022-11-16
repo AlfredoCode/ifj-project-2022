@@ -12,133 +12,131 @@
 #include <stdio.h>
 #include "parser.h"
 #include "scanner.h"
+#include "error.h"
 
+bool token_res = 0;
+token_t token;
 
-token_T tokenList;
-
-
-void init(token_T *tokenList){
-
-    tokenList->firstElement = NULL;
-    tokenList->activeElement = NULL;
-    tokenList->lastElement = NULL;
-    
-}
-
-void insertToken(token_T *tokenList, int type, char *attrib){
-    token_El *token = (token_El *)malloc(sizeof(*token));
-    if(token == NULL){
-        fprintf(stderr,"Memmory allocation failure\n");
-        return;
+int declareCheck(){
+    // Podívat se do tabulky symbolů, zda je ID rovno 'declare'
+token_res = GetToken(&token);       // levá závorka
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
     }
-    token->type = type;  
-    token->next = tokenList->firstElement;
-
-    
-
-    token->attribute = attrib;   // Tokens will always be char*
-    // printf("%s\n", token->attribute); // DEBUG
-        
-    
-    token->previous = NULL;
-    if(tokenList->lastElement != NULL){
-       tokenList->firstElement->previous = token;  
+    if(token.type != L_PAR){
+        fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
+        return SYNTAX_ERR;
     }
-    else{
-        tokenList->lastElement = token;
-        
-    } 
-    tokenList->activeElement = token;
-    tokenList->firstElement = token;   
-    
-}
 
-token_El *getToken(token_T *tokenList){
-    // We will not lose any token if we change activeElement only
-    token_El *token = tokenList->activeElement;
-    if(token->previous != NULL){
-        tokenList->activeElement = token->previous;
+    token_res = GetToken(&token);   // strict_types
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(token.type != ID){
+        fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
+        return SYNTAX_ERR;
+    }
+    // SEMANTIC - MRKNI DO SYMTABLE NA HODNOTU ID
+
+
+    token_res = GetToken(&token);   // rovná se
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(token.type != ASSIG){
+        fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
+        return SYNTAX_ERR;
+    }
+
+
+    token_res = GetToken(&token);   // int
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(token.type != INT){
+        fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
+        return SYNTAX_ERR;
+    }
+    // SEMANTIC - MRKNI DO SYMTABLE NA HODNOTU INT
+
+
+    token_res = GetToken(&token);   // pravá závorka
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(token.type != R_PAR){
+        fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
+        return SYNTAX_ERR;
+    }
+
+    token_res = GetToken(&token);   // středník
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(token.type != SEMICOL){
+        fprintf(stderr, "Syntax error ---> MISSING SEMICOL <---\n");
+        return SYNTAX_ERR;
     }
     
-    return token;
+    return SUCCESS_ERR;
+
 }
 
-int prologCheck(){
+int parse(){
+
     
-    return 0;
-}
-
-
-int main(){
     
-    init(&tokenList);
-    
-    token_El *token;
+    token_res = GetToken(&token);   
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
 
-
-    // LEXER
-    // For int
-        char* val = "5";
-    //For string
-        char *str = "SuperID";
-
-        char* empty = "";
-
-    // SIMULATION OF TOKEN LIST
-    insertToken(&tokenList, DOLLAR, empty);
-    insertToken(&tokenList, ID, str); 
-    insertToken(&tokenList, EQ, empty);    
-    insertToken(&tokenList, INT, val);
-    insertToken(&tokenList, COMMA, empty);
-    insertToken(&tokenList, TOK_EOF, empty);
-
-    token = getToken(&tokenList); // GETING THE FIRST TOKEN
-
-
-
-
-
-
-
-
-
-
-
-
-    // printf("----------------------------------------\n");
-
-    // RESET the activeElement
-
-
-    tokenList.activeElement = tokenList.lastElement;
-    while((token = getToken(&tokenList))){
-
-        if(token->type == TOK_EOF){
+    switch(token.type){
+        case EOF_T:
+            fprintf(stderr,"Syntax error ---> EMPTY FILE <---\n");
+            return SYNTAX_ERR;  // EMPTY FILE 
+        case PHP:
+            prog(); // First rule of LL
             break;
-        }
+        default:
+            fprintf(stderr,"Syntax error ---> MISSING PROLOG <---\n");
+            return SYNTAX_ERR;  // EMPTY FILE 
         
-        switch(token->type){
-            case ID: case DOLLAR: case EQ: case COMMA:
-                printf("Token type: %d\t Data: %s Memory %p\n", token->type, token->attribute, token->attribute);
-                break;
-            case INT:
-                
-                printf("Token type: %d\t Data: %s Memory %p\n", token->type, token->attribute, token->attribute);
-                break;
-
-            default:
-                break;
-        }
-
     }
-   
-    
-    
 
-    
-
-
-    return 0;
+    return SUCCESS_ERR;
 }
 
+int prog(){
+    int res;
+    token_res = GetToken(&token);   
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+
+    switch(token.type){
+        case ID:
+            res = declareCheck();
+            return (res == SUCCESS_ERR) ? res : statement_list();  
+        default:
+            fprintf(stderr,"Syntax error ---> MISSING DECLARE <---\n");
+            return SYNTAX_ERR;   
+
+    }
+
+}
+
+
+int statement_list(){
+
+    return SUCCESS_ERR;
+}
 
