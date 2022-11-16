@@ -32,7 +32,8 @@ typedef struct statement {
 
 
 int prog(); // Entry point to LL grammar rules
-int prologCheck(); // First token has to be prolog
-
+int parse();
+int declareCheck();
+int statement_list();
 
 #endif  // __PARSER_H__
