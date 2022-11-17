@@ -35,5 +35,6 @@ int prog(); // Entry point to LL grammar rules
 int parse();
 int declareCheck();
 int statement_list();
+int expression_check();
 
 #endif  // __PARSER_H__
