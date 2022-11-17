@@ -14,7 +14,7 @@ int isKeyword(char *str){
         return IF;
     }
     if(strcmp(str, "int") == 0){
-        return INT;
+        return INT_T;
     }
     if(strcmp(str, "null") == 0){
         return NULL_K;
@@ -200,7 +200,7 @@ bool GetToken(token_t *token){
         }
         if(state == TYPE_S){
             if(c == '>'){
-                state = ENDMARK; 
+                state = ENDMARK;  
                 continue;
             }
             else{

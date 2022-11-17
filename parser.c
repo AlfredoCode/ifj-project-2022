@@ -17,8 +17,22 @@
 bool token_res = 0;
 token_t token;
 
+// int errHandler(int result, char* msg){
+//     if(!result){
+//         if(!strcmp(msg, "lexical")){
+//             fprintf(stderr,"Lexical error ---> UNKNOWN TOKEN <---\n");
+//             return LEX_ERR;
+//         }
+//         else if(!strcmp(msg, "missing_declare")){
+
+//         }
+        
+//     }
+
+// }
+
 int declareCheck(){
-    // Podívat se do tabulky symbolů, zda je ID rovno 'declare'
+    // SEMANTIC  - Podívat se do tabulky symbolů, zda je ID rovno 'declare'
 token_res = GetToken(&token);       // levá závorka
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
@@ -57,7 +71,7 @@ token_res = GetToken(&token);       // levá závorka
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
-    if(token.type != INT){
+    if(token.type != INT_T){
         fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
         return SYNTAX_ERR;
     }
@@ -91,7 +105,7 @@ token_res = GetToken(&token);       // levá závorka
 
 int parse(){
 
-    
+    int res = SUCCESS_ERR;
     
     token_El *token;
 
@@ -128,8 +142,8 @@ int parse(){
             fprintf(stderr,"Syntax error ---> EMPTY FILE <---\n");
             return SYNTAX_ERR;  // EMPTY FILE 
         case PHP:
-            prog(); // First rule of LL
-            break;
+            res = prog(); // First rule of LL
+            return res;
         default:
             fprintf(stderr,"Syntax error ---> MISSING PROLOG <---\n");
             return SYNTAX_ERR;  // EMPTY FILE 
@@ -151,7 +165,11 @@ int prog(){
     switch(token.type){
         case ID:
             res = declareCheck();
-            return (res == SUCCESS_ERR) ? res : statement_list();  
+            if(res == SUCCESS_ERR){
+                res = statement_list();
+            }
+            // printf("%d\n",res); //DEBUG
+            return res; 
         default:
             fprintf(stderr,"Syntax error ---> MISSING DECLARE <---\n");
             return SYNTAX_ERR;   
@@ -162,7 +180,60 @@ int prog(){
 
 
 int statement_list(){
+    int res = SUCCESS_ERR;
 
-    return SUCCESS_ERR;
+    token_res = GetToken(&token);  
+    // printf("Token type is %d\n", token.type); // DEBUG 
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+
+    switch(token.type){
+        case EOF_T: // FOUND ?>       TODO, it is possible to do if(...){ ?> which is not valid
+            // printf("Found the end\n");   //DEBUG
+            return SUCCESS_ERR;
+        case DOLLAR:    // $ <ID> <SEPARATOR_PICK>  
+            res = expression_check();
+
+            return res;
+        case KEYWORD: //  SEMANTIC - if, function, else, while, return only, otherwise SYNTAX_ERR
+
+        default:
+            return SYNTAX_ERR;
+
+    }
+
+
+    return res;
 }
 
+
+int expression_check(){
+    int res = SUCCESS_ERR;
+
+    token_res = GetToken(&token);  
+    // printf("Token type is %d\n", token.type); // DEBUG 
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(!(token.type == ID)){
+        fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
+        return SYNTAX_ERR;
+    }
+
+    token_res = GetToken(&token);
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if((token.type == ASSIG) || (token.type == KONKAT) || (token.type == SEMICOL)){
+        switch(token.type){
+            case ASSIG:
+                res = expression_check();
+        }
+    }
+
+    return res;
+}
