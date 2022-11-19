@@ -10,6 +10,7 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
+
 // Enum for statement types
 typedef enum {
     t_fun,
@@ -26,6 +27,25 @@ typedef struct statement {
 } stat_t;
 
 
+// Used for storing expression tokens
+typedef struct exprElement{
+    token_t *token;
+    struct exprElement *next;
+    struct exprElement *previous;
+}*expr_El;
+
+typedef struct {
+	expr_El firstElement;
+    expr_El lastElement;
+    expr_El activeElement;
+} expression_T;
+
+
+
+void expressionInit(expression_T *exprList);
+expr_El *getExpr(expression_T *exprList);
+void insertExpr(expression_T *exprList, token_t *token);
+
 
 
 // ACTUAL FUNCTIONS USED IN PARSER
@@ -35,6 +55,9 @@ int prog(); // Entry point to LL grammar rules
 int parse();
 int declareCheck();
 int statement_list();
+int statement_list_inside();
 int expression_check();
+int expression_check_inside();
+int separators();
 
 #endif  // __PARSER_H__

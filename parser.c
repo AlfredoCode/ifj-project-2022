@@ -10,26 +10,60 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "parser.h"
 #include "scanner.h"
+#include "parser.h"
+
 #include "error.h"
 
-bool token_res = 0;
+int token_res = 0;
 token_t token;
+int currentToken = 0;
+expression_T *expression;
 
-// int errHandler(int result, char* msg){
-//     if(!result){
-//         if(!strcmp(msg, "lexical")){
-//             fprintf(stderr,"Lexical error ---> UNKNOWN TOKEN <---\n");
-//             return LEX_ERR;
-//         }
-//         else if(!strcmp(msg, "missing_declare")){
+expr_El *expr; // FOR DEBUG PRINTS
 
-//         }
-        
-//     }
 
-// }
+void expressionInit(expression_T *exprList){
+    exprList->firstElement = NULL;
+	exprList->activeElement = NULL;		// Nastavení default hodnot seznamu
+	exprList->lastElement = NULL;
+}
+
+void insertExpr(expression_T *exprList, token_t *token){
+
+    expr_El newElement = (expr_El ) malloc(sizeof(newElement));
+	if(newElement == NULL){
+		return; // return 99
+	}
+	newElement->token = token;
+	newElement->next = exprList->firstElement;	// Nastavení dat nového prvku seznamu
+	newElement->previous = NULL;
+	if(exprList->lastElement != NULL){
+		exprList->firstElement->previous = newElement;	
+
+	}
+	else{
+		exprList->lastElement = newElement;		// Navázání prvku do seznamu
+	}
+	
+	exprList->firstElement = newElement;	
+
+}
+
+expr_El *getExpr(expression_T *exprList){
+    // We will not lose any token if we change activeElement only
+    expr_El expr = exprList->activeElement;
+    if(expr->previous != NULL){
+        exprList->activeElement = expr->previous;
+    }
+    
+    return expr;
+}
+
+
+// -------------------------------------------------------------------------------- //
+
+
 
 int declareCheck(){
     // SEMANTIC  - Podívat se do tabulky symbolů, zda je ID rovno 'declare'
@@ -106,36 +140,13 @@ token_res = GetToken(&token);       // levá závorka
 int parse(){
 
     int res = SUCCESS_ERR;
-    
-    token_El *token;
-
-
-    // LEXER
-    // For int
-        char* val = "5";
-    //For string
-        char *str = "SuperID";
-
-        char* empty = "";
-
-    // SIMULATION OF TOKEN LIST
-    insertToken(&tokenList, DOLLAR, empty);
-    insertToken(&tokenList, ID, str); 
-    insertToken(&tokenList, EQ, empty);    
-    insertToken(&tokenList, INT, val);
-    insertToken(&tokenList, COMMA, empty);
-    insertToken(&tokenList, TOK_EOF, empty);
-
-    token = getToken(&tokenList); // GETING THE FIRST TOKEN
-
-
-    // printf("----------------------------------------\n");
-
-    // RESET the activeElement
-
-
-    tokenList.activeElement = tokenList.lastElement;
-    while((token = getToken(&tokenList))){
+    expression  = (expression_T*)malloc(sizeof(*expression));
+    expressionInit(expression);
+    token_res = GetToken(&token);   
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
 
     switch(token.type){
         case EOF_T:
@@ -151,7 +162,6 @@ int parse(){
         }
 
     return SUCCESS_ERR;
-    }
 }
 
 int prog(){
@@ -161,7 +171,6 @@ int prog(){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
-    parse();
     switch(token.type){
         case ID:
             res = declareCheck();
@@ -180,18 +189,19 @@ int prog(){
 
 
 int statement_list(){
-    int res = SUCCESS_ERR;
-
+    int res = SYNTAX_ERR;
+    
     token_res = GetToken(&token);  
     // printf("Token type is %d\n", token.type); // DEBUG 
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
-
+    
     switch(token.type){
         case EOF_T: // FOUND ?>       TODO, it is possible to do if(...){ ?> which is not valid
             // printf("Found the end\n");   //DEBUG
+   
             return SUCCESS_ERR;
         case DOLLAR:    // $ <ID> <SEPARATOR_PICK>  
             res = expression_check();
@@ -210,7 +220,7 @@ int statement_list(){
 
 
 int expression_check(){
-    int res = SUCCESS_ERR;
+    int res = SYNTAX_ERR;
 
     token_res = GetToken(&token);  
     // printf("Token type is %d\n", token.type); // DEBUG 
@@ -228,12 +238,121 @@ int expression_check(){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
-    if((token.type == ASSIG) || (token.type == KONKAT) || (token.type == SEMICOL)){
-        switch(token.type){
-            case ASSIG:
-                res = expression_check();
-        }
+    if(token.type == ASSIG){
+        // ZAVOLAT EXPRESSION PARSER
+        res = statement_list_inside();
+
+        return res;  
+    }
+
+
+    return res;
+}
+
+
+
+
+
+int expression_check_inside(){
+    int res = SUCCESS_ERR;
+
+    token_res = GetToken(&token);  
+    // printf("Token type is %d\n", token.type); // DEBUG 
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    switch(token.type){
+        case ID:
+        case INT_T:
+        case FLOAT_T:
+        case STRING_T:
+            
+            res = separators();
+            
+            return res;
+        default:
+            return SYNTAX_ERR;
+    }
+
+
+    return res;
+}
+
+
+int statement_list_inside(){
+    int res = SUCCESS_ERR;
+
+    token_res = GetToken(&token);  
+    // printf("Token type is %d\n", token.type); // DEBUG 
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    
+    switch(token.type){
+        
+        case DOLLAR:    // $ <ID> <SEPARATOR_PICK>  
+            token_res = GetToken(&token);  
+            if(!token_res){
+                fprintf(stderr,"Lexical error\n");
+                return LEX_ERR;
+            
+            }
+            if(token.type != ID){
+                return SYNTAX_ERR;
+            }
+
+            insertExpr(expression, &token);
+            printf("%s is last, %s is first\n",expression->lastElement->token->string, expression->firstElement->token->string);    // DEBUG
+            res = separators();
+            
+                
+            
+            return res;
+        case INT_T: case FLOAT_T: case STRING_T:
+            
+            res = separators();
+            return res;
+        
+        default:
+            return SYNTAX_ERR;
+
+    }
+
+
+    return res;
+}
+
+int separators(){
+    int res = SUCCESS_ERR;
+
+    token_res = GetToken(&token);
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    switch(token.type){ // SEPARATORS
+
+        case SEMICOL:
+
+           
+
+        
+        
+            // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
+            // EXPRESSION LIST DISPOSE
+            return statement_list(); // $x=$y; || $x=5; || $x = $y.$z;
+        case KONKAT: case DIV: case ADD: case SUB: case MUL:    // $x=$y.<IFSTAT> || $x=$y+<IFSTAT> etc.
+            
+            res = statement_list_inside();
+            return res;
+        default:
+            return SYNTAX_ERR;
+        
     }
 
     return res;
 }
+
+
