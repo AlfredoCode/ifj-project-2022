@@ -234,7 +234,7 @@ int expression_check(){
     }
 
     token_res = GetToken(&token);
-    if(!token_res){
+    if(!token_res){;
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
@@ -302,8 +302,12 @@ int statement_list_inside(){
             if(token.type != ID){
                 return SYNTAX_ERR;
             }
-
-            insertExpr(expression, &token);
+            token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
+            if(expr_tok == NULL){
+                return 99;
+            }
+            *expr_tok = token;
+            insertExpr(expression, expr_tok);
             printf("%s is last, %s is first\n",expression->lastElement->token->string, expression->firstElement->token->string);    // DEBUG
             res = separators();
             
