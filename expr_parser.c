@@ -352,7 +352,7 @@ p_return get_last(stack_t *stack)
     return ret_uhoh;
 }
 
-p_return expr_parse(htab_t *symtable, token_t *start_token)
+p_return expr_parse(htab_t *symtable, expression_T *list)
 {
     // Stack init
     stack_t *stack = stackInit();
@@ -363,6 +363,7 @@ p_return expr_parse(htab_t *symtable, token_t *start_token)
     stackPeek(stack, 0)->symbol = sym_dollar;
    
     // Check if I start with operator and not operand 
+    token_t *start_token = getNext(list)->token;
     p_symbol curSymbol = tokenToTerminal(start_token);
     if (curSymbol < sym_lbr) err_msg(SYNTAX_ERR, "Bad first token in expression.");
 
@@ -393,8 +394,7 @@ p_return expr_parse(htab_t *symtable, token_t *start_token)
                 stackPeek(stack, 0)->symbol = curSymbol;
 
                 // Get a new one
-                curToken = malloc(sizeof(token_t));
-                if(!get_new_token(curToken)) err_msg(LEX_ERR, "Bad lexem.");
+                curToken = getNext(list)->token;
                 curSymbol = tokenToTerminal(curToken);
                
                 // Check if I didnt get ab or ++ 
@@ -434,6 +434,8 @@ p_return expr_parse(htab_t *symtable, token_t *start_token)
                 break;
         }
     } 
-
-    return get_last(stack);
+    
+    p_return ret = get_last(stack);
+    stackClear(stack);
+    return ret;
 }

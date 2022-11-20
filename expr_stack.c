@@ -2,7 +2,7 @@
  * =================================================== *
  * Name:       prec_stack.c                            *
  * Authors:    xsafar27                                * 
- * Last modif: 11/14/2022                              *
+ * Last modif: 11/20/2022                              *
  * =================================================== *
  */
 
@@ -63,7 +63,6 @@ void stackClear(stack_t *stack)
     
     while (token) {
         stack->arr = token->next;
-        free(token->token);
         free(token);
         token = stack->arr;
     }
