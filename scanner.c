@@ -14,7 +14,7 @@ int isKeyword(char *str){
         return IF;
     }
     if(strcmp(str, "int") == 0){
-        return INT_T;
+        return INT;   // MODIFIED
     }
     if(strcmp(str, "null") == 0){
         return NULL_K;
@@ -65,6 +65,10 @@ bool GetToken(token_t *token){
             }
             if(c == '$'){
                 token->type = DOLLAR;
+                return true;
+            }
+            if(c == ','){   // MODIFIED
+                token->type = COMMA;
                 return true;
             }
             if(isalpha(c) || c == '_'){
@@ -423,6 +427,7 @@ bool GetToken(token_t *token){
             str[str_index] = '\0';
             token->integer = (int)strtol(str, NULL, 10);
             token->type = INT_T;
+            
             ungetc(c, stdin);
             return true;
         }

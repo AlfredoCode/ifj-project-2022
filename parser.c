@@ -17,8 +17,10 @@
 
 int token_res = 0;
 bool insideIf = false;
+bool insideFunc = false;
 token_t token;
 int currentToken = 0;
+int currentReturnType = 0;
 expression_T *expression, *allTokens;
 
 expr_El expr; // FOR DEBUG PRINTS
@@ -51,15 +53,15 @@ void insertExpr(expression_T *exprList, token_t *token){
 
 }
 
-expr_El *getExpr(expression_T *exprList){
-    // We will not lose any token if we change activeElement only | CURRENTLY NOT IN USE
-    expr_El expr = exprList->activeElement;
-    if(expr->previous != NULL){
-        exprList->activeElement = expr->previous;
-    }
+// expr_El *getExpr(expression_T *exprList){
+//     // We will not lose any token if we change activeElement only | CURRENTLY NOT IN USE
+//     expr_El expr = exprList->activeElement;
+//     if(expr->previous != NULL){
+//         exprList->activeElement = expr->previous;
+//     }
     
-    return expr;
-}
+//     return expr;
+// }
 
 
 void exprListDispose( expression_T *exprList ) {
@@ -232,12 +234,21 @@ int statement_list(){
                 case IF:
                     res = condiCheck();
                     return res;
+                case FUNCTION:
+                    res = functionCheck();
+                    return res;
+                case RETURN:
+                    if(currentReturnType){
+                        return SUCCESS_ERR;
+                    }
+                    
+                    return SYNTAX_ERR;  // Void function cannot have return
                 default:
                     return SYNTAX_ERR;
             }
 
         default:
-            if(insideIf && token.type == R_BRAC){
+            if((insideIf && token.type == R_BRAC)){
                 return SUCCESS_ERR;
             }
             return SYNTAX_ERR;
@@ -248,18 +259,213 @@ int statement_list(){
     return res;
 }
 
+int functionCheck(){
+    int res = SYNTAX_ERR;  
+    token_res = GetToken(&token);   // function <ID>
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(token.type != ID){
+        fprintf(stderr, "Syntax error ---> FUNCTION IS MISSING IDENTIFIER <---\n");
+        return res;
+    }
+    // INSERT ID INTO FUNCTION HTAB
+    stat_t *statement;
+    statement = (stat_t*) malloc(sizeof(*statement));
+    if(statement == NULL){
+        return INTERNAL_ERR;
+    }
+    statement->type = t_fun;
+    statement->name = token.string;
+    // printf("type is %d and name is %s\n", statement->type, statement->name);    // DEBUG
+    // -----------------------
+    token_res = GetToken(&token);   // function <ID> (
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(token.type != L_PAR){
+        fprintf(stderr, "Syntax error ---> MISSING LEFT PARENTHESIS IN FUNCTION <---\n");
+        return SYNTAX_ERR;
+    }
+    res = funcParams(); // Parametry funkce
+    if(res != SUCCESS_ERR){
+        fprintf(stderr, "Syntax error ---> Wrong parameters in function <---\n");
+        return res;
+    }
+
+    token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ):
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(token.type != COL){
+        fprintf(stderr, "Syntax error ---> MISSING COLON IN FUNCTION <---\n");
+        return SYNTAX_ERR;
+    }
+    token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): type
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(token.type != KEYWORD){  // OR IT CAN BE TYPE TOKEN
+        fprintf(stderr, "Syntax error ---> MISSING RETURN TYPE IN FUNCTION <---\n");
+        return SYNTAX_ERR;
+    }
+    
+    switch(token.keyword){   // Co za keyword jsme dostali?
+        case STRING: case INT: case FLOAT: case VOID:
+        
+            currentReturnType = token.keyword;
+            break;
+        default:
+            return SYNTAX_ERR;  // while, if apod..
+    }
+    //  int currentReturnType if token.type == TYPE TODO
+    token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): type {
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(token.type != L_BRAC){
+        fprintf(stderr, "Syntax error ---> MISSING LEFT BRACKET IN FUNCTION <---\n");
+        return SYNTAX_ERR;
+    }
+    insideFunc = true;
+    res = statement_list(); // function <ID> ( <FUNC_PARAMS> ): type{ <ST_L>
+    if(res != SUCCESS_ERR){
+        return SYNTAX_ERR;
+    }
+    token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): type {
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(currentReturnType != VOID){
+        switch(token.type){
+            case DOLLAR:
+                token_res = GetToken(&token);   // looking for ID
+                if(!token_res){
+                    fprintf(stderr,"Lexical error\n");
+                    return LEX_ERR;
+                }
+                if(token.type != ID){
+                    fprintf(stderr, "Syntax error ---> MISSING RETURN STATEMENT <---\n");
+                    return SYNTAX_ERR;
+                }
+                token_res = GetToken(&token);   // Looking for semicol;
+                if(!token_res){
+                    fprintf(stderr,"Lexical error\n");
+                    return LEX_ERR;
+                }
+                break;
+            case INT_T: case FLOAT_T: case STRING_T:    // Teoreticky muzu vratit 5+5 apod, ale to ted neresme
+                
+                token_res = GetToken(&token);   // Looking for semicol;
+                if(!token_res){
+                    fprintf(stderr,"Lexical error\n");
+                    return LEX_ERR;
+                }
+                break;
+            default:
+                return SYNTAX_ERR;
+        }
+    }
+    if(token.type != SEMICOL){
+        fprintf(stderr, "Syntax error ---> MISSING SEMICOL AFTER RETURN <---\n");
+        return SYNTAX_ERR;
+    }
+    token_res = GetToken(&token);   // Looking for R_BRAC;
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    if(token.type != R_BRAC){
+        fprintf(stderr, "Syntax error ---> MISSING RIGHT BRACKET AFTER RETURN STATEMENT <---\n");
+        return SYNTAX_ERR;
+    }
+    insideFunc = false;
+    
+    return statement_list();
+}
+
+int funcParams(){
+    int res = SYNTAX_ERR;
+    static bool multipleParams = false;
+    token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> )
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+
+    switch(token.type){
+        case R_PAR: // NO PARAM 
+            if(multipleParams){
+                multipleParams = false;
+                return SYNTAX_ERR;
+            }
+            return SUCCESS_ERR;
+        case TYPE: case KEYWORD: //TODO SCANNER NOT DONE
+            if(token.type == KEYWORD){
+                switch(token.keyword){
+                    case FLOAT: case INT: case STRING:
+                        break;
+                    default:
+                        return SYNTAX_ERR;  // FOUND WHILE, IF ETC..
+                }
+            }
+            token_res = GetToken(&token);   // type $
+            if(!token_res){
+                fprintf(stderr,"Lexical error\n");  // Hledáme ID
+                return LEX_ERR;
+            }
+            if(token.type != DOLLAR){
+                fprintf(stderr, "Syntax error ---> EXPECTED $ <---\n");
+                return SYNTAX_ERR;
+            }
+
+            token_res = GetToken(&token);   // type $ <ID>
+            if(!token_res){
+                fprintf(stderr,"Lexical error\n");  // Hledáme ID
+                return LEX_ERR;
+            }
+            if(token.type != ID){
+                fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER AFTER TYPE IN FUCNTION <---\n");
+                return SYNTAX_ERR;
+            }
+            // SEMANTIC
+            
+            token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
+            if(!token_res){
+                fprintf(stderr,"Lexical error\n");  // Hledáme ID
+                return LEX_ERR;
+            }
+            switch(token.type){
+                case R_PAR:
+                    return SUCCESS_ERR;
+                case COMMA:
+                    multipleParams = true;
+                    return funcParams();
+                default:
+                    return SYNTAX_ERR;
+            }
+
+        default:
+            return SYNTAX_ERR;
+
+    }
+    return res;
+}
 int separators_if(){
     int res = SYNTAX_ERR;
 
-   
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
         return 99;
     }
     switch(token.type){ // SEPARATORS
-
         case KONKAT: case DIV: case ADD: case SUB: case MUL:    // $x=$y.<IFSTAT> || $x=$y+<IFSTAT> etc.
-            
             *expr_tok = token;
             insertExpr(expression, expr_tok);
             res = checkIfStat();
@@ -330,9 +536,7 @@ int checkIfStat(){
         
         default:
             return SYNTAX_ERR;
-
     }
-
     return res;
 }
 
@@ -404,13 +608,12 @@ int condiCheck(){
         return res;
     }
 
-    return res;
+    return statement_list();
     
 }
 
 int elseCheck(){
     int res = SYNTAX_ERR;
-
     token_res = GetToken(&token);  
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
@@ -465,8 +668,6 @@ int expression_check(){
 
         return res;  
     }
-
-
     return res;
 }
 
@@ -575,6 +776,7 @@ int separators(){
         
         
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
+                     // expr_parse(expression_list, symtable);
             // EXPRESSION LIST DISPOSE
             exprListDispose(expression);
             return statement_list(); // $x=$y; || $x=5; || $x = $y.$z;
@@ -596,10 +798,12 @@ int separators(){
 /**TODO LIST
  * 
  * FREE ALL TOKENS AFTER THE COMPILATION IS DONE
- * FUNCTION SYNTAX CHEK
+ * FUNCTION SYNTAX CHEK - ADD ?TYPE
  * WHILE SYNTAX CHECK
  * SEMANTIC ACTIONS
  * DOPSAT EPSILON DO SEPARATORU V LL
+ * INICIALIZACE HTAB
+ * 
  */
 
 

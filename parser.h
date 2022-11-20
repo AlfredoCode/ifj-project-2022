@@ -65,6 +65,8 @@ int condiCheck();
 int checkIfStat();
 int checkIfOperators();
 int elseCheck();
+int functionCheck();
+int funcParams();
 
 
 #endif  // __PARSER_H__
