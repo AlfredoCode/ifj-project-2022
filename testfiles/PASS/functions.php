@@ -16,6 +16,12 @@
         return 1;
     }
 
+
+    function inp(?string $x): int{
+        $x = "Miluju inp";
+
+        return 1;
+    }
     
 
 ?>

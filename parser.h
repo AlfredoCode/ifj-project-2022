@@ -67,6 +67,7 @@ int checkIfOperators();
 int elseCheck();
 int functionCheck();
 int funcParams();
+int checkWhile();
 
 
 #endif  // __PARSER_H__
