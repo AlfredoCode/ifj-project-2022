@@ -141,7 +141,6 @@ token_res = GetToken(&token);       // levá závorka
         fprintf(stderr, "Syntax error ---> MISSING SEMICOL <---\n");
         return SYNTAX_ERR;
     }
-    
     return SUCCESS_ERR;
 }
 
@@ -168,9 +167,7 @@ int parse(){
         default:
             fprintf(stderr,"Syntax error ---> MISSING PROLOG <---\n");
             return SYNTAX_ERR;  // MISSING PROLOG
-        
-        }
-
+    }
     return SUCCESS_ERR;
 }
 
@@ -192,9 +189,7 @@ int prog(){
         default:
             fprintf(stderr,"Syntax error ---> MISSING DECLARE <---\n");
             return SYNTAX_ERR;   
-
     }
-
 }
 
 
@@ -203,17 +198,21 @@ int statement_list(){
     
     token_res = GetToken(&token);  
     if(!token_res){
+        if(insideIf || insideWhile || insideFunc){
+            fprintf(stderr,"Syntax error ---> EOF inside If statement <---\n");     // DONT ASK ME
+            return SYNTAX_ERR;
+        }
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
     
     switch(token.type){
-        case EOF_T: // FOUND ?>       TODO, it is possible to do if(...){ ?> which is not valid
+        case EOF_T: // FOUND ?>     
             // printf("Found the end\n");   //DEBUG
 
             free(expression);
             free(allTokens);
-   
+            
             return SUCCESS_ERR;
         case DOLLAR:    // $ <ID> <SEPARATOR_PICK>  
             res = expression_check();
