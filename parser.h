@@ -45,6 +45,7 @@ typedef struct {
 void expressionInit(expression_T *exprList);
 expr_El *getExpr(expression_T *exprList);
 void insertExpr(expression_T *exprList, token_t *token);
+void exprListDispose( expression_T *exprList );
 
 
 
@@ -59,5 +60,11 @@ int statement_list_inside();
 int expression_check();
 int expression_check_inside();
 int separators();
+
+int condiCheck();
+int checkIfStat();
+int checkIfOperators();
+int elseCheck();
+
 
 #endif  // __PARSER_H__
