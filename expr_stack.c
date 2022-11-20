@@ -12,12 +12,12 @@
 #include "expr_stack.h"
 #include "error.h"
 
-stack_t *stackInit(int size)
+stack_t *stackInit()
 {
     stack_t *stack = malloc(sizeof(stack_t));
     if (!stack) err_msg(INTERNAL_ERR, "Failed to malloc stack in stackInit");
 
-    stack->size = size;
+    stack->size = 0;
     stack->arr = NULL;
       
     return stack;
@@ -29,6 +29,8 @@ void stackPush(stack_t *stack, token_t *item)
     stack_token_t *token = malloc(sizeof(stack_token_t));
     if (!token) err_msg(INTERNAL_ERR, "Failed to malloc token in stackPush");
 
+    stack->size++;
+
     token->token = item;
     token->next = stack->arr;
     stack->arr = token;
@@ -37,6 +39,8 @@ void stackPush(stack_t *stack, token_t *item)
 
 stack_token_t *stackPop(stack_t *stack)
 {
+    stack->size--;
+
     stack_token_t *ret = stack->arr;
     stack->arr = stack->arr->next;
     return ret;

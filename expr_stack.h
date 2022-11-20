@@ -23,8 +23,8 @@ typedef enum {
     sym_gte,
     sym_eq,
     sym_neq,
-    sym_lbr,
     sym_rbr,
+    sym_lbr,
     sym_dollar,
     sym_id,
     sym_int,
@@ -68,7 +68,7 @@ typedef struct prec_stack {
  * @param   Size of prec_stack
  * @retrun  New pre_stack
  */
-stack_t *stackInit(int size);
+stack_t *stackInit();
 
 /**
  * @brief   Pushes new item on stack

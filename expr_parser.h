@@ -1,8 +1,8 @@
 /*
  * =================================================== *
  * Name:       prec_parser.h                           *
- * Authors:    xsafar27                                * 
- * Last modif: 11/14/2022                              *
+ * Authors:    xsafar27                                *
+ * Last modif: 11/20/2022                              *
  * =================================================== *
  */
 
@@ -11,6 +11,7 @@
 
 #include "scanner.h"
 #include "expr_stack.h"
+#include "symtable.h"
 
 typedef enum {
     ret_bool,
@@ -66,14 +67,39 @@ int evaluate_bool(stack_t *stack);
 int evaluate_brackets(stack_t *stack);
 
 /**
+ * @brief   evaluates concatenation
+ * @param   stack to evaluate on
+ * @return  1 if error, 0 otherwise
+ *
+ * Evaluates if concatenation expression is correct.
+ * Reduces stack.
+ */
+int evaluate_concatenation(stack_t *stack);
+
+/**
  * @brief   evaluates expression
  * @param   stack to evaluate on
+ * @param   htab to check vars in
  * @return  1 if error, 0 otherwise
  *
  * Evaluates if expression is correct.
  * Reduces stack
  */
-int evaluate(stack_t *stack);
+int evaluate(stack_t *stack, htab_t *symtable);
 
+/**
+ * @brief   gets type of last token
+ * @param   stack to check on
+ * @return  type of last term
+ */
+p_return get_last(stack_t *stack);
+
+/**
+ * @brief   main expr_parser component
+ * @param   symbol htab
+ * @param   first token
+ * @return  final datatype
+ */
+p_return expr_parse(htab_t *symTable, token_t *start_token);
 
 #endif // __PREC_PARSER_H__
