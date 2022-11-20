@@ -82,6 +82,7 @@ typedef enum {
     STRING_T,
     INT_T,
     FLOAT_T,
+    COMMA
 } TYPES;
 
 typedef struct{
