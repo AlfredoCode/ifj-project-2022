@@ -22,6 +22,9 @@
     else{
         while($y > 3){
             $y = $y+1;
+            while($y < 2){
+                // IDK MAN
+            }
         }
     }
     function bar():void{
