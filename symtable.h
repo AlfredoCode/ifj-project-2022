@@ -1,7 +1,7 @@
 /*
  * ======================================================== *
  * Name:       symtable.h                                   *
- * Last modif: 10/28/2022                                   *
+ * Last modif: 11/16/2022                                   *
  * ======================================================== *
  */
 
@@ -11,8 +11,8 @@
  * Edited to fit current usecase
  */
 
-#ifndef __HTAB_H__
-#define __HTAB_H__
+#ifndef __SYMTABLE_H__
+#define __SYMTABLE_H__
 
 #include <string.h>     // size_t
 #include <stdbool.h>    // bool
@@ -132,4 +132,4 @@ void htab_clear(htab_t * t);
  */
 void htab_free(htab_t * t);
 
-#endif // __HTAB_H__
+#endif // __SYMTABLE_H__

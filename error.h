@@ -1,3 +1,13 @@
+/*
+ * =================================================== *
+ * Name:       error.h                                 *
+ * Authors:    xhofma11                                * 
+ *             xsafar27                                * 
+ * Last modif: 11/14/2022                              *
+ * =================================================== *
+ */
+
+
 #ifndef ERROR_H_
 #define ERROR_H_
 
@@ -14,42 +24,7 @@ typedef enum{
     INTERNAL_ERR = 99
 }err_code;
 
-int errHandler(int err){
-    switch(err){
-        case SUCCESS_ERR:
-            return SUCCESS_ERR;
+void err_msg(err_code err, char* message);
 
-        case LEX_ERR:
-            return LEX_ERR;
+#endif // ERROR_H_
 
-        case SYNTAX_ERR:
-            return SYNTAX_ERR;
-
-        case SEM_FUNC_ERR:
-            return SEM_FUNC_ERR;
-
-        case SEM_PARAM_ERR:
-            return SEM_PARAM_ERR;
-
-        case SEM_UNDEF_VAR_ERR:
-            return SEM_UNDEF_VAR_ERR;
-
-        case SEM_RETURN_ERR:
-            return SUCCESS_ERR;
-
-        case SEM_TYPE_ERR:
-            return SEM_TYPE_ERR;
-
-        case SEM_OTHERS_ERR:
-            return SEM_OTHERS_ERR;
-
-        default:
-            return INTERNAL_ERR;
-        
-            
-    }
-
-}
-
-
-#endif
