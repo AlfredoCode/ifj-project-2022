@@ -2,7 +2,7 @@
  * =================================================== *
  * Name:       run_test.c                              *
  * Authors:    xsafar27                                * 
- * Last modif: 11/13/2022                              *
+ * Last modif: 11/21/2022                              *
  * =================================================== *
  */
 
@@ -20,7 +20,6 @@
 #include "parser.h"
 
 #define HTABSIZE 10
-#define PRECSTACKSIZE 50
 
 // SETUP & TEARDOWN
 static int htab_setup(void **state)
@@ -38,21 +37,37 @@ static int htab_teardown(void **state)
     return 0;
 }
 
-static int prec_stack_setup(void **state)
+static int expr_stack_setup(void **state)
 {
-    stack_t *stack = stackInit(PRECSTACKSIZE);
+    stack_t *stack = stackInit();
     if (!stack) return -1;
 
     *state = stack;
     return 0;
 }
 
-static int prec_stack_teardown(void **state)
+static int expr_stack_teardown(void **state)
 {
+    stack_t *stack = (stack_t*) *state;
+    stack_token_t *token = stack->arr;
+    while (token) {
+        free(token->token);
+        token = token->next;
+    }
+
     stackClear(*state);
     return 0; 
 }
 
+static int expr_parse_setup(void **state)
+{
+    return 0;
+}
+
+static int expr_parse_teardown(void **state)
+{
+    return 0;
+}
 
 // HTAB
 void htab_insert_test(void **state)
@@ -117,7 +132,7 @@ void htab_for_each_test(void **state)
 }
 
 // PREC_STACK
-void prec_stack_push_test(void **state)
+void expr_stack_push_test(void **state)
 {
     token_t *token = malloc(sizeof(token_t));
     token->string = "Auto";
@@ -126,7 +141,7 @@ void prec_stack_push_test(void **state)
     assert_string_equal(stackPeek(*state, 0)->token->string, "Auto");
 }
 
-void prec_stack_push_more_test(void **state)
+void expr_stack_push_more_test(void **state)
 {
     token_t *token = malloc(sizeof(token_t));
     token->string = "Orangutan";
@@ -140,7 +155,7 @@ void prec_stack_push_more_test(void **state)
     assert_string_equal(stackPeek(*state, 1)->token->string, "Orangutan");
 }
 
-void prec_stack_pop_test(void **state)
+void expr_stack_pop_test(void **state)
 {
     stack_token_t *token = stackPop(*state);
     assert_string_equal(token->token->string, "Banan"); 
@@ -163,13 +178,13 @@ int main (void)
         // cmocka_unit_test(htab_for_each_test)
     };
 
-    const struct CMUnitTest prec_stack[] = {
-        cmocka_unit_test(prec_stack_push_test),
-        cmocka_unit_test(prec_stack_push_more_test),
-        cmocka_unit_test(prec_stack_pop_test),
+    const struct CMUnitTest expr_stack[] = {
+        cmocka_unit_test(expr_stack_push_test),
+        cmocka_unit_test(expr_stack_push_more_test),
+        cmocka_unit_test(expr_stack_pop_test),
     };
 
     cmocka_run_group_tests(htab, htab_setup, htab_teardown);
-    cmocka_run_group_tests(prec_stack, prec_stack_setup, prec_stack_teardown);
+    cmocka_run_group_tests(expr_stack, expr_stack_setup, expr_stack_teardown);
     return 0;
 }
