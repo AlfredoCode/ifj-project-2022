@@ -227,7 +227,7 @@ int evaluate(stack_t *stack, htab_t *symtable)
         // Set type according to var type.
         case sym_id:
             // Looks if the var is defined in passed symtable
-            id = htab_find(symtable, top->token->strings);
+            id = htab_find(symtable, top->token->string);
             // I only get NULL if its not defined
             if (!id) {
                err_msg(SEM_UNDEF_VAR_ERR, "Undefined variable in expression!");

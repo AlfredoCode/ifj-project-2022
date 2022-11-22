@@ -120,30 +120,30 @@ void htab_for_each_test(void **state)
 void prec_stack_push_test(void **state)
 {
     token_t *token = malloc(sizeof(token_t));
-    token->strings = "Auto";
+    token->string = "Auto";
 
     stackPush(*state, token);
-    assert_string_equal(stackPeek(*state, 0)->token->strings, "Auto");
+    assert_string_equal(stackPeek(*state, 0)->token->string, "Auto");
 }
 
 void prec_stack_push_more_test(void **state)
 {
     token_t *token = malloc(sizeof(token_t));
-    token->strings = "Orangutan";
+    token->string = "Orangutan";
     stackPush(*state, token);
 
     token = malloc(sizeof(token_t));
-    token->strings = "Banan";
+    token->string = "Banan";
     stackPush(*state, token);
 
-    assert_string_equal(stackPeek(*state, 0)->token->strings, "Banan");
-    assert_string_equal(stackPeek(*state, 1)->token->strings, "Orangutan");
+    assert_string_equal(stackPeek(*state, 0)->token->string, "Banan");
+    assert_string_equal(stackPeek(*state, 1)->token->string, "Orangutan");
 }
 
 void prec_stack_pop_test(void **state)
 {
     stack_token_t *token = stackPop(*state);
-    assert_string_equal(token->token->strings, "Banan"); 
+    assert_string_equal(token->token->string, "Banan"); 
     free(token->token);
     free(token);
 }

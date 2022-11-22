@@ -1,3 +1,6 @@
+#ifndef __SCANNER_H__
+#define __SCANNER_H__
+
 #include <stdbool.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -88,3 +91,5 @@ typedef struct{
 int isKeyword(char *string);
 
 bool GetToken(token_t *token);
+
+#endif // __SCANNER_H__

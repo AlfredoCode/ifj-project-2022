@@ -13,7 +13,7 @@ CFLAGS := -std=c99 -Wall -Wextra -pedantic -g
 
 # TESTS
 
-test: $(testFile).o symtable.o expr_stack.o error.o expr_parser.o scanner.o
+test: $(testFile).o symtable.o expr_stack.o error.o expr_parser.o scanner.o parser.o
 	$(CC) $(CFLAGS) $^ -o $@ -l cmocka -L /usr/bin/lib
 
 test_run: test
@@ -34,6 +34,8 @@ expr_parser.o: expr_parser.c
 error.o: error.c
 
 scanner.o: scanner.c
+
+parser.o: parser.c
 
 # CLEANUP
 clean:
