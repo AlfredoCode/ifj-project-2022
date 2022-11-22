@@ -27,13 +27,17 @@ typedef enum {
     SYM_HEX1,
     SYM_HEX2,
     SYM_OCT1,
-    SYM_OCT2, //fsm fix
+    SYM_OCT2,
     INT_S,
     DECIMAL,
     FLOAT_S,
     EXPO,
     EXPO_SIG,
     FLOAT_E_S,
+    OPENMARK,
+    OPENMARK2,
+    OPENMARK3,
+    OPENMARK4,
 } STATES;
 
 typedef enum {

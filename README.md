@@ -4,3 +4,4 @@ Podmozina jazyka PHP
   
 ## Clenove tymu:  
 xsafar27  
+xmoskv01
