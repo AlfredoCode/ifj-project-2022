@@ -166,7 +166,6 @@ bool GetToken(token_t *token){
                 state = S;
             }
             else if(c == '*'){
-                // TODO: chybi v FSM?
                 continue;
             }
             else{
@@ -210,7 +209,7 @@ bool GetToken(token_t *token){
                 return true;
             }
         }
-        if(state == ENDMARK){ //FSM check - cokoliv pred EOF je takhle lexikalni chyba, i \nEOF
+        if(state == ENDMARK){
             if(c == EOF){
                 token->type = EOF_T;
                 return true;
@@ -239,29 +238,42 @@ bool GetToken(token_t *token){
                 return true;
             }
             if(c == '?'){
-                c = getchar();
-                if(c != 'p'){
-                    return false;
-                }
-                c = getchar();
-                if(c != 'h'){
-                    return false;
-                }
-                c = getchar();
-                if(c != 'p'){
-                    return false;
-                }
-                c = getchar();
-                if(!isspace(c)){
-                    return false;
-                }
-                token->type = PHP;
-                return true;
+                state = OPENMARK;
+                continue;
             }
             ungetc(c, stdin);
             token->type = LESS;
             return true;
         }
+        
+        if(state == OPENMARK){
+            c = getchar();
+            if(c == 'p')
+                state = OPENMARK2;
+                continue;
+        }
+        if(state == OPENMARK2){
+            c = getchar();
+            if(c == 'h'){
+                state = OPENMARK3;
+                continue;
+            }
+        }
+        if(state == OPENMARK3){
+            c = getchar();
+            if(c == 'p'){
+                state = OPENMARK4;
+                continue;
+            }
+        }
+        if(state == OPENMARK4){
+            c = getchar();
+            if(isspace(c)){
+                token->type = PHP;
+                return true;
+            }
+        }
+
         if(state == GREAT_S){
             if(c == '='){
                 token->type = GREAT_EQ;
@@ -322,7 +334,7 @@ bool GetToken(token_t *token){
                 continue;
             }
             if('0' <= c && c <= '7'){
-                state = SYM_OCT1; // FSM FIX 0-7
+                state = SYM_OCT1; 
                 if(str_index >= str_size){
                     str_size += 64;
                     str = realloc(str, str_size);
@@ -412,7 +424,7 @@ bool GetToken(token_t *token){
             }
             str[str_index] = '\0';
             token->integer = (int)strtol(str, NULL, 10);
-            token->type = INT;
+            token->type = INT_T;
             ungetc(c, stdin);
             return true;
         }
@@ -473,7 +485,7 @@ bool GetToken(token_t *token){
             else{
                 str[str_index] = '\0';
                 token->decimal = strtod(str, NULL);
-                token->type = FLOAT;
+                token->type = FLOAT_T;
                 ungetc(c, stdin);
                 return true;
             }
@@ -503,7 +515,7 @@ bool GetToken(token_t *token){
             else{
                 str[str_index] = '\0';
                 token->decimal = strtod(str, NULL);
-                token->type = FLOAT;
+                token->type = FLOAT_T;
                 ungetc(c, stdin);
                 return true;
             }
@@ -511,7 +523,7 @@ bool GetToken(token_t *token){
         return false;
     }
 }
-
+/*
 int main(void){
     token_t token;
     while(true){
@@ -530,3 +542,4 @@ int main(void){
     }
     return 0;
 }
+*/
