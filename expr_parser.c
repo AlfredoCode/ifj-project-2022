@@ -215,7 +215,7 @@ int evaluate_concatenation(stack_t *stack)
 
 int evaluate(stack_t *stack, htab_t *symtable)
 {   
-    stack_token_t *top = stackPeek(stack, 0);
+    stack_token_t *top = nextNonTerm(stack);
     // for use in div check
     stack_token_t *tok; 
     stat_t *id;
@@ -397,6 +397,7 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
                 curSymbol = tokenToTerminal(curToken);
                
                 // Check if I didnt get ab or ++ 
+                /*
                 if (operand) {
                     if (
                         curSymbol == sym_id     ||
@@ -407,14 +408,15 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
                       errHandler(SYNTAX_ERR, "Operand cant go after operand.");      
                     }
 
-                    operand = false;
+                    operand = true;
                 } else {
                     if (curSymbol < sym_lbr) {
                         errHandler(SYNTAX_ERR, "Operator cant go after operator.");
                     }
 
-                    operand = true;
+                    operand = false;
                 }
+                */
                 break;
 
             // Reduce expression
