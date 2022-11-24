@@ -11,7 +11,7 @@ CC = gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -g
 
 # TESTS
-test: htab.o $(testFile).o parser.o main.o scanner.o
+test: $(testFile).o symtable.o expr_stack.o expr_parser.o error.o scanner.o parser.o
 	$(CC) $(CFLAGS) $^ -o $@ 
 
 test_run: test
@@ -23,7 +23,6 @@ test_verbose: test
 # FILES
 $(testFile).o: $(testFile).c
 
-<<<<<<< HEAD
 symtable.o: symtable.c
 
 expr_stack.o: expr_stack.c
@@ -36,14 +35,6 @@ scanner.o: scanner.c
 
 parser.o: parser.c
 
-=======
-parser.o: parser.c
-
-main.o: main.c
-
-scanner.o: scanner.c
-
->>>>>>> Makefile changes
 # CLEANUP
 clean:
 	@rm -f $(testFile) *.o
