@@ -587,8 +587,17 @@ int separators_if(){
             res = checkIfStat();
             return res;
         case R_PAR:
-             *expr_tok = token;
-            insertExpr(expression, expr_tok);   // POTENTIAL REMOVE
+    
+
+            expr = expression->lastElement;          // DEBUG
+            while(expr != NULL){
+                printf("%s ",expr->token->string); 
+                expr = expr->previous;
+            }
+            putchar('\n');
+            expr_parse(symtable, expression);
+            
+            exprListDispose(expression);
             return SUCCESS_ERR;
         default:
             return SYNTAX_ERR;
@@ -607,7 +616,7 @@ int checkIfStat(){
     }
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
-        return 99;
+        return INTERNAL_ERR;
     }
     switch(token.type){
         
@@ -664,7 +673,10 @@ int checkIfOperators(){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
-
+    token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
+    if(expr_tok == NULL){
+        return INTERNAL_ERR;
+    }
     switch(token.type){
         case EQ: 
         case NOT_EQ:
@@ -672,6 +684,8 @@ int checkIfOperators(){
         case LESS_EQ:
         case GREAT:
         case GREAT_EQ:
+            *expr_tok = token;
+            insertExpr(expression, expr_tok);
             return SUCCESS_ERR;
         default:
             return res;
