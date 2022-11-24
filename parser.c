@@ -14,6 +14,7 @@
 #include "parser.h"
 #include "symtable.h"
 #include "error.h"
+#include "expr_parser.h"
 
 #define HTABSIZE 10
 
@@ -69,11 +70,14 @@ void insertExpr(expression_T *exprList, token_t *token){
 
 }
 
-// expr_El getExpr(expression_T *exprList){
-//     exprList->activeElement = exprList->activeElement->next;
-
-//     return exprList->activeElement;
-// }
+expr_El getExpr(expression_T *exprList){
+    if(exprList->activeElement == NULL){
+        exprList->activeElement = exprList->firstElement;
+        return exprList->activeElement; 
+    }
+    exprList->activeElement = exprList->activeElement->next;
+    return exprList->activeElement;
+}
 void exprListDispose( expression_T *exprList ) {
 	expr_El firstEl;
 	expr_El nextEl;	// Deklarace dvou pomocných prvků typu ListElementPtr
@@ -485,7 +489,7 @@ int functionCheck(){
         fprintf(stderr, "Syntax error ---> MISSING RIGHT BRACKET AFTER RETURN STATEMENT <---\n");
         return SYNTAX_ERR;
     }
-    printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
+    // printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
     insideFunc = false;
     return statement_list();
 }
@@ -886,22 +890,23 @@ int separators(){
     switch(token.type){ // SEPARATORS
 
         case SEMICOL:
-
-            // expr = expression->lastElement;          // DEBUG
-            // while(expr != NULL){
-            //     printf("%s",expr->token->string); 
-            //     expr = expr->previous;
-            // }
-            // putchar('\n');
-        
+            *expr_tok = token;
+            insertExpr(expression, expr_tok);
+            expr = expression->lastElement;          // DEBUG
+            while(expr != NULL){
+                printf("%s ",expr->token->string); 
+                expr = expr->previous;
+            }
+            putchar('\n');
+            expr_parse(symtable, expression);
         
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
                      // expr_parse(expression_list, symtable);
             // EXPRESSION LIST DISPOSE
 
              
-            statement = htab_find(symtable,statement->name);    // DEBUG
-            printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
+            // statement = htab_find(symtable,statement->name);    // DEBUG
+            // printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
 
             exprListDispose(expression);
             return statement_list(); // $x=$y; || $x=5; || $x = $y.$z;

@@ -81,7 +81,7 @@ p_symbol tokenToTerminal(token_t *token)
             return sym_float;
 
         case SEMICOL:
-        case L_BRAC:
+        case COL:
             return sym_end;
 
         default:
@@ -364,6 +364,7 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
    
     // Check if I start with operator and not operand 
     token_t *start_token = getExpr(list)->token;
+    
     p_symbol curSymbol = tokenToTerminal(start_token);
     if (curSymbol < sym_lbr) errHandler(SYNTAX_ERR, "Bad first token in expression.");
 
@@ -375,7 +376,7 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
     stack_token_t *topToken;
     token_t *curToken = start_token;
 
-
+    
     // Loop until done, done == break;
     while (parse) {
         topToken = nextNonTerm(stack);
