@@ -25,7 +25,6 @@ typedef enum {
     sym_neq,
     sym_rbr,
     sym_lbr,
-    sym_dollar,
     sym_id,
     sym_int,
     sym_float,
