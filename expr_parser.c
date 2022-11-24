@@ -80,6 +80,7 @@ p_symbol tokenToTerminal(token_t *token)
 
         case SEMICOL:
         case COL:
+        case L_BRAC:
             return sym_end;
 
         default:
@@ -191,6 +192,7 @@ int evaluate_brackets(stack_t *stack)
 
     // Return the thing between brackets back
     stackPush(stack, tok->token);
+    stackPeek(stack, 0)->symbol = tok->symbol;
 
     return 0;
 }
