@@ -54,7 +54,11 @@ void insertExpr(expression_T *exprList, token_t *token){
 
 }
 
+expr_El getExpr(expression_T *exprList){
+    exprList->activeElement = exprList->activeElement->next;
 
+    return exprList->activeElement;
+}
 void exprListDispose( expression_T *exprList ) {
 	expr_El firstEl;
 	expr_El nextEl;	// Deklarace dvou pomocných prvků typu ListElementPtr

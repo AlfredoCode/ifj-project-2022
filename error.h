@@ -24,7 +24,7 @@ typedef enum{
     INTERNAL_ERR = 99
 }err_code;
 
-int errHandler(int result, char *msg);
+void errHandler(int result, char *msg);
 
 #endif // ERROR_H_
 

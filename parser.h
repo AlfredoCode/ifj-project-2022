@@ -9,7 +9,7 @@
 
 #ifndef __PARSER_H__
 #define __PARSER_H__
-
+#include "scanner.h"
 
 // Enum for statement types
 typedef enum {
@@ -43,9 +43,10 @@ typedef struct {
 
 
 void expressionInit(expression_T *exprList);
-expr_El *getExpr(expression_T *exprList);
+expr_El getExpr(expression_T *exprList);
 void insertExpr(expression_T *exprList, token_t *token);
 void exprListDispose( expression_T *exprList );
+
 
 
 
