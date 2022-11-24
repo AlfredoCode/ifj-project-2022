@@ -587,8 +587,9 @@ int separators_if(){
             res = checkIfStat();
             return res;
         case R_PAR:
-    
-
+            
+            *expr_tok = token;
+            insertExpr(expression, expr_tok);
             expr = expression->lastElement;          // DEBUG
             while(expr != NULL){
                 printf("%s ",expr->token->string); 
@@ -696,6 +697,10 @@ int checkIfOperators(){
 int condiCheck(){
     int res = SYNTAX_ERR;
     token_res = GetToken(&token);  
+    token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
+    if(expr_tok == NULL){
+        return INTERNAL_ERR;
+    }
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
@@ -704,6 +709,8 @@ int condiCheck(){
         fprintf(stderr,"Syntax error ---> MISSING LEFT PARENTHESIS <---\n");
         return res;
     }
+    *expr_tok = token;
+    insertExpr(expression, expr_tok);
     res = checkIfStat();    // Zkontroluj levou stranu vyrazu v ifu
     if(res != SUCCESS_ERR){
         return res;
