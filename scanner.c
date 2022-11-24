@@ -250,29 +250,28 @@ bool GetToken(token_t *token){
             return true;
         }
         if(state == OPENMARK){
-            c = getchar();
-            if(c == 'p')
+            if(c == 'p'){
                 state = OPENMARK2;
                 continue;
+            }
         }
         if(state == OPENMARK2){
-            c = getchar();
             if(c == 'h'){
                 state = OPENMARK3;
                 continue;
             }
         }
         if(state == OPENMARK3){
-            c = getchar();
             if(c == 'p'){
                 state = OPENMARK4;
                 continue;
             }
         }
         if(state == OPENMARK4){
-            c = getchar();
             if(isspace(c)){
+                
                 token->type = PHP;
+                
                 return true;
             }
         }

@@ -12,19 +12,34 @@
 #include <stdio.h>
 #include "scanner.h"
 #include "parser.h"
-
+#include "symtable.h"
 #include "error.h"
 
+#define HTABSIZE 10
+
+
 int token_res = 0;
+
+// TODO MAKE IT STATIC BOI
 bool insideIf = false;
 bool insideFunc = false;
 bool insideWhile = false;
+
+//Token
 token_t token;
+
+//Statement struct
+stat_t *statement;
+
+//Internal variables
 int currentToken = 0;
 int currentReturnType = 0;
+// Expressions
 expression_T *expression, *allTokens;
-
 expr_El expr; // FOR DEBUG PRINTS
+
+// Symtable
+htab_t *symtable;
 
 
 void expressionInit(expression_T *exprList){
@@ -54,11 +69,11 @@ void insertExpr(expression_T *exprList, token_t *token){
 
 }
 
-expr_El getExpr(expression_T *exprList){
-    exprList->activeElement = exprList->activeElement->next;
+// expr_El getExpr(expression_T *exprList){
+//     exprList->activeElement = exprList->activeElement->next;
 
-    return exprList->activeElement;
-}
+//     return exprList->activeElement;
+// }
 void exprListDispose( expression_T *exprList ) {
 	expr_El firstEl;
 	expr_El nextEl;	// Deklarace dvou pomocných prvků typu ListElementPtr
@@ -87,6 +102,7 @@ token_res = GetToken(&token);       // levá závorka
         return LEX_ERR;
     }
     if(token.type != L_PAR){
+        
         fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
         return SYNTAX_ERR;
     }
@@ -109,6 +125,7 @@ token_res = GetToken(&token);       // levá závorka
         return LEX_ERR;
     }
     if(token.type != ASSIG){
+        
         fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
         return SYNTAX_ERR;
     }
@@ -120,6 +137,8 @@ token_res = GetToken(&token);       // levá závorka
         return LEX_ERR;
     }
     if(token.type != INT_T){
+        printf("SUP");
+
         fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
         return SYNTAX_ERR;
     }
@@ -153,10 +172,26 @@ token_res = GetToken(&token);       // levá závorka
 int parse(){
 
     int res = SUCCESS_ERR;
+
     expression  = (expression_T*)malloc(sizeof(*expression));
+    if(expression == NULL){
+        fprintf(stderr,"Malloc failure\n");
+        return INTERNAL_ERR;
+    }
     expressionInit(expression);
+
+    // symtable = htab_init(HTABSIZE);
+    // if(symtable == NULL){
+    //     return INTERNAL_ERR;
+    // }
+    // statement = (stat_t *)malloc(sizeof(*statement));
+    // if(statement == NULL){
+    //     return INTERNAL_ERR;
+    // }
+
     token_res = GetToken(&token);   
     if(!token_res){
+        printf("AHoj\n");
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
@@ -172,6 +207,7 @@ int parse(){
             fprintf(stderr,"Syntax error ---> MISSING PROLOG <---\n");
             return SYNTAX_ERR;  // MISSING PROLOG
     }
+    //GENERATE
     return SUCCESS_ERR;
 }
 
@@ -367,7 +403,8 @@ int functionCheck(){
         }
 
     }
-    
+
+
     switch(token.keyword){   // Co za keyword jsme dostali?
         case STRING: case INT: case FLOAT: case VOID:
         
@@ -375,9 +412,9 @@ int functionCheck(){
             currentReturnType = token.keyword;
             break;
         default:
-            
             return SYNTAX_ERR;  // while, if apod..
     }
+    
     //  int currentReturnType if token.type == TYPE TODO
     token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): type {
     if(!token_res){
@@ -442,7 +479,6 @@ int functionCheck(){
         return SYNTAX_ERR;
     }
     insideFunc = false;
-    
     return statement_list();
 }
 
@@ -724,7 +760,7 @@ int expression_check(){
         fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
         return SYNTAX_ERR;
     }
-
+   
     token_res = GetToken(&token);
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
