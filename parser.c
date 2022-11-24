@@ -590,15 +590,7 @@ int separators_if(){
             
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            expr = expression->lastElement;          // DEBUG
-            while(expr != NULL){
-                printf("%s ",expr->token->string); 
-                expr = expr->previous;
-            }
-            putchar('\n');
-            expr_parse(symtable, expression);
             
-            exprListDispose(expression);
             return SUCCESS_ERR;
         default:
             return SYNTAX_ERR;
@@ -732,6 +724,17 @@ int condiCheck(){
         fprintf(stderr,"Syntax error ---> MISSING LEFT BRACKET <---\n");
         return SYNTAX_ERR;
     }
+    *expr_tok = token;
+    insertExpr(expression, expr_tok);
+    expr = expression->lastElement;          // DEBUG
+    while(expr != NULL){
+        printf("%s ",expr->token->string); 
+        expr = expr->previous;
+    }
+    putchar('\n');
+    expr_parse(symtable, expression);
+    
+    exprListDispose(expression);
     insideIf = true;
     res = statement_list();  // Kontrola vnitřku funkce
     if(res != SUCCESS_ERR){
