@@ -72,10 +72,10 @@ void insertExpr(expression_T *exprList, token_t *token){
 
 expr_El getExpr(expression_T *exprList){
     if(exprList->activeElement == NULL){
-        exprList->activeElement = exprList->firstElement;
+        exprList->activeElement = exprList->lastElement;
         return exprList->activeElement; 
     }
-    exprList->activeElement = exprList->activeElement->next;
+    exprList->activeElement = exprList->activeElement->previous;
     return exprList->activeElement;
 }
 void exprListDispose( expression_T *exprList ) {
@@ -861,6 +861,17 @@ int statement_list_inside(){
         case FLOAT_T: 
         case STRING_T:
             // statement->value = token.string;    // value of statement of number // TODO
+            if(token.type == INT_T){
+                statement->type = t_int;
+            }
+            else if(token.type == STRING_T){
+                statement->type = t_str;
+
+            }
+            else{
+                statement->type = t_float;
+
+            }
             *expr_tok = token;
             insertExpr(expression, expr_tok);
             res = separators();
