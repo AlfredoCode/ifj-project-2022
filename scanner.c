@@ -424,7 +424,8 @@ bool GetToken(token_t *token){
                 continue;
             }
             str[str_index] = '\0';
-            token->integer = (int)strtol(str, NULL, 10);
+            // token->integer = (int)strtol(str, NULL, 10); // modif
+            token->string = str;
             token->type = INT_T;
             
             ungetc(c, stdin);
@@ -486,7 +487,8 @@ bool GetToken(token_t *token){
             }
             else{
                 str[str_index] = '\0';
-                token->decimal = strtod(str, NULL);
+                // token->decimal = strtod(str, NULL);
+                token->string = str;
                 token->type = FLOAT_T;
                 ungetc(c, stdin);
                 return true;
@@ -516,7 +518,8 @@ bool GetToken(token_t *token){
             }
             else{
                 str[str_index] = '\0';
-                token->decimal = strtod(str, NULL);
+                // token->decimal = strtod(str, NULL); // modif
+                token->string = str;
                 token->type = FLOAT_T;
                 ungetc(c, stdin);
                 return true;
