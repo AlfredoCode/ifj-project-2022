@@ -1,43 +1,9 @@
 <?php declare(strict_types = 1);
-
+$x = 1;
 if($x === 5){
-    $x = 5;
-    $x = $y.$z.$o;
-}
-else{
-    $a = $b;
-    $x = $y.$z.$o;
-}
+    $x = "s";
 
-if($x !== 5){
-    
 }
 else{
-    
-}
 
-if($x > 5){
-    
-}
-else{
-    
-}
-if($x >= 5){
-    
-}
-else{
-    
-}
-
-if($x < 5){
-    
-}
-else{
-    
-}
-if($x >= 5){
-    
-}
-else{
-    
 }
