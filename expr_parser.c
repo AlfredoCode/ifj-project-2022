@@ -327,8 +327,7 @@ int evaluate(stack_t *stack, htab_t *symtable)
 
 p_return get_last(stack_t *stack)
 {
-    // Top element is $
-    stack_token_t *last = stackPeek(stack, 1);
+    stack_token_t *last = stackPeek(stack, 0);
 
     switch (last->symbol){
         case term_int:
