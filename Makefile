@@ -11,7 +11,7 @@ CC = gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -g
 
 # TESTS
-test: $(testFile).o symtable.o expr_stack.o expr_parser.o error.o scanner.o parser.o
+test: $(testFile).o symtable.o  expr_stack.o expr_parser.o error.o scanner.o parser.o main.o
 	$(CC) $(CFLAGS) $^ -o $@ 
 
 test_run: test
@@ -34,6 +34,8 @@ error.o: error.c
 scanner.o: scanner.c
 
 parser.o: parser.c
+
+main.o: main.c
 
 # CLEANUP
 clean:

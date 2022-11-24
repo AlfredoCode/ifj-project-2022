@@ -85,7 +85,7 @@ p_symbol tokenToTerminal(token_t *token)
             return sym_end;
 
         default:
-            err_msg(SYNTAX_ERR, "Bad expression");
+            errHandler(SYNTAX_ERR, "Bad expression");
             return err_uhoh;
     }
 
@@ -121,7 +121,7 @@ int arithmetic_check(stack_t *stack)
 
             return 0;
         }
-        err_msg(SYNTAX_ERR, "Cant do anything with string and non-string, no str-num here");
+        errHandler(SYNTAX_ERR, "Cant do anything with string and non-string, no str-num here");
         return 1;
     } 
 
@@ -143,7 +143,7 @@ int arithmetic_check(stack_t *stack)
         return 0;
     }
     
-    err_msg(SYNTAX_ERR, "Error in expresion - incompatible datatypes"); 
+    errHandler(SYNTAX_ERR, "Error in expresion - incompatible datatypes"); 
     return 1;
 }
 
@@ -162,7 +162,7 @@ int evaluate_bool(stack_t *stack)
 
             return 0;
         }
-        err_msg(SYNTAX_ERR, "Cant do anything with string and non-string, no str-num here");
+        errHandler(SYNTAX_ERR, "Cant do anything with string and non-string, no str-num here");
         return 1; 
     }
 
@@ -177,7 +177,7 @@ int evaluate_bool(stack_t *stack)
         return 0;
     }
 
-    err_msg(SYNTAX_ERR, "Error in expresion - incompatible datatypes."); 
+    errHandler(SYNTAX_ERR, "Error in expresion - incompatible datatypes."); 
     return 1;
 }
 
@@ -204,7 +204,7 @@ int evaluate_concatenation(stack_t *stack)
 
     // I need both to be strings
     if (!(tok1->symbol == term_str && tok2->symbol == term_str)){
-        err_msg(SYNTAX_ERR, "Error in expresion - incompatible datatypes.");
+        errHandler(SYNTAX_ERR, "Error in expresion - incompatible datatypes.");
         return 1;
     }
 
@@ -230,7 +230,7 @@ int evaluate(stack_t *stack, htab_t *symtable)
             id = htab_find(symtable, top->token->string);
             // I only get NULL if its not defined
             if (!id) {
-               err_msg(SEM_UNDEF_VAR_ERR, "Undefined variable in expression!");
+               errHandler(SEM_UNDEF_VAR_ERR, "Undefined variable in expression!");
                return 1;
             }
             
@@ -249,7 +249,7 @@ int evaluate(stack_t *stack, htab_t *symtable)
                 
                 // My brother in christ, how did you get here
                 default:
-                    err_msg(SEM_OTHERS_ERR, "What did you do.");
+                    errHandler(SEM_OTHERS_ERR, "What did you do.");
                     break;
             }
 
@@ -284,12 +284,12 @@ int evaluate(stack_t *stack, htab_t *symtable)
             tok = stackPeek(stack, 0);
             if (tok->symbol == term_int) {
                 if (!tok->token->integer){
-                    err_msg(SEM_OTHERS_ERR, "Attempted div by 0.");
+                    errHandler(SEM_OTHERS_ERR, "Attempted div by 0.");
                     break;
                 }
             } else if (tok->symbol == term_float) {
                 if (!tok->token->decimal){
-                    err_msg(SEM_OTHERS_ERR, "Attempted div by 0.");
+                    errHandler(SEM_OTHERS_ERR, "Attempted div by 0.");
                     break;
                 }
             }
@@ -318,7 +318,7 @@ int evaluate(stack_t *stack, htab_t *symtable)
             break;
 
         default:
-            err_msg(SYNTAX_ERR, "No rules applicable for this expression.");
+            errHandler(SYNTAX_ERR, "No rules applicable for this expression.");
             return 1;
             break;
     } 
@@ -363,9 +363,9 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
     stackPeek(stack, 0)->symbol = sym_dollar;
    
     // Check if I start with operator and not operand 
-    token_t *start_token = getNext(list)->token;
+    token_t *start_token = getExpr(list)->token;
     p_symbol curSymbol = tokenToTerminal(start_token);
-    if (curSymbol < sym_lbr) err_msg(SYNTAX_ERR, "Bad first token in expression.");
+    if (curSymbol < sym_lbr) errHandler(SYNTAX_ERR, "Bad first token in expression.");
 
     // Bools
     bool parse = true;
@@ -394,7 +394,7 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
                 stackPeek(stack, 0)->symbol = curSymbol;
 
                 // Get a new one
-                curToken = getNext(list)->token;
+                curToken = getExpr(list)->token;
                 curSymbol = tokenToTerminal(curToken);
                
                 // Check if I didnt get ab or ++ 
@@ -405,13 +405,13 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
                         curSymbol == sym_float  ||
                         curSymbol == sym_str
                     ) {
-                      err_msg(SYNTAX_ERR, "Operand cant go after operand.");      
+                      errHandler(SYNTAX_ERR, "Operand cant go after operand.");      
                     }
 
                     operand = false;
                 } else {
                     if (curSymbol < sym_lbr) {
-                        err_msg(SYNTAX_ERR, "Operator cant go after operator.");
+                        errHandler(SYNTAX_ERR, "Operator cant go after operator.");
                     }
 
                     operand = true;
@@ -425,12 +425,12 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
 
             // Non-rule
             case 'X':
-                err_msg(SEM_TYPE_ERR, "Bad operands, non-rule in precedence table.");
+                errHandler(SEM_TYPE_ERR, "Bad operands, non-rule in precedence table.");
                 break;
 
             // Again, how did you get here
             default:
-                err_msg(SYNTAX_ERR, "Rule not in precedence table.");
+                errHandler(SYNTAX_ERR, "Rule not in precedence table.");
                 break;
         }
     } 
