@@ -51,8 +51,6 @@ p_symbol tokenToTerminal(token_t *token)
             return sym_mul;
         case DIV:
             return sym_div;
-        case DOLLAR:
-            return sym_dollar;
         case ID:
             return sym_id;
         case R_PAR:
@@ -359,8 +357,8 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
     token_t *initTok = NULL;
     stackPush(stack, initTok);
     
-    // First symbol needs to be dollar
-    stackPeek(stack, 0)->symbol = sym_dollar;
+    // First symbol needs to be end symbol
+    stackPeek(stack, 0)->symbol = sym_end;
    
     // Check if I start with operator and not operand 
     token_t *start_token = getExpr(list)->token;
