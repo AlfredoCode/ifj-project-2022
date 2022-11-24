@@ -180,14 +180,14 @@ int parse(){
     }
     expressionInit(expression);
 
-    // symtable = htab_init(HTABSIZE);
-    // if(symtable == NULL){
-    //     return INTERNAL_ERR;
-    // }
-    // statement = (stat_t *)malloc(sizeof(*statement));
-    // if(statement == NULL){
-    //     return INTERNAL_ERR;
-    // }
+    symtable = htab_init(HTABSIZE);
+    if(symtable == NULL){
+        return INTERNAL_ERR;
+    }
+    statement = (stat_t *)malloc(sizeof(*statement));
+    if(statement == NULL){
+        return INTERNAL_ERR;
+    }
 
     token_res = GetToken(&token);   
     if(!token_res){
@@ -353,6 +353,13 @@ int functionCheck(){
         return res;
     }
     // INSERT ID INTO FUNCTION HTAB
+    statement = htab_find(symtable, token.string);
+    if(statement != NULL){
+        fprintf(stderr,"SEMANTIC ERROR ---> Function redefinition <---\n");
+        return SEM_FUNC_ERR;
+    }
+    statement = htab_lookup_add(symtable, token.string);   // add  func identifier to symtable
+
     stat_t *statement;
     statement = (stat_t*) malloc(sizeof(*statement));
     if(statement == NULL){
@@ -478,6 +485,7 @@ int functionCheck(){
         fprintf(stderr, "Syntax error ---> MISSING RIGHT BRACKET AFTER RETURN STATEMENT <---\n");
         return SYNTAX_ERR;
     }
+    printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
     insideFunc = false;
     return statement_list();
 }
@@ -760,7 +768,12 @@ int expression_check(){
         fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
         return SYNTAX_ERR;
     }
+
+
    
+    statement = htab_lookup_add(symtable, token.string);   // add  identifier to symtable
+
+
     token_res = GetToken(&token);
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
@@ -831,7 +844,7 @@ int statement_list_inside(){
             if(token.type != ID){
                 return SYNTAX_ERR;
             }
-            
+            // statement->value = token.string;    // value of statement of variable   TODO
             *expr_tok = token;
             insertExpr(expression, expr_tok);
             // printf("%s is last, %s is first\n",expression->lastElement->token->string, expression->firstElement->token->string);    // DEBUG
@@ -840,7 +853,10 @@ int statement_list_inside(){
                 
             
             return res;
-        case INT_T: case FLOAT_T: case STRING_T:
+        case INT_T: 
+        case FLOAT_T: 
+        case STRING_T:
+            // statement->value = token.string;    // value of statement of number // TODO
             *expr_tok = token;
             insertExpr(expression, expr_tok);
             res = separators();
@@ -882,6 +898,11 @@ int separators(){
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
                      // expr_parse(expression_list, symtable);
             // EXPRESSION LIST DISPOSE
+
+             
+            statement = htab_find(symtable,statement->name);    // DEBUG
+            printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
+
             exprListDispose(expression);
             return statement_list(); // $x=$y; || $x=5; || $x = $y.$z;
         case KONKAT: case DIV: case ADD: case SUB: case MUL:    // $x=$y.<IFSTAT> || $x=$y+<IFSTAT> etc.
