@@ -724,11 +724,15 @@ int condiCheck(){
         fprintf(stderr,"Syntax error ---> MISSING LEFT BRACKET <---\n");
         return SYNTAX_ERR;
     }
-    *expr_tok = token;
-    insertExpr(expression, expr_tok);
+    token_t *expr_tok2 = (token_t*) malloc(sizeof(*expr_tok2));
+    if(expr_tok2 == NULL){
+        return INTERNAL_ERR;
+    }
+    *expr_tok2 = token;
+    insertExpr(expression, expr_tok2);
     expr = expression->lastElement;          // DEBUG
     while(expr != NULL){
-        printf("%s ",expr->token->string); 
+        printf("%d ",expr->token->type); 
         expr = expr->previous;
     }
     putchar('\n');
