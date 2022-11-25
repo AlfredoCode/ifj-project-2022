@@ -614,6 +614,15 @@ int functionCheck(){
                     return LEX_ERR;
                 }
                 break;
+            case KEYWORD:
+                if(token.keyword == NULL_K){
+                    fprintf(stderr, "null as a return type of function\n");
+                    return SEM_PARAM_ERR;
+                }
+                else{
+                    fprintf(stderr, "other keyword as a return type of function\n");
+                    return SYNTAX_ERR;  
+                }
             default:
                 return SYNTAX_ERR;
         }
