@@ -7,7 +7,7 @@
     function ial(): string{
         $x = "Miluju ial";
 
-        return $x;
+        return "ahoj";  // does not work if return $x;
     }
 
     function iss(): int{
