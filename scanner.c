@@ -154,12 +154,16 @@ bool GetToken(token_t *token){
             return true;
         }
         if(state == LINE_COM_S){
-            if (c == '\n'){
+
+            if (c == '\n' || c == EOF){
                 state = S;
             }
             continue;
         }
         if(state == BLOCK_COM_S){
+            if(c == EOF){
+                return false;
+            }
             if (c == '*'){
                 state = BLOCK_COM;
             }
@@ -198,6 +202,7 @@ bool GetToken(token_t *token){
                 else{
                     token->type = KEYWORD;
                     token->keyword = keyword;
+                    token->string = str;
                 }
                 return true;
             }
@@ -235,6 +240,8 @@ bool GetToken(token_t *token){
                 token->type = EQ;
                 return true;
             }
+            printf("pičo vole\n");
+            return false;
         }
         if(state == LESS_S){
             if(c == '='){

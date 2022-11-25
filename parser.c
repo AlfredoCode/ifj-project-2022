@@ -40,7 +40,7 @@ expression_T *expression, *allTokens;
 expr_El expr; // FOR DEBUG PRINTS
 
 // Symtable
-htab_t *symtable;
+htab_t *symtable, *funTable;
 
 
 void expressionInit(expression_T *exprList){
@@ -184,10 +184,22 @@ int parse(){
     }
     expressionInit(expression);
 
-    symtable = htab_init(HTABSIZE);
+    symtable = htab_init(HTABSIZE); // Var symtable
     if(symtable == NULL){
         return INTERNAL_ERR;
     }
+    funTable = htab_init(HTABSIZE); // Function symtable
+    if(funTable == NULL){
+        return INTERNAL_ERR;
+    }
+    htab_lookup_add(funTable, "reads");
+    htab_lookup_add(funTable, "readi");
+    htab_lookup_add(funTable, "readf");
+    htab_lookup_add(funTable, "write");
+    htab_lookup_add(funTable, "strlen");
+    htab_lookup_add(funTable, "substring");
+    htab_lookup_add(funTable, "ord");
+    htab_lookup_add(funTable, "chr");
     statement = (stat_t *)malloc(sizeof(*statement));
     if(statement == NULL){
         return INTERNAL_ERR;
@@ -279,15 +291,47 @@ int statement_list(){
                     res = checkWhile();
                     return res;
                 case RETURN:
-                    if(currentReturnType){
-                        return SUCCESS_ERR;
-                    }
+                    // if(currentReturnType){
+                    return SUCCESS_ERR;
+                    // }
                     
                     return SYNTAX_ERR;  // Void function cannot have return
                 default:
                     return SYNTAX_ERR;
             }
-
+        case ID:
+            
+            token_res = GetToken(&token);  
+            if(!token_res){
+                fprintf(stderr,"Lexical error\n");
+                return LEX_ERR;
+            }
+            if(token.type == L_PAR){
+                res = funcParams();
+                if(res != SUCCESS_ERR){
+                     
+                    return SYNTAX_ERR;  // ADD SEMICOL TO LL ON ITS OWN!!!
+                }
+                
+                // semicol();
+                token_res = GetToken(&token);  
+                // printf("Token type is %d\n", token.type); // DEBUG 
+                if(!token_res){
+                    fprintf(stderr,"Lexical error\n");
+                    return LEX_ERR;
+                }
+                if(token.type != SEMICOL){
+                    fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
+                    return SYNTAX_ERR;
+                }
+                res = statement_list();
+                if(res != SUCCESS_ERR){
+                    return res;
+                }
+                
+                return res;  
+            }
+            return SYNTAX_ERR;
         default:
             if((insideIf && token.type == R_BRAC) || (insideWhile && token.type == R_BRAC)){
                 return SUCCESS_ERR;
@@ -357,12 +401,12 @@ int functionCheck(){
         return res;
     }
     // INSERT ID INTO FUNCTION HTAB
-    statement = htab_find(symtable, token.string);
+    statement = htab_find(funTable, token.string);
     if(statement != NULL){
         fprintf(stderr,"SEMANTIC ERROR ---> Function redefinition <---\n");
         return SEM_FUNC_ERR;
     }
-    statement = htab_lookup_add(symtable, token.string);   // add  func identifier to symtable
+    statement = htab_lookup_add(funTable, token.string);   // add  func identifier to symtable
 
     stat_t *statement;
     statement = (stat_t*) malloc(sizeof(*statement));
@@ -502,7 +546,6 @@ int funcParams(){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
-
     switch(token.type){
         case R_PAR: // NO PARAM 
             if(multipleParams){
@@ -600,7 +643,7 @@ int separators_if(){
 }
 
 int checkIfStat(){
-    int res = SUCCESS_ERR;
+    int res = SYNTAX_ERR;
 
     token_res = GetToken(&token);  
     if(!token_res){
@@ -627,9 +670,9 @@ int checkIfStat(){
             *expr_tok = token;
             insertExpr(expression, expr_tok);
             res = checkIfOperators();
-            if(res == SUCCESS_ERR){
+            if(res != SUCCESS_ERR){
                 // printf("Found the triple EQ\n");
-                return SUCCESS_ERR;
+                return res;
             }
             
             res = separators_if();
@@ -796,11 +839,10 @@ int expression_check(){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
-    if(!(token.type == ID)){
+    if(!((token.type == ID) || (token.type == KEYWORD))){
         fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
         return SYNTAX_ERR;
     }
-
 
    
     statement = htab_lookup_add(symtable, token.string);   // add  identifier to symtable
@@ -817,6 +859,7 @@ int expression_check(){
 
         return res;  
     }
+    
     return res;
 }
 
