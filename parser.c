@@ -34,7 +34,7 @@ stat_t *statement;
 
 //Internal variables
 int currentToken = 0;
-int currentReturnType = 0;
+p_return currentReturnType = 0;
 // Expressions
 expression_T *expression, *allTokens;
 expr_El expr; // FOR DEBUG PRINTS
@@ -545,11 +545,19 @@ int functionCheck(){
 
 
     switch(token.keyword){   // Co za keyword jsme dostali?
-        case STRING: case INT: case FLOAT: case VOID:
-        
-        
-            currentReturnType = token.keyword;
+        case STRING: 
+            currentReturnType = ret_string;
             break;
+        case INT: 
+            currentReturnType = ret_int;
+            break;
+        case FLOAT: 
+            currentReturnType = ret_float;
+            break;
+        case VOID:
+            break;
+        
+            
         default:
             return SYNTAX_ERR;  // while, if apod..
     }
@@ -574,7 +582,8 @@ int functionCheck(){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
-    if(currentReturnType != VOID){
+    if(currentReturnType == ret_float || currentReturnType == ret_int || currentReturnType == ret_string){
+        token_t *expr_tok;
         switch(token.type){
             case DOLLAR:
                 token_res = GetToken(&token);   // looking for ID
@@ -593,7 +602,12 @@ int functionCheck(){
                 }
                 break;
             case INT_T: case FLOAT_T: case STRING_T:    // Teoreticky muzu vratit 5+5 apod, ale to ted neresme
-                
+                expr_tok = (token_t*) malloc(sizeof(*expr_tok));
+                if(expr_tok == NULL){
+                    return INTERNAL_ERR;
+                }
+                *expr_tok = token;
+                insertExpr(expression, expr_tok);
                 token_res = GetToken(&token);   // Looking for semicol;
                 if(!token_res){
                     fprintf(stderr,"Lexical error\n");
@@ -607,6 +621,20 @@ int functionCheck(){
     if(token.type != SEMICOL){
         fprintf(stderr, "Syntax error ---> MISSING SEMICOL AFTER RETURN <---\n");
         return SYNTAX_ERR;
+    }
+    token_t *expr_tok_semicol;
+    expr_tok_semicol = (token_t*) malloc(sizeof(*expr_tok_semicol));
+    if(expr_tok_semicol == NULL){
+        return INTERNAL_ERR;
+    }
+    *expr_tok_semicol = token;
+    insertExpr(expression, expr_tok_semicol);
+    if(currentReturnType == ret_string || currentReturnType == ret_int || currentReturnType == ret_float){
+        if(expr_parse(symtable, expression) != currentReturnType){   // sending return expression to expr_parser
+            fprintf(stderr, "Wrong return type\n");
+            return SEM_PARAM_ERR;
+        }
+        exprListDispose(expression);
     }
     token_res = GetToken(&token);   // Looking for R_BRAC;
     if(!token_res){
