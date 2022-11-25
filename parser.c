@@ -141,7 +141,7 @@ token_res = GetToken(&token);       // levá závorka
         return LEX_ERR;
     }
     if(token.type != INT_T){
-        printf("SUP");
+        // printf("SUP");
 
         fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
         return SYNTAX_ERR;
@@ -207,7 +207,7 @@ int parse(){
 
     token_res = GetToken(&token);   
     if(!token_res){
-        printf("AHoj\n");
+        // printf("AHoj\n");
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
@@ -775,7 +775,7 @@ int condiCheck(){
     insertExpr(expression, expr_tok2);
     expr = expression->lastElement;          // DEBUG
     while(expr != NULL){
-        printf("%d ",expr->token->type); 
+        // printf("%d ",expr->token->type); 
         expr = expr->previous;
     }
     putchar('\n');
@@ -976,7 +976,7 @@ int separators(){
             insertExpr(expression, expr_tok);
             expr = expression->lastElement;          // DEBUG
             while(expr != NULL){
-                printf("%s ",expr->token->string); 
+                // printf("%s ",expr->token->string); 
                 expr = expr->previous;
             }
             putchar('\n');
