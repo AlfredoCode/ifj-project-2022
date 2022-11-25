@@ -369,7 +369,7 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
 
     // Bools
     bool parse = true;
-    bool operand = true;
+    // bool operand = true;
 
     // Other defs
     stack_token_t *topToken;
