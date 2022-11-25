@@ -69,6 +69,7 @@ int elseCheck();
 int functionCheck();
 int funcParams();
 int checkWhile();
+int builtinParams();
 
 
 #endif  // __PARSER_H__

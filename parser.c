@@ -261,7 +261,7 @@ int statement_list(){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
-    
+    token_t *expr_tok;
     switch(token.type){
         case EOF_T: // FOUND ?>     
             // printf("Found the end\n");   //DEBUG
@@ -307,7 +307,7 @@ int statement_list(){
                 return LEX_ERR;
             }
             if(token.type == L_PAR){
-                res = funcParams();
+                res = builtinParams();
                 if(res != SUCCESS_ERR){
                      
                     return SYNTAX_ERR;  // ADD SEMICOL TO LL ON ITS OWN!!!
@@ -332,6 +332,15 @@ int statement_list(){
                 return res;  
             }
             return SYNTAX_ERR;
+        case INT_T: case FLOAT_T: case STRING_T:
+            expr_tok = (token_t*) malloc(sizeof(*expr_tok));
+            if(expr_tok == NULL){
+                return INTERNAL_ERR;
+            }
+            *expr_tok = token;
+            insertExpr(expression, expr_tok);
+            res = separators();
+            return res;
         default:
             if((insideIf && token.type == R_BRAC) || (insideWhile && token.type == R_BRAC)){
                 return SUCCESS_ERR;
@@ -343,6 +352,81 @@ int statement_list(){
 
     return res;
 }
+
+int builtinParams(){
+    int res = SYNTAX_ERR;
+    static bool multipleParams = false;
+    token_res = GetToken(&token);   // bar( <PARAMS> )
+    if(!token_res){
+        fprintf(stderr,"Lexical error\n");
+        return LEX_ERR;
+    }
+    switch(token.type){
+        case R_PAR: // NO PARAM 
+            if(multipleParams){
+                multipleParams = false;
+                return SYNTAX_ERR;
+            }
+            return SUCCESS_ERR;
+        case DOLLAR:
+          
+            token_res = GetToken(&token);   // type $
+            if(!token_res){
+                fprintf(stderr,"Lexical error\n");  // Hledáme ID
+                return LEX_ERR;
+            }
+            if(token.type != DOLLAR){
+                fprintf(stderr, "Syntax error ---> EXPECTED $ <---\n");
+                return SYNTAX_ERR;
+            }
+
+            token_res = GetToken(&token);   // type $ <ID>
+            if(!token_res){
+                fprintf(stderr,"Lexical error\n");  // Hledáme ID
+                return LEX_ERR;
+            }
+            if(token.type != ID){
+                fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER AFTER $ BUILTIN <---\n");
+                return SYNTAX_ERR;
+            }
+            // SEMANTIC
+            
+            token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
+            if(!token_res){
+                fprintf(stderr,"Lexical error\n");  // Hledáme ID
+                return LEX_ERR;
+            }
+            switch(token.type){
+                case R_PAR:
+                    return SUCCESS_ERR;
+                case COMMA:
+                    multipleParams = true;
+                    return builtinParams();
+                default:
+                    return SYNTAX_ERR;
+            }
+        case INT_T: case STRING_T: case FLOAT_T:
+            token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
+            if(!token_res){
+                fprintf(stderr,"Lexical error\n");  // Hledáme ID
+                return LEX_ERR;
+            }
+            switch(token.type){
+                case R_PAR:
+                    return SUCCESS_ERR;
+                case COMMA:
+                    multipleParams = true;
+                    return builtinParams();
+                default:
+                    return SYNTAX_ERR;
+            }
+        default:
+            return SYNTAX_ERR;
+
+    }
+    return res;
+}
+
 
 int checkWhile(){
     int res = SYNTAX_ERR;
@@ -618,10 +702,9 @@ int funcParams(){
 }
 int separators_if(){
     int res = SYNTAX_ERR;
-
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
-        return 99;
+        return INTERNAL_ERR;
     }
     switch(token.type){ // SEPARATORS
         case KONKAT: case DIV: case ADD: case SUB: case MUL:    // $x=$y.<IFSTAT> || $x=$y+<IFSTAT> etc.
@@ -670,6 +753,7 @@ int checkIfStat(){
             *expr_tok = token;
             insertExpr(expression, expr_tok);
             res = checkIfOperators();
+            
             if(res != SUCCESS_ERR){
                 // printf("Found the triple EQ\n");
                 return res;
@@ -688,6 +772,9 @@ int checkIfStat(){
             if(res == SUCCESS_ERR){
                 // printf("Found the triple EQ\n");
                 return SUCCESS_ERR;
+            }
+            else if(res == LEX_ERR){
+                return res;
             }
             res = separators_if();
             if(res != SUCCESS_ERR){
@@ -974,12 +1061,12 @@ int separators(){
         case SEMICOL:
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            expr = expression->lastElement;          // DEBUG
-            while(expr != NULL){
-                // printf("%s ",expr->token->string); 
-                expr = expr->previous;
-            }
-            putchar('\n');
+            // expr = expression->lastElement;          // DEBUG
+            // while(expr != NULL){
+            //     // printf("%s ",expr->token->string); 
+            //     expr = expr->previous;
+            // }
+            // putchar('\n');
             expr_parse(symtable, expression);
         
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
