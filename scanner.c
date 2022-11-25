@@ -240,7 +240,6 @@ bool GetToken(token_t *token){
                 token->type = EQ;
                 return true;
             }
-            printf("pičo vole\n");
             return false;
         }
         if(state == LESS_S){
@@ -302,6 +301,7 @@ bool GetToken(token_t *token){
                 token->type = NOT_EQ;
                 return true;
             }
+            return false;
         }
         if(state == STRING_START){
             if(c == '"'){

@@ -6,7 +6,7 @@ do
     echo "TESTFILE: ${file}";
     echo "";
     echo "RESULT:"
-    cat "$file" | ./test
+    cat "$file" | ../final/test
     err=`echo $?`;
     echo -n "Error code: ${err} - ";
 
@@ -34,7 +34,7 @@ do
     echo "TESTFILE: ${file}";
     echo "";
     echo "RESULT:"
-    cat "$file" | ./test
+    cat "$file" | ../final/test
     err=`echo $?`;
     echo -n "Error code: ${err} - ";
 
