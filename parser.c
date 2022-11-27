@@ -574,6 +574,9 @@ int functionCheck(){
     insideFunc = true;
     res = statement_list(); // function <ID> ( <FUNC_PARAMS> ): type{ <ST_L>
     if(res != SUCCESS_ERR){
+        if(!(currentReturnType == ret_float || currentReturnType == ret_int || currentReturnType == ret_string)){  // VOID FUNCTION WITHOUT RETURN STATEMENT
+            return SUCCESS_ERR;
+        }
         if(token.type != KEYWORD && token.keyword != RETURN){
             return SEM_PARAM_ERR;   // NO RETURN FOUND
         }
@@ -626,12 +629,16 @@ int functionCheck(){
                     return SYNTAX_ERR;  
                 }
             default:
-                return SYNTAX_ERR;
+                return SEM_RETURN_ERR;   // NO RETURN VALUE
         }
     }
     if(token.type != SEMICOL){
-        fprintf(stderr, "Syntax error ---> MISSING SEMICOL AFTER RETURN <---\n");
-        return SYNTAX_ERR;
+        if(currentReturnType == ret_float || currentReturnType == ret_int || currentReturnType == ret_string){
+            fprintf(stderr, "Syntax error ---> MISSING SEMICOL AFTER RETURN <---\n");
+            return SYNTAX_ERR;
+        }
+        fprintf(stderr, "Syntax error ---> VOID FUNCTION RETURNING VALUE <---\n");
+        return SEM_RETURN_ERR;
     }
     token_t *expr_tok_semicol;
     expr_tok_semicol = (token_t*) malloc(sizeof(*expr_tok_semicol));
@@ -985,6 +992,7 @@ int expression_check(){
 
         return res;  
     }
+    // TODO $x; UNDEF VAR
     
     return res;
 }
