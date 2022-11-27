@@ -357,6 +357,7 @@ int builtinParams(){
     static bool multipleParams = false;
     token_res = GetToken(&token);   // bar( <PARAMS> )
     if(!token_res){
+        printf("Im here, token type = %d\n",token.type);
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
@@ -368,7 +369,7 @@ int builtinParams(){
             }
             return SUCCESS_ERR;
         case DOLLAR:
-          
+            
             token_res = GetToken(&token);   // type $
             if(!token_res){
                 fprintf(stderr,"Lexical error\n");  // Hledáme ID
@@ -389,7 +390,8 @@ int builtinParams(){
                 return SYNTAX_ERR;
             }
             // SEMANTIC
-            
+           
+
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
                 fprintf(stderr,"Lexical error\n");  // Hledáme ID
@@ -397,6 +399,7 @@ int builtinParams(){
             }
             switch(token.type){
                 case R_PAR:
+                    
                     return SUCCESS_ERR;
                 case COMMA:
                     multipleParams = true;
@@ -405,6 +408,7 @@ int builtinParams(){
                     return SYNTAX_ERR;
             }
         case INT_T: case STRING_T: case FLOAT_T:
+            
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
                 fprintf(stderr,"Lexical error\n");  // Hledáme ID
@@ -1039,7 +1043,7 @@ int statement_list_inside(){
     }
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
-        return 99;
+        return INTERNAL_ERR;
     }
     switch(token.type){
         
@@ -1149,6 +1153,9 @@ int separators(){
  * INICIALIZACE HTAB
  * PRIDAVAT RETURN VYRAZY DO LISTU A POSILAT EXPR PARSERU
  * VOLÁNÍ FUNKCÍ V LL
+ * SCANNER NEBERE \n VE STRINGU
+ * dodělat "null" ve while apod.
+ * TODO BUILTIN PARAMS NOT GOING INTO EXPR PARSER
  */
 
 
