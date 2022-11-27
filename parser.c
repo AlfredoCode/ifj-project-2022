@@ -295,7 +295,6 @@ int statement_list(){
                     return SUCCESS_ERR;
                     // }
                     
-                    return SYNTAX_ERR;  // Void function cannot have return
                 default:
                     return SYNTAX_ERR;
             }
@@ -575,9 +574,12 @@ int functionCheck(){
     insideFunc = true;
     res = statement_list(); // function <ID> ( <FUNC_PARAMS> ): type{ <ST_L>
     if(res != SUCCESS_ERR){
-        return SYNTAX_ERR;
+        if(token.type != KEYWORD && token.keyword != RETURN){
+            return SEM_PARAM_ERR;   // NO RETURN FOUND
+        }
+        return res;
     }
-    token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): type {
+    token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): type { <ST_L> return <>
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
@@ -592,7 +594,7 @@ int functionCheck(){
                     return LEX_ERR;
                 }
                 if(token.type != ID){
-                    fprintf(stderr, "Syntax error ---> MISSING RETURN STATEMENT <---\n");
+                    fprintf(stderr, "Syntax error ---> MISSING RETURN STATEMENT <---\n");   
                     return SYNTAX_ERR;
                 }
                 token_res = GetToken(&token);   // Looking for semicol;
