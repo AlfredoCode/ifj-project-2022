@@ -40,6 +40,8 @@ parser.o: parser.c
 
 main.o: main.c
 
+generator.o: generator.c
+
 # CLEANUP
 clean:
 	@rm -f $(testFile) *.o
