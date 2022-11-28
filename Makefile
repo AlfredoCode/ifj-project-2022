@@ -17,9 +17,13 @@ all: expr_stack.o expr_parser.o  error.o scanner.o parser.o symtable.o  main.o
 pack:
 	tar -cvzf $(packageName).tgz *.c *.h Makefile rozdeleni dokumentace.pdf
 
+
 # TESTS
 test: $(testFile).o  expr_stack.o expr_parser.o  error.o scanner.o parser.o symtable.o  main.o
 	$(CC) $(CFLAGS) $^ -o $@ 
+
+
+gen: generator.o generator
 
 test_run: test
 	./test 2>/dev/null
@@ -43,6 +47,9 @@ scanner.o: scanner.c
 parser.o: parser.c
 
 main.o: main.c
+
+generator.o: generator.c
+
 
 # CLEANUP
 clean:
