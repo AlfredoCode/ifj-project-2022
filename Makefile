@@ -14,7 +14,8 @@ CFLAGS := -std=c99 -Wall -Wextra -pedantic -g
 # TESTS
 
 test: $(testFile).o symtable.o expr_stack.o error.o expr_parser.o scanner.o
-	$(CC) $(CFLAGS) $^ -o $@ -l cmocka -L /usr/bin/lib
+
+gen: generator.o generator
 
 test_run: test
 	./test 2>/dev/null
@@ -34,6 +35,8 @@ expr_parser.o: expr_parser.c
 error.o: error.c
 
 scanner.o: scanner.c
+
+generator.o: generator.c
 
 # CLEANUP
 clean:
