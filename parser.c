@@ -446,7 +446,7 @@ int checkWhile(){
         return res;
     }
 
-
+    
     token_res = GetToken(&token);  
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
@@ -795,59 +795,41 @@ int checkIfStat(){
             
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = checkIfOperators();
-            if(res == SUCCESS_ERR){
-                // printf("Found the triple EQ\n");
-                return SUCCESS_ERR;
-            }
-            else if(res == LEX_ERR){
-                return res;
-            }
-            res = separators_if();
-            if(res != SUCCESS_ERR){
-                return res;
-            }
-            return SUCCESS_ERR;
+            break;
+            
 
         case INT_T: case FLOAT_T: case STRING_T:
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = checkIfOperators();
-            if(res == SUCCESS_ERR){
-                // printf("Found the triple EQ\n");
-                return SUCCESS_ERR;
-            }
-            else if(res == LEX_ERR){
-                return res;
-            }
-            res = separators_if();
-            if(res != SUCCESS_ERR){
-                return res;
-            }
-            return SUCCESS_ERR;
+            break;
+            
         case KEYWORD:
             if(token.keyword != NULL_K){
                 return SYNTAX_ERR;  //TODO WHICH EXIT CODE IS THIS
             }
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = checkIfOperators();
-            if(res == SUCCESS_ERR){
-                // printf("Found the triple EQ\n");
-                return SUCCESS_ERR;
-            }
-            else if(res == LEX_ERR){
-                return res;
-            }
-            res = separators_if();
-            if(res != SUCCESS_ERR){
-                return res;
-            }
-            return SUCCESS_ERR;
+            break;
+            
         default:
+        
             return SYNTAX_ERR;
     }
-    return res;
+    res = checkIfOperators();
+    if(res == SUCCESS_ERR){
+        // printf("Found the triple EQ\n");
+        return SUCCESS_ERR;
+    }
+    else if(res == LEX_ERR){
+        return res;
+    }
+    
+    res = separators_if();
+    if(res != SUCCESS_ERR){
+        
+        return res;
+    }
+    return SUCCESS_ERR;
 }
 
 
@@ -1175,6 +1157,7 @@ int separators(){
  * SCANNER NEBERE \n VE STRINGU
  * dodělat "null" ve while apod.
  * TODO BUILTIN PARAMS NOT GOING INTO EXPR PARSER
+ * TODO while(null) if(null) atd
  */
 
 
