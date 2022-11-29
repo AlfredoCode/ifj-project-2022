@@ -248,6 +248,7 @@ int evaluate_concatenation(stack_t *stack)
         
         // already the token on top, so why not
         tok2->symbol = term_str;
+        return 0;
     }
 
     // I need both to be strings
