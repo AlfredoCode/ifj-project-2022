@@ -34,7 +34,7 @@ stat_t *statement;
 
 //Internal variables
 int currentToken = 0;
-p_return currentReturnType = 0;
+p_return currentReturnType;
 // Expressions
 expression_T *expression, *allTokens;
 expr_El expr; // FOR DEBUG PRINTS
@@ -1085,7 +1085,11 @@ int statement_list_inside(){
             insertExpr(expression, expr_tok);
             res = separators();
             return res;
-        
+        // case KEYWORD:    TODO
+        //     if(token.keyword == NULL_K){
+        //         return SUCCESS_ERR;
+        //     }
+            return SYNTAX_ERR;
         default:
             return SYNTAX_ERR;
 
