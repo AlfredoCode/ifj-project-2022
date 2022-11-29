@@ -195,7 +195,8 @@ int evaluate_bool(stack_t *stack)
         return 1; 
     }
 
-    if (tok1->symbol == term_bool || tok2->symbol == term_bool) {
+    // null is valid too
+    if (tok1->symbol == term_null || tok2->symbol == term_null) {
         stackPop(stack);
         stackPop(stack);
         
