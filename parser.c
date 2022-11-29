@@ -1079,11 +1079,14 @@ int statement_list_inside(){
             insertExpr(expression, expr_tok);
             res = separators();
             return res;
-        // case KEYWORD:    TODO
-        //     if(token.keyword == NULL_K){
-        //         return SUCCESS_ERR;
-        //     }
-            return SYNTAX_ERR;
+        case KEYWORD:
+            if(token.keyword != NULL_K){
+                return SYNTAX_ERR;  // TODO WHICH ERR IS THIS?
+            }
+            *expr_tok = token;
+            insertExpr(expression, expr_tok);
+            res = separators();
+            return res;
         default:
             return SYNTAX_ERR;
 
