@@ -825,7 +825,25 @@ int checkIfStat(){
                 return res;
             }
             return SUCCESS_ERR;
-        
+        case KEYWORD:
+            if(token.keyword != NULL_K){
+                return SYNTAX_ERR;  //TODO WHICH EXIT CODE IS THIS
+            }
+            *expr_tok = token;
+            insertExpr(expression, expr_tok);
+            res = checkIfOperators();
+            if(res == SUCCESS_ERR){
+                // printf("Found the triple EQ\n");
+                return SUCCESS_ERR;
+            }
+            else if(res == LEX_ERR){
+                return res;
+            }
+            res = separators_if();
+            if(res != SUCCESS_ERR){
+                return res;
+            }
+            return SUCCESS_ERR;
         default:
             return SYNTAX_ERR;
     }
