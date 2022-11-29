@@ -361,7 +361,6 @@ int builtinParams(){
     static bool multipleParams = false;
     token_res = GetToken(&token);   // bar( <PARAMS> )
     if(!token_res){
-        printf("Im here, token type = %d\n",token.type);
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
     }
@@ -797,12 +796,13 @@ int checkIfStat(){
             *expr_tok = token;
             insertExpr(expression, expr_tok);
             res = checkIfOperators();
-            
-            if(res != SUCCESS_ERR){
+            if(res == SUCCESS_ERR){
                 // printf("Found the triple EQ\n");
+                return SUCCESS_ERR;
+            }
+            else if(res == LEX_ERR){
                 return res;
             }
-            
             res = separators_if();
             if(res != SUCCESS_ERR){
                 return res;
@@ -922,12 +922,12 @@ int condiCheck(){
     }
     *expr_tok2 = token;
     insertExpr(expression, expr_tok2);
-    expr = expression->lastElement;          // DEBUG
-    while(expr != NULL){
-        // printf("%d ",expr->token->type); 
-        expr = expr->previous;
-    }
-    putchar('\n');
+    // expr = expression->lastElement;          // DEBUG
+    // while(expr != NULL){
+    //     // printf("%d ",expr->token->type); 
+    //     expr = expr->previous;
+    // }
+    // putchar('\n');
     expr_parse(symtable, expression);
     
     exprListDispose(expression);
