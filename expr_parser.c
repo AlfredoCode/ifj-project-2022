@@ -43,11 +43,6 @@ const char prec_table [19][19] = {
 
 p_symbol tokenToTerminal(token_t *token)
 {
-    // NULL is stored in keyword instead of type
-    if (token->keyword == NULL_K) {
-        return sym_null;
-    }
-
     switch (token->type) {
         case ADD:
             return sym_add;
@@ -88,6 +83,14 @@ p_symbol tokenToTerminal(token_t *token)
         case COL:
         case L_BRAC:
             return sym_end;
+       
+        case KEYWORD:
+            if (token->keyword == NULL_K) {
+                return sym_null;
+                break;
+            }
+        // if not null
+        // fallthru 
 
         default:
             errHandler(SYNTAX_ERR, "Bad expression");
@@ -136,8 +139,7 @@ int arithmetic_check(stack_t *stack)
         if (tok2->symbol == term_null){
             stackPeek(stack, 2)->symbol = term_null;
         }
-        // Copy the type of the second token
-        stackPeek(stack, 2)->symbol = stackPeek(stack, 1)->symbol;
+        // Just pop the two tokens
         stackPop(stack);
         stackPop(stack);
 
@@ -145,7 +147,7 @@ int arithmetic_check(stack_t *stack)
 
     } else if (tok2->symbol == term_null) {
         // Copy the type of the first token
-        stackPeek(stack, 2)->symbol = stackPeek(stack, 0)->symbol;
+        tok2->symbol = tok1->symbol;
         stackPop(stack);
         stackPop(stack);
         
@@ -268,12 +270,6 @@ int evaluate(stack_t *stack, htab_t *symtable)
     stack_token_t *tok; 
     stat_t *id;
 
-    // NULL is stored in keyword
-    if (top->token->keyword == NULL_K) {
-       top->symbol = term_null; 
-       return 0;
-    }
-    
     switch (top->symbol){
         // Check if var is declared.
         // Set type according to var type.
@@ -322,6 +318,11 @@ int evaluate(stack_t *stack, htab_t *symtable)
             top->symbol = term_str;
             break;
         
+        // My old friend NULL
+        case sym_null:
+            top->symbol = term_null;
+            break;
+
         // sym_[add|sub|mul]
         case sym_add:
         case sym_sub:
