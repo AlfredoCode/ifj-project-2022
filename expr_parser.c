@@ -18,30 +18,36 @@
 #include "symtable.h"
 
 // Global table for parsing
-const char prec_table [18][18] = {
-/* :)       +    -    *    /    .    <    >    <=   >=  ===  !==   (    )    ID  INT  FLT  STR   $   */
-/*  +  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '>'},
-/*  -  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '>'},
-/*  *  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '>'},
-/*  /  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '>'},
-/*  .  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', '<', '>'},
-/*  <  */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/*  >  */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/*  <= */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/*  >= */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/* === */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/* !== */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/*  (  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', '<', '<', '<', 'X'},
-/*  )  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', '>'},
-/*  ID */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', '>'},
-/* INT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', '>'},
-/* FLT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', '>'},
-/* STR */{ 'X', 'X', 'X', 'X', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', '>'},
-/*  $  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', 'X', '<', '<', '<', '<', '$'},
+const char prec_table [19][19] = {
+/* :)       +    -    *    /    .    <    >    <=   >=  ===  !==   (    )    ID  INT  FLT  STR  NUL   $   */
+/*  +  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '<', '>'},
+/*  -  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '<', '>'},
+/*  *  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '<', '>'},
+/*  /  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '<', '>'},
+/*  .  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', '<', '<', '>'},
+/*  <  */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/*  >  */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/*  <= */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/*  >= */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/* === */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/* !== */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/*  (  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', '<', '<', '<', '<', 'X'},
+/*  )  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/*  ID */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/* INT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/* FLT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/* STR */{ 'X', 'X', 'X', 'X', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/* NUL */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/*  $  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', 'X', '<', '<', '<', '<', '<', '$'},
 };
 
 p_symbol tokenToTerminal(token_t *token)
 {
+    // NULL is stored in keyword instead of type
+    if (token->keyword == NULL_K) {
+        return sym_null;
+    }
+
     switch (token->type) {
         case ADD:
             return sym_add;
@@ -109,7 +115,7 @@ int arithmetic_check(stack_t *stack)
     stack_token_t *tok2 = stackPeek(stack, 2);
     
     if (tok1->symbol == term_str) {
-        if (tok2->symbol == term_str) {
+        if (tok2->symbol == term_str || tok2->symbol == term_null) {
             // Remove top two terms
             stackPop(stack);
             stackPop(stack);
@@ -123,6 +129,28 @@ int arithmetic_check(stack_t *stack)
         errHandler(SYNTAX_ERR, "Cant do anything with string and non-string, no str-num here");
         return 1;
     } 
+
+    // NULL time
+    if (tok1->symbol == term_null){
+        // need to check if both are NULL
+        if (tok2->symbol == term_null){
+            stackPeek(stack, 2)->symbol = term_null;
+        }
+        // Copy the type of the second token
+        stackPeek(stack, 2)->symbol = stackPeek(stack, 1)->symbol;
+        stackPop(stack);
+        stackPop(stack);
+
+        return 0;
+
+    } else if (tok2->symbol == term_null) {
+        // Copy the type of the first token
+        stackPeek(stack, 2)->symbol = stackPeek(stack, 0)->symbol;
+        stackPop(stack);
+        stackPop(stack);
+        
+        return 0;
+    }
 
     // I hate this thing, but here we go
     // if both tokens are either int or float
@@ -165,6 +193,15 @@ int evaluate_bool(stack_t *stack)
         return 1; 
     }
 
+    if (tok1->symbol == term_bool || tok2->symbol == term_bool) {
+        stackPop(stack);
+        stackPop(stack);
+        
+        stackPeek(stack, 0)->symbol = term_bool;
+
+        return 0;
+    }
+
     // Much easier, are both numbers? Great, its a bool.
     if ((tok1->symbol == term_float || tok1->symbol == term_int)
             && (tok2->symbol == term_float || tok2->symbol == term_int)) {
@@ -202,6 +239,15 @@ int evaluate_concatenation(stack_t *stack)
     stack_token_t *tok1 = stackPeek(stack, 0);
     stack_token_t *tok2 = stackPeek(stack, 2);
 
+    // Null checks, again
+    if (tok1->symbol == term_null || tok2->symbol == term_null){
+        stackPop(stack);
+        stackPop(stack);
+        
+        // already the token on top, so why not
+        tok2->symbol = term_str;
+    }
+
     // I need both to be strings
     if (!(tok1->symbol == term_str && tok2->symbol == term_str)){
         errHandler(SYNTAX_ERR, "Error in expresion - incompatible datatypes.");
@@ -221,6 +267,12 @@ int evaluate(stack_t *stack, htab_t *symtable)
     // for use in div check
     stack_token_t *tok; 
     stat_t *id;
+
+    // NULL is stored in keyword
+    if (top->token->keyword == NULL_K) {
+       top->symbol = term_null; 
+       return 0;
+    }
     
     switch (top->symbol){
         // Check if var is declared.
@@ -253,7 +305,7 @@ int evaluate(stack_t *stack, htab_t *symtable)
                     break;
             }
 
-            return 0;
+            break;
         
         // sym_int
         case sym_int:
@@ -323,8 +375,7 @@ int evaluate(stack_t *stack, htab_t *symtable)
             break;
     } 
 
-    // If nothing
-    return err_uhoh;
+    return 0;
 }
 
 p_return get_last(stack_t *stack)
@@ -343,7 +394,10 @@ p_return get_last(stack_t *stack)
 
         case term_bool:
             return ret_bool;
-            //
+
+        case term_null:
+            return ret_null;
+
         // How did you get here
         default:
             break;
@@ -396,28 +450,6 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
                 // Get a new one
                 curToken = getExpr(list)->token;
                 curSymbol = tokenToTerminal(curToken);
-               
-                // Check if I didnt get ab or ++ 
-                /*
-                if (operand) {
-                    if (
-                        curSymbol == sym_id     ||
-                        curSymbol == sym_int    ||
-                        curSymbol == sym_float  ||
-                        curSymbol == sym_str
-                    ) {
-                      errHandler(SYNTAX_ERR, "Operand cant go after operand.");      
-                    }
-
-                    operand = true;
-                } else {
-                    if (curSymbol < sym_lbr) {
-                        errHandler(SYNTAX_ERR, "Operator cant go after operator.");
-                    }
-
-                    operand = false;
-                }
-                */
                 break;
 
             // Reduce expression
