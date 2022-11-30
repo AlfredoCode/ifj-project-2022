@@ -223,9 +223,9 @@ int parse(){
         // case PHP:
         //     res = prog(); // First rule of LL
         //     return res;
-        default:    // modif - removed case PHP, edited return code in default case to LEX_ERR
-            fprintf(stderr,"Syntax error ---> WHITESPACES BEFORE PROLOG <---\n");
-            return LEX_ERR;  // WHITESPACES BEFORE PROLOG
+        default:
+            fprintf(stderr,"Syntax error ---> UNKNOWN BEFORE PROLOG <---\n");
+            return LEX_ERR;  // MISSING PROLOG
     }
     //GENERATE
     return SUCCESS_ERR;
@@ -371,8 +371,7 @@ int builtinParams(){
                 return SYNTAX_ERR;
             }
             return SUCCESS_ERR;
-        case DOLLAR:    // modif - removed gettoken = $, does not make sense
-            
+        case DOLLAR:
             token_res = GetToken(&token);   // type $ <ID>
             if(!token_res){
                 fprintf(stderr,"Lexical error\n");  // Hledáme ID
