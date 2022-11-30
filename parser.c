@@ -205,6 +205,10 @@ int parse(){
         return INTERNAL_ERR;
     }
 
+    if(GetProlog()){    // modif was not here before
+        res = prog();
+        return res;
+    }
     token_res = GetToken(&token);   
     if(!token_res){
         // printf("AHoj\n");
@@ -216,12 +220,12 @@ int parse(){
         case EOF_T:
             fprintf(stderr,"Syntax error ---> EMPTY FILE <---\n");
             return SYNTAX_ERR;  // EMPTY FILE 
-        case PHP:
-            res = prog(); // First rule of LL
-            return res;
-        default:
-            fprintf(stderr,"Syntax error ---> MISSING PROLOG <---\n");
-            return SYNTAX_ERR;  // MISSING PROLOG
+        // case PHP:
+        //     res = prog(); // First rule of LL
+        //     return res;
+        default:    // modif - removed case PHP, edited return code in default case to LEX_ERR
+            fprintf(stderr,"Syntax error ---> WHITESPACES BEFORE PROLOG <---\n");
+            return LEX_ERR;  // WHITESPACES BEFORE PROLOG
     }
     //GENERATE
     return SUCCESS_ERR;
@@ -368,18 +372,8 @@ int builtinParams(){
                 return SYNTAX_ERR;
             }
             return SUCCESS_ERR;
-        case DOLLAR:
+        case DOLLAR:    // modif - removed gettoken = $, does not make sense
             
-            token_res = GetToken(&token);   // type $
-            if(!token_res){
-                fprintf(stderr,"Lexical error\n");  // Hledáme ID
-                return LEX_ERR;
-            }
-            if(token.type != DOLLAR){
-                fprintf(stderr, "Syntax error ---> EXPECTED $ <---\n");
-                return SYNTAX_ERR;
-            }
-
             token_res = GetToken(&token);   // type $ <ID>
             if(!token_res){
                 fprintf(stderr,"Lexical error\n");  // Hledáme ID
