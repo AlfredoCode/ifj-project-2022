@@ -81,6 +81,7 @@ typedef enum {
     STRING_T,
     INT_T,
     FLOAT_T,
+    COMMA
 } TYPES;
 
 typedef struct{
@@ -94,6 +95,7 @@ typedef struct{
 // returns KEYWORD if keyword, -1 if not
 int isKeyword(char *string);
 
+bool GetProlog();
 bool GetToken(token_t *token);
 
 #endif // __SCANNER_H__

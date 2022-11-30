@@ -14,7 +14,7 @@ int isKeyword(char *str){
         return IF;
     }
     if(strcmp(str, "int") == 0){
-        return INT;
+        return INT;   // MODIFIED
     }
     if(strcmp(str, "null") == 0){
         return NULL_K;
@@ -32,6 +32,30 @@ int isKeyword(char *str){
         return WHILE;
     }
     return -1;
+}
+
+bool GetProlog(/*idk=dohodnut sa*/){
+    int c;
+    c = getchar();
+    if(c == '<'){
+        c = getchar();
+        if (c == '?'){
+            c = getchar();
+            if( c == 'p'){
+                c = getchar();
+                if (c == 'h'){
+                    c = getchar();
+                    if (c == 'p'){
+                        c = getchar();
+                        if (isspace(c)){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
 bool GetToken(token_t *token){
@@ -65,6 +89,10 @@ bool GetToken(token_t *token){
             }
             if(c == '$'){
                 token->type = DOLLAR;
+                return true;
+            }
+            if(c == ','){   // MODIFIED
+                token->type = COMMA;
                 return true;
             }
             if(isalpha(c) || c == '_'){
@@ -150,12 +178,16 @@ bool GetToken(token_t *token){
             return true;
         }
         if(state == LINE_COM_S){
-            if (c == '\n'){
+
+            if (c == '\n' || c == EOF){
                 state = S;
             }
             continue;
         }
         if(state == BLOCK_COM_S){
+            if(c == EOF){
+                return false;
+            }
             if (c == '*'){
                 state = BLOCK_COM;
             }
@@ -194,13 +226,14 @@ bool GetToken(token_t *token){
                 else{
                     token->type = KEYWORD;
                     token->keyword = keyword;
+                    token->string = str;
                 }
                 return true;
             }
         }
         if(state == TYPE_S){
             if(c == '>'){
-                state = ENDMARK; 
+                state = ENDMARK;  
                 continue;
             }
             else{
@@ -231,49 +264,17 @@ bool GetToken(token_t *token){
                 token->type = EQ;
                 return true;
             }
+            return false;
         }
         if(state == LESS_S){
             if(c == '='){
                 token->type = LESS_EQ;
                 return true;
             }
-            if(c == '?'){
-                state = OPENMARK;
-                continue;
-            }
             ungetc(c, stdin);
             token->type = LESS;
             return true;
         }
-        
-        if(state == OPENMARK){
-            c = getchar();
-            if(c == 'p')
-                state = OPENMARK2;
-                continue;
-        }
-        if(state == OPENMARK2){
-            c = getchar();
-            if(c == 'h'){
-                state = OPENMARK3;
-                continue;
-            }
-        }
-        if(state == OPENMARK3){
-            c = getchar();
-            if(c == 'p'){
-                state = OPENMARK4;
-                continue;
-            }
-        }
-        if(state == OPENMARK4){
-            c = getchar();
-            if(isspace(c)){
-                token->type = PHP;
-                return true;
-            }
-        }
-
         if(state == GREAT_S){
             if(c == '='){
                 token->type = GREAT_EQ;
@@ -294,6 +295,7 @@ bool GetToken(token_t *token){
                 token->type = NOT_EQ;
                 return true;
             }
+            return false;
         }
         if(state == STRING_START){
             if(c == '"'){
@@ -335,6 +337,16 @@ bool GetToken(token_t *token){
             }
             if('0' <= c && c <= '7'){
                 state = SYM_OCT1; 
+                if(str_index >= str_size){
+                    str_size += 64;
+                    str = realloc(str, str_size);
+                }
+                str[str_index] = c;
+                str_index++;
+                continue;
+            }
+            if(c == 'n' || c == 't' || c == '"' || c == '\\'){
+                state = STRING_START;
                 if(str_index >= str_size){
                     str_size += 64;
                     str = realloc(str, str_size);
@@ -423,8 +435,10 @@ bool GetToken(token_t *token){
                 continue;
             }
             str[str_index] = '\0';
-            token->integer = (int)strtol(str, NULL, 10);
+            // token->integer = (int)strtol(str, NULL, 10); // modif
+            token->string = str;
             token->type = INT_T;
+            
             ungetc(c, stdin);
             return true;
         }
@@ -484,7 +498,8 @@ bool GetToken(token_t *token){
             }
             else{
                 str[str_index] = '\0';
-                token->decimal = strtod(str, NULL);
+                // token->decimal = strtod(str, NULL);
+                token->string = str;
                 token->type = FLOAT_T;
                 ungetc(c, stdin);
                 return true;
@@ -514,7 +529,8 @@ bool GetToken(token_t *token){
             }
             else{
                 str[str_index] = '\0';
-                token->decimal = strtod(str, NULL);
+                // token->decimal = strtod(str, NULL); // modif
+                token->string = str;
                 token->type = FLOAT_T;
                 ungetc(c, stdin);
                 return true;

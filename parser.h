@@ -9,6 +9,7 @@
 
 #ifndef __PARSER_H__
 #define __PARSER_H__
+#include "scanner.h"
 
 // Enum for statement types
 typedef enum {
@@ -26,32 +27,25 @@ typedef struct statement {
 } stat_t;
 
 
-
-
-
-// FOR INSERTING TOKENS PURPOSE UNTIL LEXER IS DONE
-
-
-typedef struct tokenElement{
-    int type;
-    char* attribute;
-    struct tokenElement *next;
-    struct tokenElement *previous;
-}token_El;
+// Used for storing expression tokens
+typedef struct exprElement{
+    token_t *token;
+    struct exprElement *next;
+    struct exprElement *previous;
+}*expr_El;
 
 typedef struct {
-	token_El* firstElement;
-    token_El* lastElement;
-    token_El* activeElement;
-} token_T;
+	expr_El firstElement;
+    expr_El lastElement;
+    expr_El activeElement;
+} expression_T;
 
-typedef enum {
-    DOLLAR, ID, EQ, INT, COMMA, TOK_EOF, TOK_FUNCTION, LBRACKET, RBRACKET
-}tokenTypes;
 
-void init(token_T *tokenList);
-token_El *getToken(token_T *tokenList);
-void insertToken(token_T *tokenList, int type, char *attrib);
+
+void expressionInit(expression_T *exprList);
+expr_El getExpr(expression_T *exprList);
+void insertExpr(expression_T *exprList, token_t *token);
+void exprListDispose( expression_T *exprList );
 
 
 
@@ -60,7 +54,22 @@ void insertToken(token_T *tokenList, int type, char *attrib);
 
 
 int prog(); // Entry point to LL grammar rules
-int prologCheck(); // First token has to be prolog
+int parse();
+int declareCheck();
+int statement_list();
+int statement_list_inside();
+int expression_check();
+int expression_check_inside();
+int separators();
+
+int condiCheck();
+int checkIfStat();
+int checkIfOperators();
+int elseCheck();
+int functionCheck();
+int funcParams();
+int checkWhile();
+int builtinParams();
 
 
 #endif  // __PARSER_H__

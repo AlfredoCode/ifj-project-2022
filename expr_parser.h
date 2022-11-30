@@ -18,6 +18,7 @@ typedef enum {
     ret_int,
     ret_float,
     ret_string,
+    ret_null,
     ret_uhoh
 } p_return;
 

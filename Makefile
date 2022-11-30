@@ -2,19 +2,20 @@
 # =================================================== #
 # Name:       Makefile                                # 
 # Authors:    xsafar27                                #
-# Last modif: 11/20/2022                              #
+# Last modif: 10/28/2022                              #
 # =================================================== #
 #
 
+testFile = parser
+CC = gcc
+CFLAGS=-std=c99 -Wall -Wextra -pedantic -g
 
-testFile := run_test
-CC := gcc
-CFLAGS := -std=c99 -Wall -Wextra -pedantic -g
+all: expr_stack.o expr_parser.o  error.o scanner.o parser.o symtable.o  main.o
+	$(CC) $(CFLAGS) $^ -o ifj22 
 
 # TESTS
-
-test: $(testFile).o symtable.o expr_stack.o error.o expr_parser.o scanner.o parser.o
-	$(CC) $(CFLAGS) $^ -o $@ -l cmocka -L /usr/bin/lib
+test: $(testFile).o  expr_stack.o expr_parser.o  error.o scanner.o parser.o symtable.o  main.o
+	$(CC) $(CFLAGS) $^ -o $@ 
 
 test_run: test
 	./test 2>/dev/null
@@ -36,6 +37,8 @@ error.o: error.c
 scanner.o: scanner.c
 
 parser.o: parser.c
+
+main.o: main.c
 
 # CLEANUP
 clean:
