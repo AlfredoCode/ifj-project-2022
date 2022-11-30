@@ -95,6 +95,7 @@ typedef struct{
 // returns KEYWORD if keyword, -1 if not
 int isKeyword(char *string);
 
+bool GetProlog();
 bool GetToken(token_t *token);
 
 #endif // __SCANNER_H__

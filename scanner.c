@@ -34,6 +34,30 @@ int isKeyword(char *str){
     return -1;
 }
 
+bool GetProlog(/*idk=dohodnut sa*/){
+    int c;
+    c = getchar();
+    if(c == '<'){
+        c = getchar();
+        if (c == '?'){
+            c = getchar();
+            if( c == 'p'){
+                c = getchar();
+                if (c == 'h'){
+                    c = getchar();
+                    if (c == 'p'){
+                        c = getchar();
+                        if (isspace(c)){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
 bool GetToken(token_t *token){
     STATES state = S;
     token->string = NULL;
@@ -247,39 +271,9 @@ bool GetToken(token_t *token){
                 token->type = LESS_EQ;
                 return true;
             }
-            if(c == '?'){
-                state = OPENMARK;
-                continue;
-            }
             ungetc(c, stdin);
             token->type = LESS;
             return true;
-        }
-        if(state == OPENMARK){
-            if(c == 'p'){
-                state = OPENMARK2;
-                continue;
-            }
-        }
-        if(state == OPENMARK2){
-            if(c == 'h'){
-                state = OPENMARK3;
-                continue;
-            }
-        }
-        if(state == OPENMARK3){
-            if(c == 'p'){
-                state = OPENMARK4;
-                continue;
-            }
-        }
-        if(state == OPENMARK4){
-            if(isspace(c)){
-                
-                token->type = PHP;
-                
-                return true;
-            }
         }
         if(state == GREAT_S){
             if(c == '='){
@@ -343,6 +337,16 @@ bool GetToken(token_t *token){
             }
             if('0' <= c && c <= '7'){
                 state = SYM_OCT1; 
+                if(str_index >= str_size){
+                    str_size += 64;
+                    str = realloc(str, str_size);
+                }
+                str[str_index] = c;
+                str_index++;
+                continue;
+            }
+            if(c == 'n' || c == 't' || c == '"' || c == '\\'){
+                state = STRING_START;
                 if(str_index >= str_size){
                     str_size += 64;
                     str = realloc(str, str_size);
