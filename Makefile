@@ -7,11 +7,15 @@
 #
 
 testFile = parser
+packageName = xmoskv00
 CC = gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -g
 
 all: expr_stack.o expr_parser.o  error.o scanner.o parser.o symtable.o  main.o
 	$(CC) $(CFLAGS) $^ -o ifj22 
+
+pack:
+	tar -cvzf $(packageName).tgz *.c *.h Makefile rozdeleni dokumentace.pdf
 
 # TESTS
 test: $(testFile).o  expr_stack.o expr_parser.o  error.o scanner.o parser.o symtable.o  main.o
