@@ -269,8 +269,6 @@ int evaluate_concatenation(stack_t *stack)
 int evaluate(stack_t *stack, htab_t *symtable)
 {   
     stack_token_t *top = nextNonTerm(stack);
-    // for use in div check
-    stack_token_t *tok; 
     stat_t *id;
 
     switch (top->symbol){
@@ -335,21 +333,6 @@ int evaluate(stack_t *stack, htab_t *symtable)
         
         // sym_div
         case sym_div:
-            // Need to check div by zero
-            // Since we dont store int and float vals in the same place
-            tok = stackPeek(stack, 0);
-            if (tok->symbol == term_int) {
-                if (!atoi(tok->token->string)){
-                    errHandler(SEM_OTHERS_ERR, "Attempted div by 0.");
-                    break;
-                }
-            } else if (tok->symbol == term_float) {
-                if (!atof(tok->token->string)){
-                    errHandler(SEM_OTHERS_ERR, "Attempted div by 0.");
-                    break;
-                }
-            }
-
             arithmetic_check(stack);
             break;
 
