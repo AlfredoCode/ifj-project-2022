@@ -266,6 +266,7 @@ int statement_list(htab_t *localTable){
         return LEX_ERR;
     }
     token_t *expr_tok;
+    stat_t *funcName;
     switch(token.type){
         case EOF_T: // FOUND ?>     
             // printf("Found the end\n");   //DEBUG
@@ -303,7 +304,12 @@ int statement_list(htab_t *localTable){
                     return SYNTAX_ERR;
             }
         case ID:
-            
+           
+            funcName = htab_find(funTable, token.string);   // Was function defined before??
+            if(funcName == NULL){
+                fprintf(stderr, "Semantic Error ---> FUNCTION NOT DEFINED <---\n");
+                return SEM_FUNC_ERR;
+            }
             token_res = GetToken(&token);  
             if(!token_res){
                 fprintf(stderr,"Lexical error\n");
@@ -597,6 +603,9 @@ int functionCheck(){
     insideFunc = true;
     res = statement_list(localTable); // function <ID> ( <FUNC_PARAMS> ): type{ <ST_L>
     if(res != SUCCESS_ERR){
+        if(res == SEM_FUNC_ERR){
+            return res;
+        }
         if(!(currentReturnType == ret_float || currentReturnType == ret_int || currentReturnType == ret_string)){  // VOID FUNCTION WITHOUT RETURN STATEMENT
             return SUCCESS_ERR;
         }
@@ -1086,6 +1095,7 @@ int statement_list_inside(htab_t *table){
     if(expr_tok == NULL){
         return INTERNAL_ERR;
     }
+   
     switch(token.type){
         
         case DOLLAR:    // $ <ID> <SEPARATOR_PICK>  
@@ -1107,6 +1117,11 @@ int statement_list_inside(htab_t *table){
                 
             
             return res;
+        case L_PAR:
+        
+            *expr_tok = token;
+            insertExpr(expression, expr_tok);
+            return statement_list_inside(table);
         case INT_T: 
         case FLOAT_T: 
         case STRING_T:
@@ -1168,11 +1183,12 @@ int statement_list_inside(htab_t *table){
             return SYNTAX_ERR;
 
         default:
+        
             return SYNTAX_ERR;
 
     }
 
-
+    
     return res;
 }
 
@@ -1212,6 +1228,10 @@ int separators(htab_t *table){
 
             exprListDispose(expression);
             return statement_list(table); // $x=$y; || $x=5; || $x = $y.$z;
+        case R_PAR:
+            *expr_tok = token;
+            insertExpr(expression, expr_tok);
+            return separators(table);
         case KONKAT: case DIV: case ADD: case SUB: case MUL:    // $x=$y.<IFSTAT> || $x=$y+<IFSTAT> etc.
             
             *expr_tok = token;
