@@ -426,6 +426,7 @@ int builtinParams(){
 int checkWhile(){
     int res = SYNTAX_ERR;
     token_res = GetToken(&token);  
+    token_t *expr_tok;
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
         return LEX_ERR;
@@ -434,6 +435,12 @@ int checkWhile(){
         fprintf(stderr,"Syntax error ---> MISSING LEFT PARENTHESIS <---\n");
         return res;
     }
+    expr_tok = (token_t*) malloc(sizeof(*expr_tok));
+    if(expr_tok == NULL){
+        return INTERNAL_ERR;
+    }
+    *expr_tok = token;
+    insertExpr(expression, expr_tok);
     res = checkIfStat();    // Zkontroluj levou stranu vyrazu v ifu
     if(res != SUCCESS_ERR){
         return res;
@@ -444,7 +451,7 @@ int checkWhile(){
     if(res != SUCCESS_ERR){
         return res;
     }
-
+    
     
     token_res = GetToken(&token);  
     if(!token_res){
@@ -455,6 +462,14 @@ int checkWhile(){
         fprintf(stderr,"Syntax error ---> MISSING LEFT BRACKET <---\n");
         return SYNTAX_ERR;
     }
+    expr_tok = (token_t*) malloc(sizeof(*expr_tok));
+    if(expr_tok == NULL){
+        return INTERNAL_ERR;
+    }
+    *expr_tok = token;
+    insertExpr(expression, expr_tok);
+    expr_parse(symtable, expression); // modif
+    exprListDispose(expression);
     insideWhile = true;
     res = statement_list();  // Kontrola vnitřku funkce
     if(res != SUCCESS_ERR){
@@ -791,7 +806,6 @@ int separators_if(){
             
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-          
             return SUCCESS_ERR;
         default:
             return SYNTAX_ERR;
@@ -861,6 +875,7 @@ int checkIfStat(){
         
         return res;
     }
+    
     return SUCCESS_ERR;
 }
 
@@ -1119,6 +1134,39 @@ int statement_list_inside(){
             insertExpr(expression, expr_tok);
             res = separators();
             return res;
+        case ID:    //$x = foo();   TODO FUNCTION NOT DEFINED
+            token_res = GetToken(&token);  
+            if(!token_res){
+                fprintf(stderr,"Lexical error\n");
+                return LEX_ERR;
+            }
+            if(token.type == L_PAR){
+                res = builtinParams();
+                if(res != SUCCESS_ERR){
+                     
+                    return SYNTAX_ERR;  // ADD SEMICOL TO LL ON ITS OWN!!!
+                }
+                
+                // semicol();
+                token_res = GetToken(&token);  
+                // printf("Token type is %d\n", token.type); // DEBUG 
+                if(!token_res){
+                    fprintf(stderr,"Lexical error\n");
+                    return LEX_ERR;
+                }
+                if(token.type != SEMICOL){
+                    fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
+                    return SYNTAX_ERR;
+                }
+                res = statement_list();
+                if(res != SUCCESS_ERR){
+                    return res;
+                }
+                
+                return res;  
+            }
+            return SYNTAX_ERR;
+
         default:
             return SYNTAX_ERR;
 
@@ -1151,6 +1199,7 @@ int separators(){
             //     expr = expr->previous;
             // }
             // putchar('\n');
+            
             expr_parse(symtable, expression);
         
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;

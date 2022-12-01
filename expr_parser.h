@@ -12,6 +12,7 @@
 #include "scanner.h"
 #include "expr_stack.h"
 #include "symtable.h"
+#include "parser.h"
 
 typedef enum {
     ret_bool,
