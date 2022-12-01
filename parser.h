@@ -10,21 +10,7 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 #include "scanner.h"
-
-// Enum for statement types
-typedef enum {
-    t_fun,
-    t_int,
-    t_float,
-    t_str,
-}stat_type;
-
-// Internal structure used to store variables and functions inside htab
-typedef struct statement {
-    stat_type type;
-    char* name;
-    char* value;
-} stat_t;
+#include "symtable.h"
 
 
 // Used for storing expression tokens
@@ -67,7 +53,7 @@ int checkIfStat();
 int checkIfOperators();
 int elseCheck();
 int functionCheck();
-int funcParams();
+int funcParams(struct htab *localTab, stat_t *statementIn);
 int checkWhile();
 int builtinParams();
 

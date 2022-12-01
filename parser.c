@@ -470,6 +470,17 @@ int checkWhile(){
 
 int functionCheck(){
     int res = SYNTAX_ERR;  
+    stat_t *statementFun;
+    statementFun = (stat_t*) malloc(sizeof(*statementFun));
+    if(statementFun == NULL){
+        return INTERNAL_ERR;
+    }
+    htab_t *localTable;
+    localTable = htab_init(HTABSIZE); // Function local var symtable
+    if(localTable == NULL){
+        return INTERNAL_ERR;
+    }
+
     token_res = GetToken(&token);   // function <ID>
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
@@ -480,20 +491,21 @@ int functionCheck(){
         return res;
     }
     // INSERT ID INTO FUNCTION HTAB
-    statement = htab_find(funTable, token.string);
-    if(statement != NULL){
+    statementFun = htab_find(funTable, token.string);
+    if(statementFun != NULL){
         fprintf(stderr,"SEMANTIC ERROR ---> Function redefinition <---\n");
         return SEM_FUNC_ERR;
     }
-    statement = htab_lookup_add(funTable, token.string);   // add  func identifier to symtable
+    statementFun = htab_lookup_add(funTable, token.string);   // add  func identifier to symtable
+
+    statementFun->type = t_fun;
+    statementFun->name = token.string;
 
     stat_t *statement;
     statement = (stat_t*) malloc(sizeof(*statement));
     if(statement == NULL){
         return INTERNAL_ERR;
     }
-    statement->type = t_fun;
-    statement->name = token.string;
     // printf("type is %d and name is %s\n", statement->type, statement->name);    // DEBUG
     // -----------------------
     token_res = GetToken(&token);   // function <ID> (
@@ -505,7 +517,7 @@ int functionCheck(){
         fprintf(stderr, "Syntax error ---> MISSING LEFT PARENTHESIS IN FUNCTION <---\n");
         return SYNTAX_ERR;
     }
-    res = funcParams(); // Parametry funkce
+    res = funcParams(localTable, statement); // Parametry funkce
     if(res != SUCCESS_ERR){
         fprintf(stderr, "Syntax error ---> Wrong parameters in function <---\n");
         return res;
@@ -596,6 +608,12 @@ int functionCheck(){
                     fprintf(stderr, "Syntax error ---> MISSING RETURN STATEMENT <---\n");   
                     return SYNTAX_ERR;
                 }
+                expr_tok = (token_t*) malloc(sizeof(*expr_tok));
+                if(expr_tok == NULL){
+                    return INTERNAL_ERR;
+                }
+                *expr_tok = token;
+                insertExpr(expression, expr_tok);
                 token_res = GetToken(&token);   // Looking for semicol;
                 if(!token_res){
                     fprintf(stderr,"Lexical error\n");
@@ -644,12 +662,16 @@ int functionCheck(){
     *expr_tok_semicol = token;
     insertExpr(expression, expr_tok_semicol);
     if(currentReturnType == ret_string || currentReturnType == ret_int || currentReturnType == ret_float){
-        if(expr_parse(symtable, expression) != currentReturnType){   // sending return expression to expr_parser
+        // statement = htab_find(localTable,statement->name);    // DEBUG
+        //     printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
+        if(expr_parse(localTable, expression) != currentReturnType){   // sending return expression to expr_parser
+
             fprintf(stderr, "Wrong return type\n");
             return SEM_PARAM_ERR;
         }
-        exprListDispose(expression);
+        
     }
+    exprListDispose(expression);
     token_res = GetToken(&token);   // Looking for R_BRAC;
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
@@ -664,9 +686,10 @@ int functionCheck(){
     return statement_list();
 }
 
-int funcParams(){
+int funcParams(htab_t *localTable, stat_t *statementIn){
     int res = SYNTAX_ERR;
     static bool multipleParams = false;
+    
     token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> )
     if(!token_res){
         fprintf(stderr,"Lexical error\n");
@@ -691,7 +714,14 @@ int funcParams(){
                 }
             }
             switch(token.keyword){
-                case FLOAT: case INT: case STRING:
+                case FLOAT: 
+                    statement->type = t_float;
+                    break;
+                case INT: 
+                    statement->type = t_int;
+                    break;
+                case STRING:
+                    statement->type = t_str;
                     break;
                 default:
                     return SYNTAX_ERR;  // FOUND WHILE, IF ETC..
@@ -720,6 +750,9 @@ int funcParams(){
                 return SYNTAX_ERR;
             }
             // SEMANTIC
+            statementIn = htab_lookup_add(localTable, token.string);  // ADD PARAM TO LOCAL VAR TABLE
+            statementIn->type = statement->type;
+            
             
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
@@ -731,7 +764,7 @@ int funcParams(){
                     return SUCCESS_ERR;
                 case COMMA:
                     multipleParams = true;
-                    return funcParams();
+                    return funcParams(localTable, statement);
                 default:
                     return SYNTAX_ERR;
             }
@@ -758,7 +791,7 @@ int separators_if(){
             
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            
+          
             return SUCCESS_ERR;
         default:
             return SYNTAX_ERR;
@@ -1155,8 +1188,9 @@ int separators(){
  * VOLÁNÍ FUNKCÍ V LL
  * SCANNER NEBERE \n VE STRINGU
  * dodělat "null" ve while apod.
- * TODO BUILTIN PARAMS NOT GOING INTO EXPR PARSER
- * TODO while(null) if(null) atd
+ * BUILTIN PARAMS NOT GOING INTO EXPR PARSER
+ * while(null) if(null) atd
+ * while nerozpoznava symtable, tedy rika ze napr while($x < $y) jsou undefined vars, i když nejsou
  */
 
 
