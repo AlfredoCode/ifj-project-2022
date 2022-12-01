@@ -1240,6 +1240,7 @@ int separators(){
  * BUILTIN PARAMS NOT GOING INTO EXPR PARSER
  * while(null) if(null) atd
  * while nerozpoznava symtable, tedy rika ze napr while($x < $y) jsou undefined vars, i když nejsou
+ * what if $x = func() what type is $x? it is not t_str, t_int etc
  */
 
 
