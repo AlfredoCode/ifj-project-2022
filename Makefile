@@ -23,6 +23,8 @@ test: $(testFile).o  expr_stack.o expr_parser.o  error.o scanner.o parser.o symt
 	$(CC) $(CFLAGS) $^ -o $@ 
 
 
+test: $(testFile).o symtable.o expr_stack.o error.o expr_parser.o scanner.o parser.o
+
 gen: generator.o generator
 
 test_run: test
@@ -45,6 +47,7 @@ error.o: error.c
 scanner.o: scanner.c
 
 parser.o: parser.c
+generator.o: generator.c
 
 main.o: main.c
 
