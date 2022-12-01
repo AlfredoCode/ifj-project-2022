@@ -3,11 +3,10 @@
  * Name:       generator.c                             *
  * Authors:    xsafar27                                * 
  *             xhofma11                                *
+ *             xjadrn03                                *
  * Last modif: 11/28/2022                              *
  * =================================================== *
  */
-
-// FUNCTIONS
 
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +16,7 @@
 
 instructList_T *instrList;
 
-// FUNCTIONS
+/*List functions*/
 void initInstList(instructList_T *instrList){
     instrList->activeElement = NULL;
     instrList->firstElement = NULL;
