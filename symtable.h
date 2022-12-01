@@ -16,12 +16,28 @@
 
 #include <string.h>     // size_t
 #include <stdbool.h>    // bool
-#include "parser.h"
+// #include "parser.h"
 
 typedef const char * htab_key_t;
 
 
 // Structs
+
+// Enum for statement types
+typedef enum {
+    t_fun,
+    t_int,
+    t_float,
+    t_str,
+}stat_type;
+
+// Internal structure used to store variables and functions inside htab
+typedef struct statement {
+    stat_type type;
+    char* name;
+    char* value;
+} stat_t;
+
 typedef struct htab_item {
     stat_t *statement;
     struct htab_item *next;

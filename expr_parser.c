@@ -18,26 +18,27 @@
 #include "symtable.h"
 
 // Global table for parsing
-const char prec_table [18][18] = {
-/* :)       +    -    *    /    .    <    >    <=   >=  ===  !==   (    )    ID  INT  FLT  STR   $   */
-/*  +  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '>'},
-/*  -  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '>'},
-/*  *  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '>'},
-/*  /  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '>'},
-/*  .  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', '<', '>'},
-/*  <  */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/*  >  */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/*  <= */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/*  >= */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/* === */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/* !== */{ '<', '<', '<', '<', '>', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '>'},
-/*  (  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', '<', '<', '<', 'X'},
-/*  )  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', '>'},
-/*  ID */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', '>'},
-/* INT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', '>'},
-/* FLT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', '>'},
-/* STR */{ 'X', 'X', 'X', 'X', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', '>'},
-/*  $  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', 'X', '<', '<', '<', '<', '$'},
+const char prec_table [19][19] = {
+/* :)       +    -    *    /    .    <    >    <=   >=  ===  !==   (    )    ID  INT  FLT  STR  NUL   $   */
+/*  +  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '<', '>'},
+/*  -  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '<', '>'},
+/*  *  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '<', '>'},
+/*  /  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', 'X', '<', '>'},
+/*  .  */{ '>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '<', '<', '<', '<', '>'},
+/*  <  */{ '<', '<', '<', '<', '<', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/*  >  */{ '<', '<', '<', '<', '<', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/*  <= */{ '<', '<', '<', '<', '<', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/*  >= */{ '<', '<', '<', '<', '<', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/* === */{ '<', '<', '<', '<', '<', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/* !== */{ '<', '<', '<', '<', '<', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
+/*  (  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', '<', '<', '<', '<', 'X'},
+/*  )  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/*  ID */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/* INT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/* FLT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/* STR */{ 'X', 'X', 'X', 'X', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/* NUL */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/*  $  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', 'X', '<', '<', '<', '<', '<', '$'},
 };
 
 p_symbol tokenToTerminal(token_t *token)
@@ -51,8 +52,6 @@ p_symbol tokenToTerminal(token_t *token)
             return sym_mul;
         case DIV:
             return sym_div;
-        case DOLLAR:
-            return sym_dollar;
         case ID:
             return sym_id;
         case R_PAR:
@@ -81,11 +80,20 @@ p_symbol tokenToTerminal(token_t *token)
             return sym_float;
 
         case SEMICOL:
+        case COL:
         case L_BRAC:
             return sym_end;
+       
+        case KEYWORD:
+            if (token->keyword == NULL_K) {
+                return sym_null;
+                break;
+            }
+        // if not null
+        // fallthru 
 
         default:
-            err_msg(SYNTAX_ERR, "Bad expression");
+            errHandler(SYNTAX_ERR, "Bad expression");
             return err_uhoh;
     }
 
@@ -110,7 +118,7 @@ int arithmetic_check(stack_t *stack)
     stack_token_t *tok2 = stackPeek(stack, 2);
     
     if (tok1->symbol == term_str) {
-        if (tok2->symbol == term_str) {
+        if (tok2->symbol == term_str || tok2->symbol == term_null) {
             // Remove top two terms
             stackPop(stack);
             stackPop(stack);
@@ -121,9 +129,30 @@ int arithmetic_check(stack_t *stack)
 
             return 0;
         }
-        err_msg(SYNTAX_ERR, "Cant do anything with string and non-string, no str-num here");
+        errHandler(SYNTAX_ERR, "Cant do anything with string and non-string, no str-num here");
         return 1;
     } 
+
+    // NULL time
+    if (tok1->symbol == term_null){
+        // need to check if both are NULL
+        if (tok2->symbol == term_null){
+            stackPeek(stack, 2)->symbol = term_null;
+        }
+        // Just pop the two tokens
+        stackPop(stack);
+        stackPop(stack);
+
+        return 0;
+
+    } else if (tok2->symbol == term_null) {
+        // Copy the type of the first token
+        tok2->symbol = tok1->symbol;
+        stackPop(stack);
+        stackPop(stack);
+        
+        return 0;
+    }
 
     // I hate this thing, but here we go
     // if both tokens are either int or float
@@ -143,7 +172,7 @@ int arithmetic_check(stack_t *stack)
         return 0;
     }
     
-    err_msg(SYNTAX_ERR, "Error in expresion - incompatible datatypes"); 
+    errHandler(SYNTAX_ERR, "Error in expresion - incompatible datatypes"); 
     return 1;
 }
 
@@ -152,6 +181,17 @@ int evaluate_bool(stack_t *stack)
     stack_token_t *tok1 = stackPeek(stack, 0);
     stack_token_t *tok2 = stackPeek(stack, 2);
 
+    // null is valid too
+    if (tok1->symbol == term_null || tok2->symbol == term_null) {
+        stackPop(stack);
+        stackPop(stack);
+        
+        stackPeek(stack, 0)->symbol = term_bool;
+
+        return 0;
+    }
+
+    // Strings
     if (tok1->symbol == term_str) {
         if (tok2->symbol == term_str) {
             // same as in line 87
@@ -162,7 +202,7 @@ int evaluate_bool(stack_t *stack)
 
             return 0;
         }
-        err_msg(SYNTAX_ERR, "Cant do anything with string and non-string, no str-num here");
+        errHandler(SYNTAX_ERR, "Cant do anything with string and non-string, no str-num here");
         return 1; 
     }
 
@@ -177,7 +217,7 @@ int evaluate_bool(stack_t *stack)
         return 0;
     }
 
-    err_msg(SYNTAX_ERR, "Error in expresion - incompatible datatypes."); 
+    errHandler(SYNTAX_ERR, "Error in expresion - incompatible datatypes."); 
     return 1;
 }
 
@@ -193,6 +233,7 @@ int evaluate_brackets(stack_t *stack)
 
     // Return the thing between brackets back
     stackPush(stack, tok->token);
+    stackPeek(stack, 0)->symbol = tok->symbol;
 
     return 0;
 }
@@ -202,9 +243,19 @@ int evaluate_concatenation(stack_t *stack)
     stack_token_t *tok1 = stackPeek(stack, 0);
     stack_token_t *tok2 = stackPeek(stack, 2);
 
+    // Null checks, again
+    if (tok1->symbol == term_null || tok2->symbol == term_null){
+        stackPop(stack);
+        stackPop(stack);
+        
+        // already the token on top, so why not
+        tok2->symbol = term_str;
+        return 0;
+    }
+
     // I need both to be strings
     if (!(tok1->symbol == term_str && tok2->symbol == term_str)){
-        err_msg(SYNTAX_ERR, "Error in expresion - incompatible datatypes.");
+        errHandler(SYNTAX_ERR, "Error in expresion - incompatible datatypes.");
         return 1;
     }
 
@@ -217,11 +268,11 @@ int evaluate_concatenation(stack_t *stack)
 
 int evaluate(stack_t *stack, htab_t *symtable)
 {   
-    stack_token_t *top = stackPeek(stack, 0);
+    stack_token_t *top = nextNonTerm(stack);
     // for use in div check
     stack_token_t *tok; 
     stat_t *id;
-    
+
     switch (top->symbol){
         // Check if var is declared.
         // Set type according to var type.
@@ -230,7 +281,7 @@ int evaluate(stack_t *stack, htab_t *symtable)
             id = htab_find(symtable, top->token->string);
             // I only get NULL if its not defined
             if (!id) {
-               err_msg(SEM_UNDEF_VAR_ERR, "Undefined variable in expression!");
+               errHandler(SEM_UNDEF_VAR_ERR, "Undefined variable in expression!");
                return 1;
             }
             
@@ -249,11 +300,11 @@ int evaluate(stack_t *stack, htab_t *symtable)
                 
                 // My brother in christ, how did you get here
                 default:
-                    err_msg(SEM_OTHERS_ERR, "What did you do.");
+                    errHandler(SEM_OTHERS_ERR, "What did you do.");
                     break;
             }
 
-            return 0;
+            break;
         
         // sym_int
         case sym_int:
@@ -270,6 +321,11 @@ int evaluate(stack_t *stack, htab_t *symtable)
             top->symbol = term_str;
             break;
         
+        // My old friend NULL
+        case sym_null:
+            top->symbol = term_null;
+            break;
+
         // sym_[add|sub|mul]
         case sym_add:
         case sym_sub:
@@ -284,12 +340,12 @@ int evaluate(stack_t *stack, htab_t *symtable)
             tok = stackPeek(stack, 0);
             if (tok->symbol == term_int) {
                 if (!tok->token->integer){
-                    err_msg(SEM_OTHERS_ERR, "Attempted div by 0.");
+                    errHandler(SEM_OTHERS_ERR, "Attempted div by 0.");
                     break;
                 }
             } else if (tok->symbol == term_float) {
                 if (!tok->token->decimal){
-                    err_msg(SEM_OTHERS_ERR, "Attempted div by 0.");
+                    errHandler(SEM_OTHERS_ERR, "Attempted div by 0.");
                     break;
                 }
             }
@@ -318,19 +374,17 @@ int evaluate(stack_t *stack, htab_t *symtable)
             break;
 
         default:
-            err_msg(SYNTAX_ERR, "No rules applicable for this expression.");
+            errHandler(SYNTAX_ERR, "No rules applicable for this expression.");
             return 1;
             break;
     } 
 
-    // If nothing
-    return err_uhoh;
+    return 0;
 }
 
 p_return get_last(stack_t *stack)
 {
-    // Top element is $
-    stack_token_t *last = stackPeek(stack, 1);
+    stack_token_t *last = stackPeek(stack, 0);
 
     switch (last->symbol){
         case term_int:
@@ -344,7 +398,10 @@ p_return get_last(stack_t *stack)
 
         case term_bool:
             return ret_bool;
-            //
+
+        case term_null:
+            return ret_null;
+
         // How did you get here
         default:
             break;
@@ -359,23 +416,24 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
     token_t *initTok = NULL;
     stackPush(stack, initTok);
     
-    // First symbol needs to be dollar
-    stackPeek(stack, 0)->symbol = sym_dollar;
+    // First symbol needs to be end symbol
+    stackPeek(stack, 0)->symbol = sym_end;
    
     // Check if I start with operator and not operand 
-    token_t *start_token = getNext(list)->token;
+    token_t *start_token = getExpr(list)->token;
+    
     p_symbol curSymbol = tokenToTerminal(start_token);
-    if (curSymbol < sym_lbr) err_msg(SYNTAX_ERR, "Bad first token in expression.");
+    if (curSymbol < sym_lbr) errHandler(SYNTAX_ERR, "Bad first token in expression.");
 
     // Bools
     bool parse = true;
-    bool operand = true;
+    // bool operand = true;
 
     // Other defs
     stack_token_t *topToken;
     token_t *curToken = start_token;
 
-
+    
     // Loop until done, done == break;
     while (parse) {
         topToken = nextNonTerm(stack);
@@ -394,28 +452,8 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
                 stackPeek(stack, 0)->symbol = curSymbol;
 
                 // Get a new one
-                curToken = getNext(list)->token;
+                curToken = getExpr(list)->token;
                 curSymbol = tokenToTerminal(curToken);
-               
-                // Check if I didnt get ab or ++ 
-                if (operand) {
-                    if (
-                        curSymbol == sym_id     ||
-                        curSymbol == sym_int    ||
-                        curSymbol == sym_float  ||
-                        curSymbol == sym_str
-                    ) {
-                      err_msg(SYNTAX_ERR, "Operand cant go after operand.");      
-                    }
-
-                    operand = false;
-                } else {
-                    if (curSymbol < sym_lbr) {
-                        err_msg(SYNTAX_ERR, "Operator cant go after operator.");
-                    }
-
-                    operand = true;
-                }
                 break;
 
             // Reduce expression
@@ -425,12 +463,12 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
 
             // Non-rule
             case 'X':
-                err_msg(SEM_TYPE_ERR, "Bad operands, non-rule in precedence table.");
+                errHandler(SEM_TYPE_ERR, "Bad operands, non-rule in precedence table.");
                 break;
 
             // Again, how did you get here
             default:
-                err_msg(SYNTAX_ERR, "Rule not in precedence table.");
+                errHandler(SYNTAX_ERR, "Rule not in precedence table.");
                 break;
         }
     } 

@@ -11,7 +11,7 @@
 
 #include "error.h"
 
-void err_msg(err_code err, char* message)
+void errHandler(err_code err, char* message)
 {
     fprintf(stderr, "Exit code (%i): %s\n", err, message);
     exit(err);

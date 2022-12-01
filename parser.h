@@ -9,49 +9,29 @@
 
 #ifndef __PARSER_H__
 #define __PARSER_H__
-
-// Enum for statement types
-typedef enum {
-    t_fun,
-    t_int,
-    t_float,
-    t_str,
-}stat_type;
-
-// Internal structure used to store variables and functions inside htab
-typedef struct statement {
-    stat_type type;
-    char* name;
-    char* value;
-} stat_t;
+#include "scanner.h"
+#include "symtable.h"
 
 
-
-
-
-// FOR INSERTING TOKENS PURPOSE UNTIL LEXER IS DONE
-
-
-typedef struct tokenElement{
-    int type;
-    char* attribute;
-    struct tokenElement *next;
-    struct tokenElement *previous;
-}token_El;
+// Used for storing expression tokens
+typedef struct exprElement{
+    token_t *token;
+    struct exprElement *next;
+    struct exprElement *previous;
+}*expr_El;
 
 typedef struct {
-	token_El* firstElement;
-    token_El* lastElement;
-    token_El* activeElement;
-} token_T;
+	expr_El firstElement;
+    expr_El lastElement;
+    expr_El activeElement;
+} expression_T;
 
-typedef enum {
-    DOLLAR, ID, EQ, INT, COMMA, TOK_EOF, TOK_FUNCTION, LBRACKET, RBRACKET
-}tokenTypes;
 
-void init(token_T *tokenList);
-token_El *getToken(token_T *tokenList);
-void insertToken(token_T *tokenList, int type, char *attrib);
+
+void expressionInit(expression_T *exprList);
+expr_El getExpr(expression_T *exprList);
+void insertExpr(expression_T *exprList, token_t *token);
+void exprListDispose( expression_T *exprList );
 
 
 
@@ -60,7 +40,22 @@ void insertToken(token_T *tokenList, int type, char *attrib);
 
 
 int prog(); // Entry point to LL grammar rules
-int prologCheck(); // First token has to be prolog
+int parse();
+int declareCheck();
+int statement_list(struct htab *localTab);
+int statement_list_inside(struct htab *table);
+int expression_check(struct htab *table);
+int expression_check_inside(struct htab *table);
+int separators(struct htab *table);
+
+int condiCheck(struct htab *table);
+int checkIfStat(struct htab *table);
+int checkIfOperators();
+int elseCheck(struct htab *table);
+int functionCheck();
+int funcParams(struct htab *localTab, stat_t *statementIn);
+int checkWhile(struct htab *localTab);
+int builtinParams();
 
 
 #endif  // __PARSER_H__

@@ -12,12 +12,14 @@
 #include "scanner.h"
 #include "expr_stack.h"
 #include "symtable.h"
+#include "parser.h"
 
 typedef enum {
     ret_bool,
     ret_int,
     ret_float,
     ret_string,
+    ret_null,
     ret_uhoh
 } p_return;
 

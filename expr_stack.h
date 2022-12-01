@@ -23,13 +23,13 @@ typedef enum {
     sym_gte,
     sym_eq,
     sym_neq,
-    sym_rbr,
     sym_lbr,
-    sym_dollar,
+    sym_rbr,
     sym_id,
     sym_int,
     sym_float,
     sym_str,
+    sym_null,
     sym_end,
     term_add,
     term_sub,
@@ -48,6 +48,7 @@ typedef enum {
     term_float,
     term_str,
     term_bool,
+    term_null,
     err_uhoh
 } p_symbol;
 
