@@ -242,7 +242,7 @@ int prog(){
         case ID:
             res = declareCheck();
             if(res == SUCCESS_ERR){
-                res = statement_list();
+                res = statement_list(symtable);
             }
             // printf("%d\n",res); //DEBUG
             return res; 
@@ -253,7 +253,7 @@ int prog(){
 }
 
 
-int statement_list(){
+int statement_list(htab_t *localTable){
     int res = SYNTAX_ERR;
     
     token_res = GetToken(&token);  
@@ -275,14 +275,14 @@ int statement_list(){
             
             return SUCCESS_ERR;
         case DOLLAR:    // $ <ID> <SEPARATOR_PICK>  
-            res = expression_check();
+            res = expression_check(localTable);
 
             return res;
         case KEYWORD: 
             //  SEMANTIC - if, function, else, while, return only, otherwise SYNTAX_ERR
             switch(token.keyword){
                 case IF:
-                    res = condiCheck();
+                    res = condiCheck(localTable);
                     return res;
                 case FUNCTION:
                     if(insideFunc){ // Vnořené funkce nechceme
@@ -292,7 +292,7 @@ int statement_list(){
                     res = functionCheck();
                     return res;
                 case WHILE:
-                    res = checkWhile();
+                    res = checkWhile(localTable);
                     return res;
                 case RETURN:
                     // if(currentReturnType){
@@ -327,7 +327,7 @@ int statement_list(){
                     fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
                     return SYNTAX_ERR;
                 }
-                res = statement_list();
+                res = statement_list(localTable);
                 if(res != SUCCESS_ERR){
                     return res;
                 }
@@ -342,7 +342,7 @@ int statement_list(){
             }
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = separators();
+            res = separators(localTable);
             return res;
         default:
             if((insideIf && token.type == R_BRAC) || (insideWhile && token.type == R_BRAC)){
@@ -423,7 +423,7 @@ int builtinParams(){
 }
 
 
-int checkWhile(){
+int checkWhile(htab_t *localTable){
     int res = SYNTAX_ERR;
     token_res = GetToken(&token);  
     token_t *expr_tok;
@@ -441,13 +441,13 @@ int checkWhile(){
     }
     *expr_tok = token;
     insertExpr(expression, expr_tok);
-    res = checkIfStat();    // Zkontroluj levou stranu vyrazu v ifu
+    res = checkIfStat(localTable);    // Zkontroluj levou stranu vyrazu v ifu
     if(res != SUCCESS_ERR){
         return res;
     }
     
 
-    res = checkIfStat();    // Zkontroluj pravou stranu vyrazu v ifu
+    res = checkIfStat(localTable);    // Zkontroluj pravou stranu vyrazu v ifu
     if(res != SUCCESS_ERR){
         return res;
     }
@@ -468,10 +468,10 @@ int checkWhile(){
     }
     *expr_tok = token;
     insertExpr(expression, expr_tok);
-    expr_parse(symtable, expression); // modif
+    expr_parse(localTable, expression); // modif
     exprListDispose(expression);
     insideWhile = true;
-    res = statement_list();  // Kontrola vnitřku funkce
+    res = statement_list(localTable);  // Kontrola vnitřku funkce
     if(res != SUCCESS_ERR){
         return res;
     }
@@ -479,7 +479,7 @@ int checkWhile(){
     insideWhile = false;
     
 
-    return statement_list();
+    return statement_list(localTable);
 }
 
 
@@ -595,7 +595,7 @@ int functionCheck(){
         return SYNTAX_ERR;
     }
     insideFunc = true;
-    res = statement_list(); // function <ID> ( <FUNC_PARAMS> ): type{ <ST_L>
+    res = statement_list(localTable); // function <ID> ( <FUNC_PARAMS> ): type{ <ST_L>
     if(res != SUCCESS_ERR){
         if(!(currentReturnType == ret_float || currentReturnType == ret_int || currentReturnType == ret_string)){  // VOID FUNCTION WITHOUT RETURN STATEMENT
             return SUCCESS_ERR;
@@ -698,7 +698,7 @@ int functionCheck(){
     }
     // printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
     insideFunc = false;
-    return statement_list();
+    return statement_list(symtable);
 }
 
 int funcParams(htab_t *localTable, stat_t *statementIn){
@@ -790,7 +790,7 @@ int funcParams(htab_t *localTable, stat_t *statementIn){
     }
     return res;
 }
-int separators_if(){
+int separators_if(htab_t *table){
     int res = SYNTAX_ERR;
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
@@ -800,7 +800,7 @@ int separators_if(){
         case KONKAT: case DIV: case ADD: case SUB: case MUL:    // $x=$y.<IFSTAT> || $x=$y+<IFSTAT> etc.
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = checkIfStat();
+            res = checkIfStat(table);
             return res;
         case R_PAR:
             
@@ -814,7 +814,7 @@ int separators_if(){
     return res;
 }
 
-int checkIfStat(){
+int checkIfStat(htab_t *table){
     int res = SYNTAX_ERR;
 
     token_res = GetToken(&token);  
@@ -870,7 +870,7 @@ int checkIfStat(){
         return res;
     }
     
-    res = separators_if();
+    res = separators_if(table);
     if(res != SUCCESS_ERR){
         
         return res;
@@ -907,7 +907,7 @@ int checkIfOperators(){
 
 }
 
-int condiCheck(){
+int condiCheck(htab_t *table){
     int res = SYNTAX_ERR;
     token_res = GetToken(&token);  
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
@@ -924,13 +924,13 @@ int condiCheck(){
     }
     *expr_tok = token;
     insertExpr(expression, expr_tok);
-    res = checkIfStat();    // Zkontroluj levou stranu vyrazu v ifu
+    res = checkIfStat(table);    // Zkontroluj levou stranu vyrazu v ifu
     if(res != SUCCESS_ERR){
         return res;
     }
     
 
-    res = checkIfStat();    // Zkontroluj pravou stranu vyrazu v ifu
+    res = checkIfStat(table);    // Zkontroluj pravou stranu vyrazu v ifu
     if(res != SUCCESS_ERR){
         return res;
     }
@@ -957,27 +957,27 @@ int condiCheck(){
     //     expr = expr->previous;
     // }
     // putchar('\n');
-    expr_parse(symtable, expression);
+    expr_parse(table, expression);
     
     exprListDispose(expression);
     insideIf = true;
-    res = statement_list();  // Kontrola vnitřku funkce
+    res = statement_list(table);  // Kontrola vnitřku funkce
     if(res != SUCCESS_ERR){
         return res;
     }
     
     insideIf = false;
-    res = elseCheck();
+    res = elseCheck(table);
     if(res != SUCCESS_ERR){
         fprintf(stderr,"Syntax error ---> WRONG ELSE FORMAT <---\n");
         return res;
     }
 
-    return statement_list();
+    return statement_list(table);
     
 }
 
-int elseCheck(){
+int elseCheck(htab_t *localTable){
     int res = SYNTAX_ERR;
     token_res = GetToken(&token);  
     if(!token_res){
@@ -999,7 +999,7 @@ int elseCheck(){
         return SYNTAX_ERR;
     }
     insideIf = true;
-    res = statement_list(); // Kontrola těla else
+    res = statement_list(localTable); // Kontrola těla else
     if(res != SUCCESS_ERR){
         return res;
     }
@@ -1008,7 +1008,7 @@ int elseCheck(){
 }
 
 
-int expression_check(){
+int expression_check(htab_t *table){
     int res = SYNTAX_ERR;
 
     token_res = GetToken(&token);  
@@ -1023,7 +1023,7 @@ int expression_check(){
     }
 
    
-    statement = htab_lookup_add(symtable, token.string);   // add  identifier to symtable
+    statement = htab_lookup_add(table, token.string);   // add  identifier to symtable
 
 
     token_res = GetToken(&token);
@@ -1033,7 +1033,7 @@ int expression_check(){
     }
     if(token.type == ASSIG){
         // ZAVOLAT EXPRESSION PARSER
-        res = statement_list_inside();
+        res = statement_list_inside(table);
 
         return res;  
     }
@@ -1046,7 +1046,7 @@ int expression_check(){
 
 
 
-int expression_check_inside(){
+int expression_check_inside(htab_t *table){
     int res = SUCCESS_ERR;
 
     token_res = GetToken(&token);  
@@ -1061,7 +1061,7 @@ int expression_check_inside(){
         case FLOAT_T:
         case STRING_T:
             
-            res = separators();
+            res = separators(table);
             
             return res;
         default:
@@ -1073,7 +1073,7 @@ int expression_check_inside(){
 }
 
 
-int statement_list_inside(){
+int statement_list_inside(htab_t *table){
     int res = SUCCESS_ERR;
 
     token_res = GetToken(&token);  
@@ -1102,7 +1102,7 @@ int statement_list_inside(){
             *expr_tok = token;
             insertExpr(expression, expr_tok);
             // printf("%s is last, %s is first\n",expression->lastElement->token->string, expression->firstElement->token->string);    // DEBUG
-            res = separators();
+            res = separators(table);
             
                 
             
@@ -1124,7 +1124,7 @@ int statement_list_inside(){
             }
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = separators();
+            res = separators(table);
             return res;
         case KEYWORD:
             if(token.keyword != NULL_K){
@@ -1132,7 +1132,7 @@ int statement_list_inside(){
             }
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = separators();
+            res = separators(table);
             return res;
         case ID:    //$x = foo();   TODO FUNCTION NOT DEFINED
             token_res = GetToken(&token);  
@@ -1158,7 +1158,7 @@ int statement_list_inside(){
                     fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
                     return SYNTAX_ERR;
                 }
-                res = statement_list();
+                res = statement_list(table);
                 if(res != SUCCESS_ERR){
                     return res;
                 }
@@ -1176,7 +1176,7 @@ int statement_list_inside(){
     return res;
 }
 
-int separators(){
+int separators(htab_t *table){
     int res = SUCCESS_ERR;
 
     token_res = GetToken(&token);
@@ -1200,7 +1200,7 @@ int separators(){
             // }
             // putchar('\n');
             
-            expr_parse(symtable, expression);
+            expr_parse(table, expression);
         
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
                      // expr_parse(expression_list, symtable);
@@ -1211,12 +1211,12 @@ int separators(){
             // printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
 
             exprListDispose(expression);
-            return statement_list(); // $x=$y; || $x=5; || $x = $y.$z;
+            return statement_list(table); // $x=$y; || $x=5; || $x = $y.$z;
         case KONKAT: case DIV: case ADD: case SUB: case MUL:    // $x=$y.<IFSTAT> || $x=$y+<IFSTAT> etc.
             
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = statement_list_inside();
+            res = statement_list_inside(table);
             return res;
         default:
             return SYNTAX_ERR;

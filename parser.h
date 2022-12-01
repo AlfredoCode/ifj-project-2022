@@ -42,19 +42,19 @@ void exprListDispose( expression_T *exprList );
 int prog(); // Entry point to LL grammar rules
 int parse();
 int declareCheck();
-int statement_list();
-int statement_list_inside();
-int expression_check();
-int expression_check_inside();
-int separators();
+int statement_list(struct htab *localTab);
+int statement_list_inside(struct htab *table);
+int expression_check(struct htab *table);
+int expression_check_inside(struct htab *table);
+int separators(struct htab *table);
 
-int condiCheck();
-int checkIfStat();
+int condiCheck(struct htab *table);
+int checkIfStat(struct htab *table);
 int checkIfOperators();
-int elseCheck();
+int elseCheck(struct htab *table);
 int functionCheck();
 int funcParams(struct htab *localTab, stat_t *statementIn);
-int checkWhile();
+int checkWhile(struct htab *localTab);
 int builtinParams();
 
 
