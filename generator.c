@@ -26,7 +26,7 @@ void initInstList(instructList_T *instrList){
 }
 
 int insertInstruction(instructList_T *instrList, TYPES operation, char* op1, char* op2, char* dest){ //Can possibly be type of instructList_T so we can modify the value in parser and in expr_parser
-    instructElem newElement = (instructElem) malloc(sizeof(newElement));
+    instructElem newElement = (instructElem) malloc(sizeof(*newElement));
 	if(newElement == NULL){
 		return INTERNAL_ERR; // return 99
 	}

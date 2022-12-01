@@ -3,6 +3,7 @@
  * Name:       generator.h                             *
  * Authors:    xsafar27                                *
  *             xhofma11                                *
+ *             xjadrn03                                *
  * Last modif: 11/28/2022                              *
  * =================================================== *
  */
@@ -17,7 +18,7 @@ typedef struct instructionElement{
     char *op1;
     char *op2;
     char *dest;
-    TYPES operation;
+    TYPES operation;                //todo
 
     struct instructionElement *next;
     struct instructionElement *previous;
@@ -35,7 +36,20 @@ typedef struct instructionList{
 void initInstList(instructList_T *instrList);
 int insertInstruction(instructList_T *instrList, TYPES operation, char* op1, char* op2, char* dest); //Can possibly be type of instructList_T so we can modify the value in parser and in expr_parser
 
+void generateProgramHead();
 
+/*Main function*/
+void generateMainStart();
+void generateMainEnd();
+
+/*Other functions*/
+void generateFuncStart(char *funcname);
+void generateFunctionEnd();
+
+/*Built-ins*/
+void generateRead(char *var, char *type);
+void generateWrite(char *symb);
+void generateStrlen(char *var, char *symb);
 // Generate built-ins
 // Reads
 // Readi
@@ -45,6 +59,65 @@ int insertInstruction(instructList_T *instrList, TYPES operation, char* op1, cha
 // Substring
 // Ord
 // Chr
+
+/*Aritmetic operations on stack*/
+void generateAdds();
+void generateSubs();
+void generateMuls();
+void generateDivs();
+void generateIDivs();
+
+/*Relation operations*/
+void generateLts();
+void generateGts();
+void generateEqs();
+
+/*Bool operations*/
+void generateAnds();
+void generateOrs();
+void generateNots();
+
+/*Conversion*/
+void generateInt2Floats();
+void generateFloat2Ints();
+void generateInt2Chars();
+void generateString2Ints();
+
+/*Type of symb stores to var*/
+void generateType(char *var, char *symb);
+
+/*String operations*/
+void generateConcat(char *dest, char *op1, char *op2);
+void generateStrlen(char *dest, char *op);
+void generateGetchar(char *dest, char *op1, char *op2);
+void generateSetchar(char *dest, char *op1, char *op2);
+
+/*Stack operations*/
+void generatePushs(char *symb);
+void generatePops(char *var);
+void generateClears();
+
+/*Frames and function calls*/
+void generateCreateFrame();
+void generatePushFrame();
+void generatePopFrame();
+void generateCall(char *label);
+void generateReturn();
+
+/*Dataflow*/
+void generateLabel(char *label);
+void generateJump(char *label);
+void generateJumpIfEqs(char *label);
+void generateJumpIfNEqs(char *label);
+void generateExit(char *number);        // 0 <= number <= 49
+
+void UniqueLabel(char *idk); //co s tim
+
+
+void generateMove(char *var, char *symb);
+void generateDefvar(char *var);
+
+char* stringConvertor(char* stringBefore);
 
 // Functions
 
