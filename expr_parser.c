@@ -339,12 +339,12 @@ int evaluate(stack_t *stack, htab_t *symtable)
             // Since we dont store int and float vals in the same place
             tok = stackPeek(stack, 0);
             if (tok->symbol == term_int) {
-                if (!tok->token->integer){
+                if (!atoi(tok->token->string)){
                     errHandler(SEM_OTHERS_ERR, "Attempted div by 0.");
                     break;
                 }
             } else if (tok->symbol == term_float) {
-                if (!tok->token->decimal){
+                if (!atof(tok->token->string)){
                     errHandler(SEM_OTHERS_ERR, "Attempted div by 0.");
                     break;
                 }
