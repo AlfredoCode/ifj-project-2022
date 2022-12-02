@@ -80,7 +80,7 @@ void generatePushs(char *symb, TYPES type){
 
 /*String convertor*/
 char* stringConvertor(char* stringBefore){
-    int stringSizeB = sizeof(stringBefore);
+    int stringSizeB = strlen(stringBefore);
     int stringSizeA = stringSizeB;
     char *stringAfter = (char *) malloc(stringSizeB * sizeof(char));
     char *add = (char *) malloc(sizeof(char) * 5);
@@ -88,8 +88,8 @@ char* stringConvertor(char* stringBefore){
     int k = 0;
     while(stringBefore[i] != '\0'){
         if(!isdigit(stringBefore[i])){
-            stringSizeA += 5;
-            stringAfter = realloc(stringAfter, stringSizeA);
+           stringSizeA += 5;
+            stringAfter = (char *)realloc(stringAfter, stringSizeA * sizeof(char *));
             if((stringBefore[i] >= 0 && stringBefore[i] <= 32) || (stringBefore[i] == 35) || (stringBefore[i] == 92)){
                 if(stringBefore[i] >= 0 && stringBefore[i] <= 9){
                     sprintf(add, "/00%d", stringBefore[i]);
@@ -108,7 +108,6 @@ char* stringConvertor(char* stringBefore){
             stringAfter[k] = stringBefore[i];
             k++;
         }
-
         i++;
     }
     return stringAfter;
@@ -125,9 +124,11 @@ int main(){
     initInstList(instrList);
     insertInstruction(instrList, ADD, "x","y","z");
     //generateProgramHead();
-    char *string = "\\neviem už .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?";
+    char *string = "\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?";
+    // char *string = "\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?";
     char *string2 = stringConvertor(string);
     printf("%s\n", string2);
+    
     
 
     return 0;
