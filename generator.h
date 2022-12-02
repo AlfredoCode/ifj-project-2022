@@ -130,7 +130,7 @@ void generateGetchar(char *dest, char *op1, char *op2);
 void generateSetchar(char *dest, char *op1, char *op2);
 
 /*Stack operations*/
-void generatePushs(char *symb);
+void generatePushs(char *symb, TYPES type);
 void generatePops(char *var);
 void generateClears();
 
@@ -154,6 +154,7 @@ void UniqueLabel(int labelnmbr,char *idk); //co s tim
 void generateMove(char *var, char *symb);
 void generateDefvar(char *var);
 
+/*String convertor*/
 char* stringConvertor(char* stringBefore);
 
 // Functions
