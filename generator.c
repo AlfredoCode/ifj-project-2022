@@ -45,17 +45,15 @@ int insertInstruction(instructList_T *instrList, TYPES operation, char* op1, cha
     newElement-> operation = operation;
 
 
-	newElement->next = instrList->firstElement;	// Nastavení dat nového prvku seznamu
-	newElement->previous = NULL;
+	newElement->previous = instrList->lastElement;	// Nastavení dat nového prvku seznamu
+	newElement->next = NULL;
 	if(instrList->lastElement != NULL){
-		instrList->firstElement->previous = newElement;	
-
+		instrList->lastElement->next = newElement;	
 	}
 	else{
-		instrList->lastElement = newElement;		// Navázání prvku do seznamu
+		instrList->firstElement = newElement;		// Navázání prvku do seznamu
 	}
-	
-	instrList->firstElement = newElement;	
+	instrList->lastElement = newElement;	
     return SUCCESS_ERR;
 
 }
@@ -150,7 +148,7 @@ char* stringConvertor(char* stringBefore){
     }
     return stringAfter;
 }
-
+/*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList){
     generateProgramHead();
     First(instrList);
@@ -262,20 +260,7 @@ int main(){
     insertInstruction(instrList, PUSHS_FLOAT_I, "1.5",NULL,NULL);
     insertInstruction(instrList, PUSHS_ID_I, "x",NULL,NULL);
     generatorInit(instrList);
-    //char *string = "h123456798ello wor00122032658 01ld#";
-    // char *string = "\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?\\neviem uz .#.\n.\t kde jsou ty otazniky blby co to vypisovalo?";
-    //char *string2 = stringConvertor(string);
-    //printf("%s\n", string2);
-    //char *string = "Hello world<>#";
-    /*char *id = "x";
-    char *intliteral = "123";
-    char *floatliteral = "125.478";
-    char *nil = "nil";
-    generatePushs(string2, PUSHS_STRING_I);
-    generatePushs(id, PUSHS_ID_I);
-    generatePushs(intliteral, PUSHS_INT_I);
-    generatePushs(floatliteral, PUSHS_FLOAT_I);
-    generatePushs(nil, PUSHS_NIL_I);*/
+    
     
 
     return 0;
