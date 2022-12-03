@@ -11,7 +11,7 @@ packageName = xmoskv00
 CC = gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -g
 
-all: expr_stack.o expr_parser.o  error.o scanner.o parser.o symtable.o  main.o
+all: expr_stack.o expr_parser.o  error.o scanner.o generator.o parser.o symtable.o  main.o
 	$(CC) $(CFLAGS) $^ -o ifj22 
 
 pack:
@@ -41,6 +41,8 @@ error.o: error.c
 scanner.o: scanner.c
 
 parser.o: parser.c
+
+generator.o: generator.c
 
 main.o: main.c
 

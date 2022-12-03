@@ -15,6 +15,7 @@
 #include "symtable.h"
 #include "error.h"
 #include "expr_parser.h"
+#include "generator.h"
 
 #define HTABSIZE 10
 
@@ -32,12 +33,16 @@ token_t token;
 //Statement struct
 stat_t *statement;
 
+// Instruction list
+instructList_T *instrList;
+
 //Internal variables
 int currentToken = 0;
 p_return currentReturnType;
+
 // Expressions
 expression_T *expression, *allTokens;
-expr_El expr; // FOR DEBUG PRINTS
+// expr_El expr; // FOR DEBUG PRINTS
 
 // Symtable
 htab_t *symtable, *funTable;
@@ -102,71 +107,55 @@ int declareCheck(){
     // SEMANTIC  - Podívat se do tabulky symbolů, zda je ID rovno 'declare'
 token_res = GetToken(&token);       // levá závorka
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR, "Lexical error\n");
     }
     if(token.type != L_PAR){
-        
-        fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
     }
 
     token_res = GetToken(&token);   // strict_types
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != ID){
-        fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
     }
     // SEMANTIC - MRKNI DO SYMTABLE NA HODNOTU ID
 
 
     token_res = GetToken(&token);   // rovná se
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != ASSIG){
-        
-        fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
     }
 
 
     token_res = GetToken(&token);   // int
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != INT_T){
-        // printf("SUP");
-
-        fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
     }
     // SEMANTIC - MRKNI DO SYMTABLE NA HODNOTU INT
 
 
     token_res = GetToken(&token);   // pravá závorka
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != R_PAR){
-        fprintf(stderr, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
     }
 
     token_res = GetToken(&token);   // středník
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != SEMICOL){
-        fprintf(stderr, "Syntax error ---> MISSING SEMICOL <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR, "Syntax error ---> MISSING SEMICOL <---\n");
     }
     return SUCCESS_ERR;
 }
@@ -179,10 +168,15 @@ int parse(){
 
     expression  = (expression_T*)malloc(sizeof(*expression));
     if(expression == NULL){
-        fprintf(stderr,"Malloc failure\n");
-        return INTERNAL_ERR;
+        errHandler(INTERNAL_ERR,"Malloc failure\n");
     }
     expressionInit(expression);
+
+    instrList  = (instructList_T*)malloc(sizeof(*instrList));
+    if(instrList == NULL){
+        errHandler(INTERNAL_ERR,"Malloc failure\n");
+    }
+    initInstList(instrList);
 
     symtable = htab_init(HTABSIZE); // Var symtable
     if(symtable == NULL){
@@ -211,21 +205,15 @@ int parse(){
     }
     token_res = GetToken(&token);   
     if(!token_res){
-        // printf("AHoj\n");
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
 
     switch(token.type){
         case EOF_T:
-            fprintf(stderr,"Syntax error ---> EMPTY FILE <---\n");
-            return SYNTAX_ERR;  // EMPTY FILE 
-        // case PHP:
-        //     res = prog(); // First rule of LL
-        //     return res;
+            errHandler(SYNTAX_ERR,"Syntax error ---> EMPTY FILE <---\n");
+            break;
         default:
-            fprintf(stderr,"Syntax error ---> UNKNOWN BEFORE PROLOG <---\n");
-            return LEX_ERR;  // MISSING PROLOG
+            errHandler(LEX_ERR,"Syntax error ---> UNKNOWN BEFORE PROLOG <---\n");
     }
     //GENERATE
     return SUCCESS_ERR;
@@ -235,8 +223,7 @@ int prog(){
     int res;
     token_res = GetToken(&token);   
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     switch(token.type){
         case ID:
@@ -244,11 +231,10 @@ int prog(){
             if(res == SUCCESS_ERR){
                 res = statement_list(symtable);
             }
-            // printf("%d\n",res); //DEBUG
             return res; 
         default:
-            fprintf(stderr,"Syntax error ---> MISSING DECLARE <---\n");
-            return SYNTAX_ERR;   
+            errHandler(SYNTAX_ERR,"Syntax error ---> MISSING DECLARE <---\n");
+            return SYNTAX_ERR;
     }
 }
 
@@ -259,17 +245,14 @@ int statement_list(htab_t *localTable){
     token_res = GetToken(&token);  
     if(!token_res){
         if(insideIf || insideWhile || insideFunc){
-            fprintf(stderr,"Syntax error ---> EOF inside If statement <---\n");     // DONT ASK ME
-            return SYNTAX_ERR;
+            errHandler(SYNTAX_ERR,"Syntax error ---> EOF inside If statement <---\n");     // DONT ASK ME
         }
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     token_t *expr_tok;
     stat_t *funcName;
     switch(token.type){
         case EOF_T: // FOUND ?>     
-            // printf("Found the end\n");   //DEBUG
 
             free(expression);
             free(allTokens);
@@ -287,8 +270,7 @@ int statement_list(htab_t *localTable){
                     return res;
                 case FUNCTION:
                     if(insideFunc){ // Vnořené funkce nechceme
-                        fprintf(stderr,"Correct, we do not want nested functions\n"); //TODO WHICH ERROR IS THIS?
-                        return SYNTAX_ERR;
+                        errHandler(SYNTAX_ERR,"Correct, we do not want nested functions\n"); //TODO WHICH ERROR IS THIS?
                     }
                     res = functionCheck();
                     return res;
@@ -307,31 +289,25 @@ int statement_list(htab_t *localTable){
            
             funcName = htab_find(funTable, token.string);   // Was function defined before??
             if(funcName == NULL){
-                fprintf(stderr, "Semantic Error ---> FUNCTION NOT DEFINED <---\n");
-                return SEM_FUNC_ERR;
+                errHandler(SEM_FUNC_ERR, "Semantic Error ---> FUNCTION NOT DEFINED <---\n");
             }
             token_res = GetToken(&token);  
             if(!token_res){
-                fprintf(stderr,"Lexical error\n");
-                return LEX_ERR;
+                errHandler(LEX_ERR,"Lexical error\n");
             }
             if(token.type == L_PAR){
                 res = builtinParams();
                 if(res != SUCCESS_ERR){
-                     
                     return SYNTAX_ERR;  // ADD SEMICOL TO LL ON ITS OWN!!!
                 }
                 
-                // semicol();
                 token_res = GetToken(&token);  
                 // printf("Token type is %d\n", token.type); // DEBUG 
                 if(!token_res){
-                    fprintf(stderr,"Lexical error\n");
-                    return LEX_ERR;
+                    errHandler(LEX_ERR,"Lexical error\n");
                 }
                 if(token.type != SEMICOL){
-                    fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
-                    return SYNTAX_ERR;
+                    errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
                 }
                 res = statement_list(localTable);
                 if(res != SUCCESS_ERR){
@@ -367,8 +343,7 @@ int builtinParams(){
     static bool multipleParams = false;
     token_res = GetToken(&token);   // bar( <PARAMS> )
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     switch(token.type){
         case R_PAR: // NO PARAM 
@@ -380,20 +355,17 @@ int builtinParams(){
         case DOLLAR:
             token_res = GetToken(&token);   // type $ <ID>
             if(!token_res){
-                fprintf(stderr,"Lexical error\n");  // Hledáme ID
-                return LEX_ERR;
+                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
             }
             if(token.type != ID){
-                fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER AFTER $ BUILTIN <---\n");
-                return SYNTAX_ERR;
+                errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER AFTER $ BUILTIN <---\n");
             }
             // SEMANTIC
            
 
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
-                fprintf(stderr,"Lexical error\n");  // Hledáme ID
-                return LEX_ERR;
+                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
             }
             switch(token.type){
                 case R_PAR:
@@ -409,8 +381,7 @@ int builtinParams(){
             
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
-                fprintf(stderr,"Lexical error\n");  // Hledáme ID
-                return LEX_ERR;
+                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
             }
             switch(token.type){
                 case R_PAR:
@@ -434,12 +405,10 @@ int checkWhile(htab_t *localTable){
     token_res = GetToken(&token);  
     token_t *expr_tok;
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != L_PAR){                   // Kontrola (
-        fprintf(stderr,"Syntax error ---> MISSING LEFT PARENTHESIS <---\n");
-        return res;
+        errHandler(SYNTAX_ERR,"Syntax error ---> MISSING LEFT PARENTHESIS <---\n");
     }
     expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
@@ -461,12 +430,10 @@ int checkWhile(htab_t *localTable){
     
     token_res = GetToken(&token);  
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != L_BRAC){               // Kontrola {
-        fprintf(stderr,"Syntax error ---> MISSING LEFT BRACKET <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR,"Syntax error ---> MISSING LEFT BRACKET <---\n");
     }
     expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
@@ -504,18 +471,15 @@ int functionCheck(){
 
     token_res = GetToken(&token);   // function <ID>
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != ID){
-        fprintf(stderr, "Syntax error ---> FUNCTION IS MISSING IDENTIFIER <---\n");
-        return res;
+        errHandler(SYNTAX_ERR, "Syntax error ---> FUNCTION IS MISSING IDENTIFIER <---\n");
     }
     // INSERT ID INTO FUNCTION HTAB
     statementFun = htab_find(funTable, token.string);
     if(statementFun != NULL){
-        fprintf(stderr,"SEMANTIC ERROR ---> Function redefinition <---\n");
-        return SEM_FUNC_ERR;
+        errHandler(SEM_FUNC_ERR,"SEMANTIC ERROR ---> Function redefinition <---\n");
     }
     statementFun = htab_lookup_add(funTable, token.string);   // add  func identifier to symtable
 
@@ -531,39 +495,32 @@ int functionCheck(){
     // -----------------------
     token_res = GetToken(&token);   // function <ID> (
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != L_PAR){
-        fprintf(stderr, "Syntax error ---> MISSING LEFT PARENTHESIS IN FUNCTION <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR, "Syntax error ---> MISSING LEFT PARENTHESIS IN FUNCTION <---\n");
     }
     res = funcParams(localTable, statement); // Parametry funkce
     if(res != SUCCESS_ERR){
-        fprintf(stderr, "Syntax error ---> Wrong parameters in function <---\n");
-        return res;
+        errHandler(res, "Syntax error ---> Wrong parameters in function <---\n");
     }
 
     token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ):
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != COL){
-        fprintf(stderr, "Syntax error ---> MISSING COLON IN FUNCTION <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR, "Syntax error ---> MISSING COLON IN FUNCTION <---\n");
     }
     token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): type
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
 
     if(token.type != KEYWORD){  // OR IT CAN BE TYPE TOKEN
         token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): ?type
         if(!token_res){
-            fprintf(stderr,"Lexical error\n");
-            return LEX_ERR;
+            errHandler(LEX_ERR,"Lexical error\n");
         }
         if(token.type != KEYWORD){
             return SYNTAX_ERR;
@@ -593,12 +550,10 @@ int functionCheck(){
     //  int currentReturnType if token.type == TYPE TODO
     token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): type {
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != L_BRAC){
-        fprintf(stderr, "Syntax error ---> MISSING LEFT BRACKET IN FUNCTION <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR, "Syntax error ---> MISSING LEFT BRACKET IN FUNCTION <---\n");
     }
     insideFunc = true;
     res = statement_list(localTable); // function <ID> ( <FUNC_PARAMS> ): type{ <ST_L>
@@ -616,8 +571,7 @@ int functionCheck(){
     }
     token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): type { <ST_L> return <>
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(currentReturnType == ret_float || currentReturnType == ret_int || currentReturnType == ret_string){
         token_t *expr_tok;
@@ -625,12 +579,10 @@ int functionCheck(){
             case DOLLAR:
                 token_res = GetToken(&token);   // looking for ID
                 if(!token_res){
-                    fprintf(stderr,"Lexical error\n");
-                    return LEX_ERR;
+                    errHandler(LEX_ERR,"Lexical error\n");
                 }
                 if(token.type != ID){
-                    fprintf(stderr, "Syntax error ---> MISSING RETURN STATEMENT <---\n");   
-                    return SYNTAX_ERR;
+                    errHandler(SYNTAX_ERR, "Syntax error ---> MISSING RETURN STATEMENT <---\n");   
                 }
                 expr_tok = (token_t*) malloc(sizeof(*expr_tok));
                 if(expr_tok == NULL){
@@ -640,8 +592,7 @@ int functionCheck(){
                 insertExpr(expression, expr_tok);
                 token_res = GetToken(&token);   // Looking for semicol;
                 if(!token_res){
-                    fprintf(stderr,"Lexical error\n");
-                    return LEX_ERR;
+                    errHandler(LEX_ERR,"Lexical error\n");
                 }
                 break;
             case INT_T: case FLOAT_T: case STRING_T:    // Teoreticky muzu vratit 5+5 apod, ale to ted neresme
@@ -653,30 +604,26 @@ int functionCheck(){
                 insertExpr(expression, expr_tok);
                 token_res = GetToken(&token);   // Looking for semicol;
                 if(!token_res){
-                    fprintf(stderr,"Lexical error\n");
-                    return LEX_ERR;
+                    errHandler(LEX_ERR,"Lexical error\n");
                 }
                 break;
             case KEYWORD:
                 if(token.keyword == NULL_K){
-                    fprintf(stderr, "null as a return type of function\n");
-                    return SEM_PARAM_ERR;
+                    errHandler(SEM_PARAM_ERR, "null as a return type of function\n");
                 }
                 else{
-                    fprintf(stderr, "other keyword as a return type of function\n");
-                    return SYNTAX_ERR;  
+                    errHandler(SYNTAX_ERR, "other keyword as a return type of function\n");
                 }
+                break;
             default:
                 return SEM_RETURN_ERR;   // NO RETURN VALUE
         }
     }
     if(token.type != SEMICOL){
         if(currentReturnType == ret_float || currentReturnType == ret_int || currentReturnType == ret_string){
-            fprintf(stderr, "Syntax error ---> MISSING SEMICOL AFTER RETURN <---\n");
-            return SYNTAX_ERR;
+            errHandler(SYNTAX_ERR, "Syntax error ---> MISSING SEMICOL AFTER RETURN <---\n");
         }
-        fprintf(stderr, "Syntax error ---> VOID FUNCTION RETURNING VALUE <---\n");
-        return SEM_RETURN_ERR;
+        errHandler(SEM_RETURN_ERR, "Syntax error ---> VOID FUNCTION RETURNING VALUE <---\n");
     }
     token_t *expr_tok_semicol;
     expr_tok_semicol = (token_t*) malloc(sizeof(*expr_tok_semicol));
@@ -686,24 +633,18 @@ int functionCheck(){
     *expr_tok_semicol = token;
     insertExpr(expression, expr_tok_semicol);
     if(currentReturnType == ret_string || currentReturnType == ret_int || currentReturnType == ret_float){
-        // statement = htab_find(localTable,statement->name);    // DEBUG
-        //     printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
         if(expr_parse(localTable, expression) != currentReturnType){   // sending return expression to expr_parser
-
-            fprintf(stderr, "Wrong return type\n");
-            return SEM_PARAM_ERR;
+            errHandler(SEM_PARAM_ERR, "Wrong return type\n");
         }
         
     }
     exprListDispose(expression);
     token_res = GetToken(&token);   // Looking for R_BRAC;
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != R_BRAC){
-        fprintf(stderr, "Syntax error ---> MISSING RIGHT BRACKET AFTER RETURN STATEMENT <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR, "Syntax error ---> MISSING RIGHT BRACKET AFTER RETURN STATEMENT <---\n");
     }
     // printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
     insideFunc = false;
@@ -716,8 +657,7 @@ int funcParams(htab_t *localTable, stat_t *statementIn){
     
     token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> )
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     switch(token.type){
         case R_PAR: // NO PARAM 
@@ -730,8 +670,7 @@ int funcParams(htab_t *localTable, stat_t *statementIn){
             if(token.type == TYPE){
                 token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): ?type
                 if(!token_res){
-                    fprintf(stderr,"Lexical error\n");
-                    return LEX_ERR;
+                    errHandler(LEX_ERR,"Lexical error\n");
                 }
                 if(token.type != KEYWORD){
                     return SYNTAX_ERR;
@@ -756,22 +695,18 @@ int funcParams(htab_t *localTable, stat_t *statementIn){
             
             token_res = GetToken(&token);   // type $
             if(!token_res){
-                fprintf(stderr,"Lexical error\n");  // Hledáme ID
-                return LEX_ERR;
+                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
             }
             if(token.type != DOLLAR){
-                fprintf(stderr, "Syntax error ---> EXPECTED $ <---\n");
-                return SYNTAX_ERR;
+                errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED $ <---\n");
             }
 
             token_res = GetToken(&token);   // type $ <ID>
             if(!token_res){
-                fprintf(stderr,"Lexical error\n");  // Hledáme ID
-                return LEX_ERR;
+                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
             }
             if(token.type != ID){
-                fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER AFTER TYPE IN FUCNTION <---\n");
-                return SYNTAX_ERR;
+                errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER AFTER TYPE IN FUCNTION <---\n");
             }
             // SEMANTIC
             statementIn = htab_lookup_add(localTable, token.string);  // ADD PARAM TO LOCAL VAR TABLE
@@ -780,8 +715,7 @@ int funcParams(htab_t *localTable, stat_t *statementIn){
             
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
-                fprintf(stderr,"Lexical error\n");  // Hledáme ID
-                return LEX_ERR;
+                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
             }
             switch(token.type){
                 case R_PAR:
@@ -828,8 +762,7 @@ int checkIfStat(htab_t *table){
 
     token_res = GetToken(&token);  
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
@@ -840,9 +773,7 @@ int checkIfStat(htab_t *table){
         case DOLLAR:    // $ <ID> <SEPARATOR>  
             token_res = GetToken(&token);  
             if(!token_res){
-                fprintf(stderr,"Lexical error\n");
-                return LEX_ERR;
-            
+                errHandler(LEX_ERR,"Lexical error\n");
             }
             if(token.type != ID){
                 return SYNTAX_ERR;
@@ -872,7 +803,6 @@ int checkIfStat(htab_t *table){
     }
     res = checkIfOperators();
     if(res == SUCCESS_ERR){
-        // printf("Found the triple EQ\n");
         return SUCCESS_ERR;
     }
     else if(res == LEX_ERR){
@@ -881,10 +811,8 @@ int checkIfStat(htab_t *table){
     
     res = separators_if(table);
     if(res != SUCCESS_ERR){
-        
         return res;
     }
-    
     return SUCCESS_ERR;
 }
 
@@ -893,8 +821,7 @@ int checkIfOperators(){
     int res = SYNTAX_ERR;
     token_res = GetToken(&token);  
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
@@ -924,12 +851,10 @@ int condiCheck(htab_t *table){
         return INTERNAL_ERR;
     }
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != L_PAR){                   // Kontrola (
-        fprintf(stderr,"Syntax error ---> MISSING LEFT PARENTHESIS <---\n");
-        return res;
+        errHandler(res,"Syntax error ---> MISSING LEFT PARENTHESIS <---\n");
     }
     *expr_tok = token;
     insertExpr(expression, expr_tok);
@@ -937,22 +862,17 @@ int condiCheck(htab_t *table){
     if(res != SUCCESS_ERR){
         return res;
     }
-    
-
     res = checkIfStat(table);    // Zkontroluj pravou stranu vyrazu v ifu
     if(res != SUCCESS_ERR){
         return res;
     }
 
-
     token_res = GetToken(&token);  
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != L_BRAC){               // Kontrola {
-        fprintf(stderr,"Syntax error ---> MISSING LEFT BRACKET <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR,"Syntax error ---> MISSING LEFT BRACKET <---\n");
     }
     token_t *expr_tok2 = (token_t*) malloc(sizeof(*expr_tok2));
     if(expr_tok2 == NULL){
@@ -978,8 +898,7 @@ int condiCheck(htab_t *table){
     insideIf = false;
     res = elseCheck(table);
     if(res != SUCCESS_ERR){
-        fprintf(stderr,"Syntax error ---> WRONG ELSE FORMAT <---\n");
-        return res;
+        errHandler(res,"Syntax error ---> WRONG ELSE FORMAT <---\n");
     }
 
     return statement_list(table);
@@ -990,22 +909,18 @@ int elseCheck(htab_t *localTable){
     int res = SYNTAX_ERR;
     token_res = GetToken(&token);  
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.keyword != ELSE){               // Kontrola tokenu else
-        fprintf(stderr,"Syntax error ---> MISSING ELSE <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR,"Syntax error ---> MISSING ELSE <---\n");
     }
 
     token_res = GetToken(&token);  
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type != L_BRAC){               // Kontrola {
-        fprintf(stderr,"Syntax error ---> MISSING LEFT BRACKET <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR,"Syntax error ---> MISSING LEFT BRACKET <---\n");
     }
     insideIf = true;
     res = statement_list(localTable); // Kontrola těla else
@@ -1023,22 +938,17 @@ int expression_check(htab_t *table){
     token_res = GetToken(&token);  
     // printf("Token type is %d\n", token.type); // DEBUG 
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(!((token.type == ID) || (token.type == KEYWORD))){
-        fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
-        return SYNTAX_ERR;
+        errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
     }
 
-   
     statement = htab_lookup_add(table, token.string);   // add  identifier to symtable
-
 
     token_res = GetToken(&token);
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type == ASSIG){
         // ZAVOLAT EXPRESSION PARSER
@@ -1059,25 +969,19 @@ int expression_check_inside(htab_t *table){
     int res = SUCCESS_ERR;
 
     token_res = GetToken(&token);  
-    // printf("Token type is %d\n", token.type); // DEBUG 
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     switch(token.type){
         case ID:
         case INT_T:
         case FLOAT_T:
         case STRING_T:
-            
             res = separators(table);
-            
             return res;
         default:
             return SYNTAX_ERR;
     }
-
-
     return res;
 }
 
@@ -1088,8 +992,7 @@ int statement_list_inside(htab_t *table){
     token_res = GetToken(&token);  
     // printf("Token type is %d\n", token.type); // DEBUG 
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
@@ -1101,9 +1004,7 @@ int statement_list_inside(htab_t *table){
         case DOLLAR:    // $ <ID> <SEPARATOR_PICK>  
             token_res = GetToken(&token);  
             if(!token_res){
-                fprintf(stderr,"Lexical error\n");
-                return LEX_ERR;
-            
+                errHandler(LEX_ERR,"Lexical error\n");
             }
             if(token.type != ID){
                 return SYNTAX_ERR;
@@ -1152,8 +1053,7 @@ int statement_list_inside(htab_t *table){
         case ID:    //$x = foo();   TODO FUNCTION NOT DEFINED
             token_res = GetToken(&token);  
             if(!token_res){
-                fprintf(stderr,"Lexical error\n");
-                return LEX_ERR;
+                errHandler(LEX_ERR,"Lexical error\n");
             }
             if(token.type == L_PAR){
                 res = builtinParams();
@@ -1161,34 +1061,25 @@ int statement_list_inside(htab_t *table){
                      
                     return SYNTAX_ERR;  // ADD SEMICOL TO LL ON ITS OWN!!!
                 }
-                
-                // semicol();
                 token_res = GetToken(&token);  
                 // printf("Token type is %d\n", token.type); // DEBUG 
                 if(!token_res){
-                    fprintf(stderr,"Lexical error\n");
-                    return LEX_ERR;
+                    errHandler(LEX_ERR,"Lexical error\n");
                 }
                 if(token.type != SEMICOL){
-                    fprintf(stderr, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
-                    return SYNTAX_ERR;
+                    errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
                 }
                 res = statement_list(table);
                 if(res != SUCCESS_ERR){
                     return res;
                 }
-                
                 return res;  
             }
             return SYNTAX_ERR;
-
         default:
-        
             return SYNTAX_ERR;
 
     }
-
-    
     return res;
 }
 
@@ -1197,8 +1088,7 @@ int separators(htab_t *table){
 
     token_res = GetToken(&token);
     if(!token_res){
-        fprintf(stderr,"Lexical error\n");
-        return LEX_ERR;
+        errHandler(LEX_ERR,"Lexical error\n");
     }
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
@@ -1252,15 +1142,11 @@ int separators(htab_t *table){
  * FREE ALL TOKENS AFTER THE COMPILATION IS DONE
  * SEMANTIC ACTIONS
  * DOPSAT EPSILON DO SEPARATORU V LL
- * INICIALIZACE HTAB
  * PRIDAVAT RETURN VYRAZY DO LISTU A POSILAT EXPR PARSERU
  * VOLÁNÍ FUNKCÍ V LL
- * SCANNER NEBERE \n VE STRINGU
- * dodělat "null" ve while apod.
- * BUILTIN PARAMS NOT GOING INTO EXPR PARSER
  * while(null) if(null) atd
- * while nerozpoznava symtable, tedy rika ze napr while($x < $y) jsou undefined vars, i když nejsou
  * what if $x = func() what type is $x? it is not t_str, t_int etc
+ * Posílat expr_parseru instruction list s hodnotou destination
  */
 
 
