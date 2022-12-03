@@ -21,7 +21,11 @@ typedef enum{
     DEFVAR_I,
     CALL_I,
     RETURN_I,
-    PUSHS_I,
+    PUSHS_INT_I,
+    PUSHS_FLOAT_I,
+    PUSHS_STRING_I,
+    PUSHS_ID_I,
+    PUSHS_NIL_I,
     POPS_I,
     CLEARS_I,
     ADDS_I,
@@ -130,7 +134,7 @@ void generateGetchar(char *dest, char *op1, char *op2);
 void generateSetchar(char *dest, char *op1, char *op2);
 
 /*Stack operations*/
-void generatePushs(char *symb, TYPES type);
+void generatePushs(char *symb, INSTRUCTIONS type);
 void generatePops(char *var);
 void generateClears();
 
