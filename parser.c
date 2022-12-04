@@ -35,7 +35,6 @@ stat_t *statement;
 
 
 //Internal variables
-int currentToken = 0;
 p_return currentReturnType;
 
 // Expressions
@@ -44,6 +43,7 @@ expression_T *expression, *allTokens;
 
 // Symtable
 htab_t *symtable, *funTable;
+htab_list *sym_list;
 
 // Instruction list for generation
 instructList_T *iList;
@@ -163,6 +163,29 @@ token_res = GetToken(&token);       // levá závorka
 
 /********************************PARSING SECTION********************************************************/
 
+void builtinInit(htab_t *funTable){
+    stat_t *newStat = (stat_t*)malloc(sizeof(newStat));
+    if(newStat == NULL){
+        exit(INTERNAL_ERR);
+    }
+    newStat = htab_lookup_add(funTable, "reads");
+    newStat->value = "Ss";  // S means it can return nil or string
+    newStat = htab_lookup_add(funTable, "readi");
+    newStat->value = "Ii";  // I means it can return nil or int
+    newStat = htab_lookup_add(funTable, "readf");
+    newStat->value = "Ff";  // F means it can return nil or float
+    newStat = htab_lookup_add(funTable, "write");   
+    newStat->value = "";    // 0 idea how to do infinite params
+    newStat = htab_lookup_add(funTable, "strlen");
+    newStat->value = "is";  //returns int, takes string
+    newStat = htab_lookup_add(funTable, "substring");
+    newStat->value = "Ssii";  //returns string or nil, takes string, int, int
+    newStat = htab_lookup_add(funTable, "ord");
+    newStat->value = "is";  //returns int, takes string
+    newStat = htab_lookup_add(funTable, "chr");
+    newStat->value = "si";
+}
+
 int parse(){
 
     int res = SUCCESS_ERR;
@@ -187,14 +210,16 @@ int parse(){
     if(funTable == NULL){
         return INTERNAL_ERR;
     }
-    htab_lookup_add(funTable, "reads");
-    htab_lookup_add(funTable, "readi");
-    htab_lookup_add(funTable, "readf");
-    htab_lookup_add(funTable, "write");
-    htab_lookup_add(funTable, "strlen");
-    htab_lookup_add(funTable, "substring");
-    htab_lookup_add(funTable, "ord");
-    htab_lookup_add(funTable, "chr");
+
+    sym_list  = (htab_list*)malloc(sizeof(*sym_list));
+    if(sym_list == NULL){
+        errHandler(INTERNAL_ERR,"Malloc failure\n");
+    }
+    initSymList(sym_list);
+    insertSymtable(funTable, sym_list);
+
+    builtinInit(funTable);
+    
     statement = (stat_t *)malloc(sizeof(*statement));
     if(statement == NULL){
         return INTERNAL_ERR;
@@ -202,7 +227,9 @@ int parse(){
 
     if(GetProlog()){    // modif was not here before
         res = prog();
-        generatorInit(iList);  
+        if(res == SUCCESS_ERR){
+            generatorInit(iList, sym_list);
+        }
         return res;
     }
     token_res = GetToken(&token);   
@@ -222,7 +249,7 @@ int parse(){
 }
 
 int prog(){
-    int res;
+    int res = SYNTAX_ERR;
     token_res = GetToken(&token);   
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -236,8 +263,9 @@ int prog(){
             return res; 
         default:
             errHandler(SYNTAX_ERR,"Syntax error ---> MISSING DECLARE <---\n");
-            return SYNTAX_ERR;
     }
+    errHandler(SYNTAX_ERR,"Syntax error\n");
+    return res;
 }
 
 
@@ -285,6 +313,7 @@ int statement_list(htab_t *localTable){
                     // }
                     
                 default:
+                    errHandler(SYNTAX_ERR,"Syntax error\n");
                     return SYNTAX_ERR;
             }
         case ID:
@@ -300,7 +329,7 @@ int statement_list(htab_t *localTable){
             if(token.type == L_PAR){
                 res = builtinParams();
                 if(res != SUCCESS_ERR){
-                    return SYNTAX_ERR;  // ADD SEMICOL TO LL ON ITS OWN!!!
+                    errHandler(SYNTAX_ERR,"Syntax error\n");// ADD SEMICOL TO LL ON ITS OWN!!!
                 }
                 
                 token_res = GetToken(&token);  
@@ -318,7 +347,8 @@ int statement_list(htab_t *localTable){
                 
                 return res;  
             }
-            return SYNTAX_ERR;
+            errHandler(SYNTAX_ERR, "Syntax error\n");
+            break;
         case INT_T: case FLOAT_T: case STRING_T:
             expr_tok = (token_t*) malloc(sizeof(*expr_tok));
             if(expr_tok == NULL){
@@ -470,7 +500,7 @@ int functionCheck(){
     if(localTable == NULL){
         return INTERNAL_ERR;
     }
-
+    insertSymtable(localTable, sym_list);
     token_res = GetToken(&token);   // function <ID>
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -483,10 +513,12 @@ int functionCheck(){
     if(statementFun != NULL){
         errHandler(SEM_FUNC_ERR,"SEMANTIC ERROR ---> Function redefinition <---\n");
     }
+
     statementFun = htab_lookup_add(funTable, token.string);   // add  func identifier to symtable
 
     statementFun->type = t_fun;
     statementFun->name = token.string;
+    // statementFun->value = ??
 
     stat_t *statement;
     statement = (stat_t*) malloc(sizeof(*statement));
@@ -534,12 +566,15 @@ int functionCheck(){
     switch(token.keyword){   // Co za keyword jsme dostali?
         case STRING: 
             currentReturnType = ret_string;
+            statementFun->value = "s";
             break;
         case INT: 
             currentReturnType = ret_int;
+            statementFun->value = "i";
             break;
         case FLOAT: 
             currentReturnType = ret_float;
+            statementFun->value = "f";
             break;
         case VOID:
             break;
@@ -950,7 +985,7 @@ int expression_check(htab_t *table){
     if(!((token.type == ID) || (token.type == KEYWORD))){
         errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
     }
-
+    
     statement = htab_lookup_add(table, token.string);   // add  identifier to symtable
 
     token_res = GetToken(&token);
@@ -1065,8 +1100,7 @@ int statement_list_inside(htab_t *table){
             if(token.type == L_PAR){
                 res = builtinParams();
                 if(res != SUCCESS_ERR){
-                     
-                    return SYNTAX_ERR;  // ADD SEMICOL TO LL ON ITS OWN!!!
+                    errHandler(SYNTAX_ERR, "Syntax error\n"); // ADD SEMICOL TO LL ON ITS OWN!!!
                 }
                 token_res = GetToken(&token);  
                 // printf("Token type is %d\n", token.type); // DEBUG 
@@ -1082,11 +1116,13 @@ int statement_list_inside(htab_t *table){
                 }
                 return res;  
             }
-            return SYNTAX_ERR;
+            errHandler(SYNTAX_ERR, "Syntax error\n");
+            break;
         default:
-            return SYNTAX_ERR;
+            errHandler(SYNTAX_ERR, "Syntax error\n");
 
     }
+    // How did you get there?
     return res;
 }
 
@@ -1099,7 +1135,7 @@ int separators(htab_t *table){
     }
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
     if(expr_tok == NULL){
-        return INTERNAL_ERR;
+        errHandler(INTERNAL_ERR,"Internal error\n");
     }
     switch(token.type){ // SEPARATORS
 
@@ -1114,7 +1150,7 @@ int separators(htab_t *table){
             // putchar('\n');
             
             expr_parse(table, expression, iList);
-        
+            
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
                      // expr_parse(expression_list, symtable);
             // EXPRESSION LIST DISPOSE
@@ -1136,7 +1172,7 @@ int separators(htab_t *table){
             res = statement_list_inside(table);
             return res;
         default:
-            return SYNTAX_ERR;
+            errHandler(SYNTAX_ERR, "Syntax Error\n");
         
     }
 
@@ -1149,11 +1185,14 @@ int separators(htab_t *table){
  * FREE ALL TOKENS AFTER THE COMPILATION IS DONE
  * SEMANTIC ACTIONS
  * DOPSAT EPSILON DO SEPARATORU V LL
- * PRIDAVAT RETURN VYRAZY DO LISTU A POSILAT EXPR PARSERU
  * VOLÁNÍ FUNKCÍ V LL
  * while(null) if(null) atd
  * what if $x = func() what type is $x? it is not t_str, t_int etc
- * Posílat expr_parseru instruction list s hodnotou destination
+ * errHandler for returns
+ * struct na ukládání symtables, kde bude název fce, ke které patří
+ * pops instruction after expr_parse
+ * How to generate inside of function before main??
+ * 
  */
 
 

@@ -47,7 +47,17 @@ typedef struct htab {
     int size;
     int arr_size;
     htab_item_t **arr_ptr;
+    struct htab *next;
 } htab_t;
+
+typedef struct htab_l{
+    htab_t *activeElement;
+    htab_t *lastElement;
+}htab_list;
+
+
+int insertSymtable(htab_t *symtable, htab_list *list);
+void initSymList(htab_list *list);
 
 /**
  * @brief Hash function

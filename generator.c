@@ -14,6 +14,7 @@
 #include "generator.h"
 #include "error.h"
 
+
 instructList_T *instrList;
 
 /*List functions*/
@@ -108,7 +109,34 @@ void generateIDivs()
 // FRAME TODO
 
 // DATAFLOW TODO
+void generateLabel(char *label){
+    printf("LABEL ?%s\n",label);
+}
+void generateFunctions(stat_t *data){
+    generateLabel(data->name);
+    if(data->value[0] != 'v'){
+        generateCreateFrame();
+    }
+    switch(data->value[0]){
+        case 'S':   // String or null
+            
+            break;
+        case 'I':   // Int or null
+            // printf("\tINT/NULL\n");
+            break;
+        case 'F':   // Float or null
+            // printf("\tFLOAT/NULL\n");
+            break;
+        default:
+            // HOW DID U GET THERE??
+            break;
+    }
 
+}
+
+void generateMain(){
+    printf("LABEL ?main\n");
+}
 // MISC TODO
 
 /*Program head*/
@@ -209,8 +237,13 @@ char* stringConvertor(char* stringBefore){
     return retstring;
 }
 /*****************************Traverse through list of instructions*****************************/
-void generatorInit(instructList_T *instrList){
+void generatorInit(instructList_T *instrList, htab_list *sym_list){
     generateProgramHead();
+    if(sym_list->lastElement != NULL){
+        printf("JUMP ?main\n");   // Temporary, can be fixed by implementing JUMP INSTR
+        htab_for_each(sym_list->activeElement, generateFunctions); // GENERATE LABELS ETC FOR FUNCTIONS
+        generateMain();
+    }
     First(instrList);
 
     while(instrList->activeElement != NULL){
@@ -335,6 +368,7 @@ void generatorInit(instructList_T *instrList){
                 break;
 
             case LABEL_I:
+                generateLabel(instrList->activeElement->dest);
                 break;
 
             case JUMP_I:

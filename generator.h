@@ -9,6 +9,7 @@
  */
 
 #include "scanner.h"    // TYPES
+#include "symtable.h"
 
 #ifndef __GENERATOR_H__
 #define __GENERATOR_H__
@@ -81,7 +82,7 @@ int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* o
 
 // ============= GENERATION ==================
 
-void generatorInit(instructList_T *instrList);          //???????????????????
+void generatorInit(instructList_T *instrList, htab_list *sym_list);          //???????????????????
 void generateProgramHead();
 
 /*Main function*/
