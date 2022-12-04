@@ -14,6 +14,7 @@
 #include "generator.h"
 #include "error.h"
 
+
 instructList_T *instrList;
 // ============ INSTRUCTION LIST ============
 void initInstList(instructList_T *instrList){
@@ -22,6 +23,7 @@ void initInstList(instructList_T *instrList){
     instrList->lastElement = NULL;
 
 }
+
 
 void First(instructList_T *instrList ) {
 	instrList->activeElement = instrList->firstElement;
@@ -43,7 +45,6 @@ int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* o
     newElement->op2 = op2;
     newElement->dest = dest;
     newElement-> operation = operation;
-
 
 	newElement->previous = instrList->lastElement;	// Nastavení dat nového prvku seznamu
 	newElement->next = NULL;
@@ -520,6 +521,7 @@ void generatorInit(instructList_T *instrList){
                 break;
 
             case LABEL_I:
+                generateLabel(instrList->activeElement->dest);
                 break;
 
             case JUMP_I:

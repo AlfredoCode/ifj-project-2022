@@ -9,6 +9,7 @@
  */
 
 #include "scanner.h"    // TYPES
+#include "symtable.h"
 
 #ifndef __GENERATOR_H__
 #define __GENERATOR_H__
@@ -86,6 +87,7 @@ typedef struct instructionList{
 }instructList_T;
 
 void initInstList(instructList_T *instrList);
+
 //Can possibly be type of instructList_T so we can modify the value in parser and in expr_parser
 int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* op1, char* op2, char* dest); 
 
