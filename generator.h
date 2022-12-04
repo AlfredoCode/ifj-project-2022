@@ -96,7 +96,7 @@ void generateFunctionEnd();
 void generateRead(char *var, char *type);
 void generateWrite(char *symb);
 void generateStrlen(char *var, char *symb);
-void generateSubstring();
+void generateSubstring(); // TODO and next ones
 void generateOrd();
 void generateChr();
 
@@ -158,6 +158,12 @@ void generateMove(char *var, char *symb);
 void generateDefvar(char *var);
 
 /*String convertor*/
+
+/*
+ * @brief   converts c str to ifjcode22 str
+ * @param   string to convert
+ * @return  converted string   
+ */
 char* stringConvertor(char* stringBefore);
 
 // Functions

@@ -174,38 +174,38 @@ void generatePushs(char *symb, INSTRUCTIONS type){
 
 /*String convertor*/
 char* stringConvertor(char* stringBefore){
-    int stringSizeB = strlen(stringBefore);
-    int stringSizeA = stringSizeB;
-    char *stringAfter = (char *) malloc(stringSizeB * sizeof(char));
-    char *add = (char *) malloc(sizeof(char) * 5);
-    int i = 0;
-    int k = 0;
-    while(stringBefore[i] != '\0'){
-        if(!isdigit(stringBefore[i])){
-           stringSizeA += 5;
-            stringAfter = (char *)realloc(stringAfter, stringSizeA * sizeof(char *));
-            if((stringBefore[i] >= 0 && stringBefore[i] <= 32) || 
-                    (stringBefore[i] == 35) || (stringBefore[i] == 92)){
-                if(stringBefore[i] >= 0 && stringBefore[i] <= 9){
-                    sprintf(add, "/00%d", stringBefore[i]);
-                    strcat(stringAfter, add);
-                    k += 4;
-                }else{
-                    sprintf(add, "/0%d", stringBefore[i]);
-                    strcat(stringAfter, add);
-                    k += 4;
-                } 
-            }else{
-                stringAfter[k] = stringBefore[i];
-                k++;
+    size_t size = 16;
+    char* retstring = malloc(size);
+    strcpy(retstring, "");
+    char* helpString = malloc(5);
+
+    for (size_t i = 0; i < strlen(stringBefore); i++){
+        if (
+                stringBefore[i] <= 32 ||
+                stringBefore[i] == 35
+           ) {
+            snprintf(helpString, 5, "\\0%d", stringBefore[i]);
+        } else if (stringBefore[i] == 92) { 
+            if (stringBefore[i + 1] == 110) {
+                // newline
+                snprintf(helpString, 5, "\\010");
+            } else if (stringBefore[i + 1] == 116) {
+                // tab
+                snprintf(helpString, 5, "\\009");
+            } else {
+                snprintf(helpString, 5, "\\0%d", stringBefore[i]);
             }
-        }else{
-            stringAfter[k] = stringBefore[i];
-            k++;
+        } else {
+            snprintf(helpString, 5, "%c", stringBefore[i]);
         }
-        i++;
+
+        if (strlen(helpString) + strlen(retstring) + 1 > size) {
+            size = size * 2;
+            retstring = realloc(retstring, size);
+        }
+        strcat(retstring, helpString);
     }
-    return stringAfter;
+    return retstring;
 }
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList){
