@@ -47,7 +47,7 @@ stack_token_t *nextNonTerm(stack_t *stack);
  * @param   stack to check on
  * @return  0 if correct, 1 otherwise
  */
-int arithmetic_check(stack_t *stack, instructList_T *ilist);
+int arithmetic_check(stack_t *stack);
 
 /**
  * @brief   evaluates bool expression
@@ -57,7 +57,7 @@ int arithmetic_check(stack_t *stack, instructList_T *ilist);
  * Evaluates if bool expression is correct.
  * Reduces stack.
  */
-int evaluate_bool(stack_t *stack, instructList_T *ilist);
+int evaluate_bool(stack_t *stack);
 
 /**
  * @brief   evaluates brackets

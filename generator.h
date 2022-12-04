@@ -57,6 +57,7 @@ typedef enum{
     EXIT_I,
 }INSTRUCTIONS;
 
+// ============ INSTRUCTION LIST ============
 
 typedef struct instructionElement{
     char *op1;
@@ -74,7 +75,10 @@ typedef struct instructionList{
 }instructList_T;
 
 void initInstList(instructList_T *instrList);
-int insertInstruction(instructList_T *instrList, TYPES operation, char* op1, char* op2, char* dest); //Can possibly be type of instructList_T so we can modify the value in parser and in expr_parser
+//Can possibly be type of instructList_T so we can modify the value in parser and in expr_parser
+int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* op1, char* op2, char* dest); 
+
+// ============= GENERATION ==================
 
 void generatorInit(instructList_T *instrList);          //???????????????????
 void generateProgramHead();
@@ -88,18 +92,13 @@ void generateFuncStart(char *funcname);
 void generateFunctionEnd();
 
 /*Built-ins*/
+// Read[s|i|f], Write, Strlen, Substring, Ord, Chr
 void generateRead(char *var, char *type);
 void generateWrite(char *symb);
 void generateStrlen(char *var, char *symb);
-// Generate built-ins
-// Reads
-// Readi
-// Readf
-// Write
-// Strlen
-// Substring
-// Ord
-// Chr
+void generateSubstring();
+void generateOrd();
+void generateChr();
 
 /*Aritmetic operations on stack*/
 void generateAdds();

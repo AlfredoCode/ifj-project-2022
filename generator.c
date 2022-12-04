@@ -34,7 +34,8 @@ void Next(instructList_T *instrList){
     }
 }
 
-int insertInstruction(instructList_T *instrList, TYPES operation, char* op1, char* op2, char* dest){ //Can possibly be type of instructList_T so we can modify the value in parser and in expr_parser
+//Can possibly be type of instructList_T so we can modify the value in parser and in expr_parser
+int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* op1, char* op2, char* dest){
     instructElem newElement = (instructElem) malloc(sizeof(*newElement));
 	if(newElement == NULL){
 		return INTERNAL_ERR; // return 99
@@ -57,59 +58,116 @@ int insertInstruction(instructList_T *instrList, TYPES operation, char* op1, cha
     return SUCCESS_ERR;
 
 }
+// ======================== GENERATION ==========================
 /*Generating*/
+
+// BUILT-INS TODO
+void generateRead(char *var, char *type);
+void generateWrite(char *symb);
+void generateStrlen(char *var, char *symb);
+void generateSubstring();
+void generateOrd();
+void generateChr();
+
+// ARITHMETIC STACK
+void generateAdds()
+{
+    printf("ADDS\n");
+}
+
+void generateSubs()
+{
+    printf("SUBS\n");
+}
+
+void generateMuls()
+{
+    printf("MULS\n");
+}
+
+void generateDivs()
+{
+    printf("DIVS\n");
+}
+
+void generateIDivs()
+{
+    printf("IDIVS\n");
+}
+
+// RELATION STACK TODO
+
+// BOOL STACK TODO
+
+// CONVERSION TODO 
+
+// STRING TODO
+
+// STACK TODO
+
+// FRAME TODO
+
+// DATAFLOW TODO
+
+// MISC TODO
+
 /*Program head*/
 void generateProgramHead(){
     printf(".IFJcode22\n");
 }
 
-/*void generateMove(char *var, char *symb){
-    printf("MOVE LF@%s ????", var);
-}*/
+void generateMove(char *var, char *symb){
+    printf("MOVE LF@%s\n", var);
+}
 
 /*Frames and function calls*/
 void generateCreateFrame(){
-    printf("CREATEFRAME");
+    printf("CREATEFRAME\n");
 }
 
 void generatePushFrame(){
-    printf("PUSHFRAME");
+    printf("PUSHFRAME\n");
 }
 
 void generatePopFrame(){
-    printf("POPFRAME");
+    printf("POPFRAME\n");
 }
 
 void generateDefvar(char *var){        //jak zjistim jestli ma byt lf, gf, nevbo tf
-    printf("DEFVAR LF@%s", var);
+    printf("DEFVAR LF@%s\n", var);
 }
 
 void generateCall(char *label){
     //fce pro vytvoreni unikatniho lablu
-    printf("CALL %s", label);
+    printf("CALL %s\n", label);
 }
 
 /*Stack functions*/
 void generatePushs(char *symb, INSTRUCTIONS type){
     switch(type){
         case PUSHS_INT_I:
-            printf("PUSHS int@%a\n", atof(symb));
+            printf("PUSHS int@%d\n", atoi(symb));
             break;
+
         case PUSHS_FLOAT_I:
             printf("PUSHS float@%a\n", atof(symb));
             break;
+
         case PUSHS_STRING_I:
             printf("PUSHS string@%s\n", stringConvertor(symb));
             break;
+
         case PUSHS_ID_I:
             printf("PUSHS LF@%s\n", symb);
             break;
-        case PUSHS_NIL_I:
-            printf("PUSHS nil@nil\n");         //?????????????
-            break;
-        default: break;
-    }
 
+        case PUSHS_NIL_I:
+            printf("PUSHS nil@nil\n");
+            break;
+
+        default: 
+            break;
+    }
 }
 //void generatePops(char *var);
 //void generateClears();
@@ -126,7 +184,8 @@ char* stringConvertor(char* stringBefore){
         if(!isdigit(stringBefore[i])){
            stringSizeA += 5;
             stringAfter = (char *)realloc(stringAfter, stringSizeA * sizeof(char *));
-            if((stringBefore[i] >= 0 && stringBefore[i] <= 32) || (stringBefore[i] == 35) || (stringBefore[i] == 92)){
+            if((stringBefore[i] >= 0 && stringBefore[i] <= 32) || 
+                    (stringBefore[i] == 35) || (stringBefore[i] == 92)){
                 if(stringBefore[i] >= 0 && stringBefore[i] <= 9){
                     sprintf(add, "/00%d", stringBefore[i]);
                     strcat(stringAfter, add);
@@ -152,103 +211,151 @@ char* stringConvertor(char* stringBefore){
 void generatorInit(instructList_T *instrList){
     generateProgramHead();
     First(instrList);
+
     while(instrList->activeElement != NULL){
         switch(instrList->activeElement->operation){
             case MOVE_I:
                 break;
+
             case CREATEFRAME_I:
                 generateCreateFrame();
                 break;
+
             case PUSHFRAME_I:
                 break;
+
             case POPFRAME_I:
                 break;
+
             case DEFVAR_I:
                 break;
+
             case CALL_I:
                 break;
+
             case RETURN_I:
                 break;
+
             case PUSHS_INT_I:
                 generatePushs(instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
+
             case PUSHS_FLOAT_I:
                 generatePushs(instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
+
             case PUSHS_STRING_I:
                 generatePushs(instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
+
             case PUSHS_ID_I:
                 generatePushs(instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
+
             case PUSHS_NIL_I:
                 generatePushs(instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
+
             case POPS_I:
                 break;
+
             case CLEARS_I:
                 break;
+
             case ADDS_I:
+                generateAdds();
                 break;
+
             case SUBS_I:
+                generateSubs();
                 break;
+
             case MULS_I:
+                generateMuls();
                 break;
+
             case DIVS_I:
+                generateDivs();
                 break;
+
             case IDIVS_I:
+                generateIDivs();
                 break;
+
             case LTS_I:
                 break;
+
             case GTS_I:
                 break;
+
             case EQS_I:
                 break;
+
             case ANDS_I:
                 break;
+
             case ORS_I:
                 break;
+
             case NOTS_I:
                 break;
+
             case INT2FLOATS_I:
                 break;
+
             case FLOAT2INTS_I:
                 break;
+
             case INT2CHARS_I:
                 break;
+
             case STRI2INTS_I:
                 break;
+
             case READ_I:
                 break;
+
             case WRITE_I:
                 break;
+
             case CONCAT_I:
                 break;
+
             case STRLEN_I:
                 break;
+
             case GETCHAR_I:
                 break;
+
             case SETCHAR_I:
                 break;
+
             case TYPE_I:
                 break;
+
             case LABEL_I:
                 break;
+
             case JUMP_I:
                 break;
+
             case JUMPIFEQS_I:
                 break;
+
             case JUMPIFNEQS_I:
                 break;
+
             case EXIT_I:
                 break;
-            default: break;
+
+            default: 
+                break;
         }
         Next(instrList);
     }
 }
 
-
+/*
 int main(){
     instrList  = (instructList_T*)malloc(sizeof(*instrList));
     if(instrList == NULL){
@@ -260,8 +367,6 @@ int main(){
     insertInstruction(instrList, PUSHS_FLOAT_I, "1.5",NULL,NULL);
     insertInstruction(instrList, PUSHS_ID_I, "x",NULL,NULL);
     generatorInit(instrList);
-    
-    
-
     return 0;
 }
+*/

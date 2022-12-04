@@ -33,7 +33,7 @@ const char prec_table [19][19] = {
 /* !== */{ '<', '<', '<', '<', '<', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
 /*  (  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', '<', '<', '<', '<', 'X'},
 /*  )  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
-/*  ID */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/*  ID */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
 /* INT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
 /* FLT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
 /* STR */{ 'X', 'X', 'X', 'X', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
@@ -111,7 +111,7 @@ stack_token_t *nextNonTerm(stack_t *stack)
     }
 }
 
-int arithmetic_check(stack_t *stack, instructList_T *iList)
+int arithmetic_check(stack_t *stack)
 {
     stack_token_t *tok1 = stackPeek(stack, 0);
     stack_token_t *tok2 = stackPeek(stack, 2);
@@ -175,7 +175,7 @@ int arithmetic_check(stack_t *stack, instructList_T *iList)
     return 1;
 }
 
-int evaluate_bool(stack_t *stack, instructList_T *iList)
+int evaluate_bool(stack_t *stack)
 {
     stack_token_t *tok1 = stackPeek(stack, 0);
     stack_token_t *tok2 = stackPeek(stack, 2);
@@ -268,8 +268,6 @@ int evaluate_concatenation(stack_t *stack, instructList_T *iList)
 int evaluate(stack_t *stack, htab_t *symtable, instructList_T *iList)
 {   
     stack_token_t *top = nextNonTerm(stack);
-    // for use in div check
-    stack_token_t *tok; 
     stat_t *id;
 
     switch (top->symbol){
@@ -334,23 +332,23 @@ int evaluate(stack_t *stack, htab_t *symtable, instructList_T *iList)
         // sym_[add|sub|mul|div]
         case sym_add:
             insertInstruction(iList, ADDS_I, NULL, NULL, NULL);
-            arithmetic_check(stack, iList);
+            arithmetic_check(stack);
             break;
 
         case sym_sub:
             insertInstruction(iList, SUBS_I, NULL, NULL, NULL);
-            arithmetic_check(stack, iList);
+            arithmetic_check(stack);
             break;
 
         case sym_mul:
             insertInstruction(iList, MULS_I, NULL, NULL, NULL);
-            arithmetic_check(stack, iList);
+            arithmetic_check(stack);
             break;
 
         case sym_div:
-            //TODO IDIVS
-            insertInstruction(iList, DIVS_I, NULL, NULL, NULL);
-            arithmetic_check(stack, iList);
+            //TODO DIVS
+            insertInstruction(iList, IDIVS_I, NULL, NULL, NULL);
+            arithmetic_check(stack);
             break;
 
         // sym_con
@@ -367,37 +365,37 @@ int evaluate(stack_t *stack, htab_t *symtable, instructList_T *iList)
         // sym_[lt|gt|lte|gte|eq|neq]
         case sym_lt:
             insertInstruction(iList, LTS_I, NULL, NULL, NULL);
-            evaluate_bool(stack, iList);
+            evaluate_bool(stack);
             break;
 
         case sym_gt:
             insertInstruction(iList, GTS_I, NULL, NULL, NULL);
-            evaluate_bool(stack, iList);
+            evaluate_bool(stack);
             break;
             
         case sym_lte:
             insertInstruction(iList, LTS_I, NULL, NULL, NULL);
             insertInstruction(iList, EQS_I, NULL, NULL, NULL);
             insertInstruction(iList, ORS_I, NULL, NULL, NULL);
-            evaluate_bool(stack, iList);
+            evaluate_bool(stack);
             break;
 
         case sym_gte:
             insertInstruction(iList, GTS_I, NULL, NULL, NULL);
             insertInstruction(iList, EQS_I, NULL, NULL, NULL);
             insertInstruction(iList, ORS_I, NULL, NULL, NULL);
-            evaluate_bool(stack, iList);
+            evaluate_bool(stack);
             break;
 
         case sym_eq:
             insertInstruction(iList, EQS_I, NULL, NULL, NULL);
-            evaluate_bool(stack, iList);
+            evaluate_bool(stack);
             break;
 
         case sym_neq:
             insertInstruction(iList, LTS_I, NULL, NULL, NULL);
             insertInstruction(iList, NOTS_I, NULL, NULL, NULL);
-            evaluate_bool(stack, iList);
+            evaluate_bool(stack);
             break;
 
         default:
