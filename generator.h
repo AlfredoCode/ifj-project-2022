@@ -14,7 +14,18 @@
 #define __GENERATOR_H__
 
 typedef enum{
-    MOVE_I,
+    MOVEI2TF_I,
+    MOVEF2TF_I,
+    MOVES2TF_I,
+    MOVENIL2TF_I,
+    MOVELF2TF_I,
+    MOVETF2TF_I,
+    MOVEI2LF_I,
+    MOVEF2LF_I,
+    MOVES2LF_I,
+    MOVENIL2LF_I,
+    MOVETF2LF_I,
+    MOVELF2LF_I,
     CREATEFRAME_I,
     PUSHFRAME_I,
     POPFRAME_I,
@@ -156,7 +167,7 @@ void generateExit(char *number);        // 0 <= number <= 49
 void UniqueLabel(int labelnmbr,char *idk); //co s tim
 
 
-void generateMove(char *var, char *symb);
+void generateMove(char *var, char *symb, INSTRUCTIONS type);
 void generateDefvar(char *var);
 
 /*String convertor*/
