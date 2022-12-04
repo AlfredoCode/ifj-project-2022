@@ -41,8 +41,6 @@ typedef enum{
     NOTS_I,
     INT2FLOATS_I,
     FLOAT2INTS_I,
-    INT2CHARS_I,
-    STRI2INTS_I,
     READI_I,
     READS_I,
     READF_I,
@@ -81,19 +79,7 @@ void initInstList(instructList_T *instrList);
 int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* op1, char* op2, char* dest); 
 
 // ============= GENERATION ==================
-
-void generatorInit(instructList_T *instrList);
-void generateProgramHead();
-
-/*Main function*/
-void generateMainStart();
-void generateMainEnd();
-
-/*Other functions*/
-void generateFuncStart(char *funcname);
-void generateFunctionEnd();
-
-/*Built-ins*/
+// BUILT-INS
 // Read[s|i|f], Write, Strlen, Substring, Ord, Chr
 void generateRead(char *var, INSTRUCTIONS type);
 void generateWrite(char *symb);
@@ -102,64 +88,75 @@ void generateSubstring(); // TODO and next ones
 void generateOrd();
 void generateChr();
 
-/*Aritmetic operations on stack*/
+// ARITHMETIC ON STACK
+// Non-stack are not used
+// + - * /
 void generateAdds();
 void generateSubs();
 void generateMuls();
 void generateDivs();
-void generateIDivs();
+void generateIDivs(); // Kinda obsolete?
 
-/*Relation operations*/
+// RELATION
+// < > ===
+// <= >= !== need to be generated using these and bool
 void generateLts();
 void generateGts();
 void generateEqs();
 
-/*Bool operations*/
+// BOOL
+// && || ! 
 void generateAnds();
 void generateOrs();
 void generateNots();
 
-/*Conversion*/
+// CONVERSIONS
+// Only between int and float
+// Rests are strval which is not supported
 void generateInt2Floats();
 void generateFloat2Ints();
-void generateInt2Chars();
-void generateStri2Ints();
 
-/*Type of symb stores to var*/
-void generateType(char *var, char *symb);
-
-/*String operations*/
-void generateConcat(char *dest, char *op1, char *op2);
+// STRING
+void generateConcat(); // Made to work like *S functions
 void generateStrlen(char *dest, char *op);
 void generateGetchar(char *dest, char *op1, char *op2);
 void generateSetchar(char *dest, char *op1, char *op2);
 
-/*Stack operations*/
+// STACK
 void generatePushs(char *symb, INSTRUCTIONS type);
 void generatePops(char *var);
 void generateClears();
 
-/*Frames and function calls*/
+// FRAME
 void generateCreateFrame();
 void generatePushFrame();
 void generatePopFrame();
 void generateCall(char *label);
 void generateReturn();
 
-/*Dataflow*/
+// DATAFLOW
 void generateLabel(char *label);
 void generateJump(char *label);
 void generateJumpIfEqs(char *label);
 void generateJumpIfNEqs(char *label);
 void generateExit(char *number);        // 0 <= number <= 49
 
-void UniqueLabel(int labelnmbr,char *idk); //co s tim
-
-
+// MISC
+void generateProgramHead();
 void generateMove(char *var, char *symb);
 void generateDefvar(char *var);
+void generateType(char *var, char *symb);
+void generateMainStart();
+void generateMainEnd();
+void generateFuncStart(char *funcname);
+void generateFunctionEnd();
 
-/*String convertor*/
+// MAIN GENERATE FUNCTION
+void generatorInit(instructList_T *instrList);
+
+
+// HELPER FUNCTIONS
+void UniqueLabel(int labelnmbr,char *idk);
 
 /*
  * @brief   converts c str to ifjcode22 str
@@ -167,11 +164,5 @@ void generateDefvar(char *var);
  * @return  converted string   
  */
 char* stringConvertor(char* stringBefore);
-
-// Functions
-
-// Gen init
-
-// ...
-
 #endif // __GENERATOR_H__
+
