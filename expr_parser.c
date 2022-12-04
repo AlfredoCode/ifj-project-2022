@@ -307,7 +307,10 @@ int evaluate(stack_t *stack, htab_t *symtable, instructList_T *iList)
         
         // sym_int
         case sym_int:
-            insertInstruction(iList, PUSHS_INT_I, top->token->string, NULL, NULL);
+            // Treating int as floats for easier logic.
+            // If the value ends up being int float2int will be added to the 
+            // instruction list.
+            insertInstruction(iList, PUSHS_FLOAT_I, top->token->string, NULL, NULL);
             top->symbol = term_int;
             break;
          
@@ -346,9 +349,10 @@ int evaluate(stack_t *stack, htab_t *symtable, instructList_T *iList)
             break;
 
         case sym_div:
-            //TODO DIVS
-            insertInstruction(iList, IDIVS_I, NULL, NULL, NULL);
+            insertInstruction(iList, DIVS_I, NULL, NULL, NULL);
             arithmetic_check(stack);
+            // div always gets me float
+            stack->arr->symbol = term_float;
             break;
 
         // sym_con
@@ -499,6 +503,8 @@ p_return expr_parse(htab_t *symtable, expression_T *list, instructList_T *iList)
     } 
     
     p_return ret = get_last(stack);
+    // Since I am doing everything on floats, if I should end up with int I need to end up with int
+    if (ret == ret_int) insertInstruction(iList, FLOAT2INTS_I, NULL, NULL, NULL);
     stackClear(stack);
     return ret;
 }
