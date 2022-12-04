@@ -166,7 +166,7 @@ void generateFuncStart(char *funcname);
 void generateFunctionEnd();
 
 // MAIN GENERATE FUNCTION
-void generatorInit(instructList_T *instrList);
+void generatorInit(instructList_T *instrList, htab_list *symList);
 
 
 // HELPER FUNCTIONS

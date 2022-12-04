@@ -217,7 +217,10 @@ void generateCall(char *label){
 void generateReturn(); // TODO
 
 // DATAFLOW TODO
-void generateLabel(char *label);
+void generateLabel(char *label)
+{
+    printf("LABEL %s\n", label);
+}
 void generateJump(char *label);
 void generateJumpIfEqs(char *label);
 void generateJumpIfNEqs(char *label);
@@ -333,7 +336,7 @@ char* stringConvertor(char* stringBefore){
     return retstring;
 }
 /*****************************Traverse through list of instructions*****************************/
-void generatorInit(instructList_T *instrList){
+void generatorInit(instructList_T *instrList, htab_list *symList){
     generateProgramHead();
     generateMainStart();
     First(instrList);
