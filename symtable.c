@@ -10,11 +10,33 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include "error.h"
 
 #include "symtable.h"
 
 #define AVG_MIN 3
 #define AVG_MAX 5
+
+
+int insertSymtable(htab_t *symtable, htab_list *list){
+    
+    if(list->lastElement != NULL){
+        list->lastElement->next = symtable;
+        list->lastElement = symtable;
+    }
+    else{
+        list->lastElement = symtable;  
+        list->activeElement = symtable;
+    }
+    symtable->next = NULL;
+    return SUCCESS_ERR;
+}
+
+void initSymList(htab_list *list){
+    list->lastElement = NULL;
+    list->activeElement = NULL;
+    
+}
 
 size_t htab_hash_function(const char *str)
 {

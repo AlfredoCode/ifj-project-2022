@@ -33,7 +33,7 @@ const char prec_table [19][19] = {
 /* !== */{ '<', '<', '<', '<', '<', 'X', 'X', 'X', 'X', 'X', 'X', '<', '>', '<', '<', '<', '<', '<', '>'},
 /*  (  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', '<', '<', '<', '<', 'X'},
 /*  )  */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
-/*  ID */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
+/*  ID */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
 /* INT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
 /* FLT */{ '>', '>', '>', '>', 'X', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
 /* STR */{ 'X', 'X', 'X', 'X', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
@@ -89,7 +89,6 @@ p_symbol tokenToTerminal(token_t *token)
                 return sym_null;
                 break;
             }
-        // if not null
         // fallthru 
 
         default:
@@ -238,7 +237,7 @@ int evaluate_brackets(stack_t *stack)
     return 0;
 }
 
-int evaluate_concatenation(stack_t *stack)
+int evaluate_concatenation(stack_t *stack, instructList_T *iList)
 {
     stack_token_t *tok1 = stackPeek(stack, 0);
     stack_token_t *tok2 = stackPeek(stack, 2);
@@ -266,11 +265,9 @@ int evaluate_concatenation(stack_t *stack)
     return 0;
 }
 
-int evaluate(stack_t *stack, htab_t *symtable)
+int evaluate(stack_t *stack, htab_t *symtable, instructList_T *iList)
 {   
     stack_token_t *top = nextNonTerm(stack);
-    // for use in div check
-    stack_token_t *tok; 
     stat_t *id;
 
     switch (top->symbol){
@@ -284,7 +281,9 @@ int evaluate(stack_t *stack, htab_t *symtable)
                errHandler(SEM_UNDEF_VAR_ERR, "Undefined variable in expression!");
                return 1;
             }
-            
+
+            insertInstruction(iList, PUSHS_ID_I, top->token->string, NULL, NULL);
+             
             switch (id->type){
                 case t_int:
                     top->symbol = term_int;
@@ -308,54 +307,54 @@ int evaluate(stack_t *stack, htab_t *symtable)
         
         // sym_int
         case sym_int:
+            insertInstruction(iList, PUSHS_INT_I, top->token->string, NULL, NULL);
             top->symbol = term_int;
             break;
          
         // sym_float
         case sym_float:
+            insertInstruction(iList, PUSHS_FLOAT_I, top->token->string, NULL, NULL);
             top->symbol = term_float;
             break;
         
         // sym_str
         case sym_str:
+            insertInstruction(iList, PUSHS_STRING_I, top->token->string, NULL, NULL);
             top->symbol = term_str;
             break;
         
         // My old friend NULL
         case sym_null:
+            insertInstruction(iList, PUSHS_NIL_I, NULL, NULL, NULL);
             top->symbol = term_null;
             break;
 
-        // sym_[add|sub|mul]
+        // sym_[add|sub|mul|div]
         case sym_add:
-        case sym_sub:
-        case sym_mul:
+            insertInstruction(iList, ADDS_I, NULL, NULL, NULL);
             arithmetic_check(stack);
             break;
-        
-        // sym_div
-        case sym_div:
-            // Need to check div by zero
-            // Since we dont store int and float vals in the same place
-            tok = stackPeek(stack, 0);
-            if (tok->symbol == term_int) {
-                if (!tok->token->integer){
-                    errHandler(SEM_OTHERS_ERR, "Attempted div by 0.");
-                    break;
-                }
-            } else if (tok->symbol == term_float) {
-                if (!tok->token->decimal){
-                    errHandler(SEM_OTHERS_ERR, "Attempted div by 0.");
-                    break;
-                }
-            }
 
+        case sym_sub:
+            insertInstruction(iList, SUBS_I, NULL, NULL, NULL);
+            arithmetic_check(stack);
+            break;
+
+        case sym_mul:
+            insertInstruction(iList, MULS_I, NULL, NULL, NULL);
+            arithmetic_check(stack);
+            break;
+
+        case sym_div:
+            //TODO DIVS
+            insertInstruction(iList, IDIVS_I, NULL, NULL, NULL);
             arithmetic_check(stack);
             break;
 
         // sym_con
         case sym_con:
-            evaluate_concatenation(stack);
+            insertInstruction(iList, CONCAT_I, NULL, NULL, NULL);
+            evaluate_concatenation(stack, iList);
             break;
         
         // sym_rbr
@@ -365,11 +364,37 @@ int evaluate(stack_t *stack, htab_t *symtable)
         
         // sym_[lt|gt|lte|gte|eq|neq]
         case sym_lt:
+            insertInstruction(iList, LTS_I, NULL, NULL, NULL);
+            evaluate_bool(stack);
+            break;
+
         case sym_gt:
+            insertInstruction(iList, GTS_I, NULL, NULL, NULL);
+            evaluate_bool(stack);
+            break;
+            
         case sym_lte:
+            insertInstruction(iList, LTS_I, NULL, NULL, NULL);
+            insertInstruction(iList, EQS_I, NULL, NULL, NULL);
+            insertInstruction(iList, ORS_I, NULL, NULL, NULL);
+            evaluate_bool(stack);
+            break;
+
         case sym_gte:
+            insertInstruction(iList, GTS_I, NULL, NULL, NULL);
+            insertInstruction(iList, EQS_I, NULL, NULL, NULL);
+            insertInstruction(iList, ORS_I, NULL, NULL, NULL);
+            evaluate_bool(stack);
+            break;
+
         case sym_eq:
+            insertInstruction(iList, EQS_I, NULL, NULL, NULL);
+            evaluate_bool(stack);
+            break;
+
         case sym_neq:
+            insertInstruction(iList, LTS_I, NULL, NULL, NULL);
+            insertInstruction(iList, NOTS_I, NULL, NULL, NULL);
             evaluate_bool(stack);
             break;
 
@@ -409,7 +434,7 @@ p_return get_last(stack_t *stack)
     return ret_uhoh;
 }
 
-p_return expr_parse(htab_t *symtable, expression_T *list)
+p_return expr_parse(htab_t *symtable, expression_T *list, instructList_T *iList)
 {
     // Stack init
     stack_t *stack = stackInit();
@@ -458,7 +483,7 @@ p_return expr_parse(htab_t *symtable, expression_T *list)
 
             // Reduce expression
             case '>':
-                evaluate(stack, symtable);
+                evaluate(stack, symtable, iList);
                 break;
 
             // Non-rule
