@@ -154,7 +154,7 @@ void generateExit(char *number);        // 0 <= number <= 49
 
 // MISC
 void generateProgramHead();
-void generateMove(char *var, char *symb);
+void generateMove(char *var, char *symb, INSTRUCTIONS type);
 
 void generateDefvar(char *var);
 void generateType(char *var, char *symb);
