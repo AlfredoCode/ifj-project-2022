@@ -138,7 +138,15 @@ void generateFloat2Ints(){
 }
 
 // STRING TODO
-void generateConcat();
+void generateConcat()
+{
+    printf("# STACK CONCAT\n");
+    printf("POPS GF@temp0\n");
+    printf("POPS GF@temp1\n");
+    printf("CONCAT GF@temp2 GF@temp1 GF@temp0\n");
+    printf("PUSHS GF@temp2\n");
+}
+
 void generateStrlen(char *dest, char*op);
 void generateGetchar(char *dest, char *op1, char *op2);
 void generateSetchar(char *dest, char *op1, char *op2);
@@ -209,6 +217,10 @@ void generateExit(char *number);        // 0 <= number <= 49
 // MISC TODO
 void generateProgramHead(){
     printf(".IFJcode22\n");
+    printf("DEFVAR GF@temp0\n");
+    printf("DEFVAR GF@temp1\n");
+    printf("DEFVAR GF@temp2\n");
+    printf("JUMP ??main\n");
 }
 
 void generateMove(char *var, char *symb){
@@ -220,8 +232,21 @@ void generateDefvar(char *var){        //jak zjistim jestli ma byt lf, gf, nevbo
 }
 
 void generateType(char *var, char *symb);
-void generateMainStart();
-void generateMainEnd();
+
+void generateMainStart()
+{
+    printf("# START OF MAIN\n");
+    printf("LABEL ??main\n");
+    generateCreateFrame();
+    generatePushFrame();
+}
+
+void generateMainEnd()
+{
+    generatePopFrame();
+    printf("# END OF PROGRAM\n");
+}
+
 void generateFuncStart(char *funcname);
 void generateFunctionEnd();
 
@@ -263,6 +288,7 @@ char* stringConvertor(char* stringBefore){
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList){
     generateProgramHead();
+    generateMainStart();
     First(instrList);
 
     while(instrList->activeElement != NULL){
@@ -385,6 +411,7 @@ void generatorInit(instructList_T *instrList){
                 break;
 
             case CONCAT_I:
+                generateConcat();
                 break;
 
             case STRLEN_I:
@@ -419,4 +446,6 @@ void generatorInit(instructList_T *instrList){
         }
         Next(instrList);
     }
+
+    generateMainEnd();
 }
