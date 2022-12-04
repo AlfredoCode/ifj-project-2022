@@ -75,8 +75,16 @@ void generateRead(char *var, INSTRUCTIONS type){
         default: break;
     }
 }
-void generateWrite(char *symb);
-void generateStrlen(char *var, char *symb);
+
+void generateWrite(char *symb){
+    printf("WRITE LF@%s\n", symb);
+}
+
+void generateStrlen(char *var, char *symb){
+    printf("STRLEN LF@%s LF@%s", var, symb);        //může být symb aji string@algo? --> přidat instrukce strlen_id, strlen_konst
+}
+
+//TODO
 void generateSubstring();
 void generateOrd();
 void generateChr();
@@ -223,8 +231,46 @@ void generateProgramHead(){
     printf("JUMP ??main\n");
 }
 
-void generateMove(char *var, char *symb){
-    printf("MOVE LF@%s\n", var);
+void generateMove(char *var, char *symb, INSTRUCTIONS type){
+    switch(type){
+        case MOVEI2LF_I:
+            printf("MOVE LF@%s int@%d\n", var, atoi(symb));
+            break;
+        case MOVEF2LF_I:
+            printf("MOVE LF@%s float@%a\n", var, atof(symb));
+            break;
+        case MOVES2LF_I:
+            printf("MOVE LF@%s string@%s\n", var, stringConvertor(symb));
+            break;
+        case MOVENIL2LF_I:
+            printf("MOVE LF@%s nil@nil\n", var);
+            break;
+        case MOVETF2LF_I:
+            printf("MOVE LF@%s TF@%s\n", var, symb);
+            break;
+        case MOVEI2TF_I:
+            printf("MOVE TF@%s int@%d\n", var, atoi(symb));
+            break;
+        case MOVEF2TF_I:
+            printf("MOVE TF@%s float@%a\n", var, atof(symb));
+            break;
+        case MOVES2TF_I:
+            printf("MOVE TF@%s string@%s\n", var, stringConvertor(symb));
+            break;
+        case MOVENIL2TF_I:
+            printf("MOVE TF@%s nil@nil\n", var);
+            break;
+        case MOVELF2TF_I:
+            printf("MOVE TF@%s LF@%s\n", var, symb);
+            break;
+        case MOVELF2LF_I:
+            printf("MOVE LF@%s LF@%s\n", var, symb);
+            break;
+        case MOVETF2TF_I:
+            printf("MOVE TF@%s TF@%s\n", var, symb);
+            break;
+        default: break;
+    }
 }
 
 void generateDefvar(char *var){        //jak zjistim jestli ma byt lf, gf, nevbo tf
@@ -293,7 +339,52 @@ void generatorInit(instructList_T *instrList){
 
     while(instrList->activeElement != NULL){
         switch(instrList->activeElement->operation){
-            case MOVE_I:
+            case MOVEI2TF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case MOVEF2TF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case MOVES2TF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case MOVENIL2TF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case MOVELF2TF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case MOVEI2LF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case MOVEF2LF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case MOVES2LF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case MOVENIL2LF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case MOVETF2LF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case MOVELF2LF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case MOVETF2TF_I:
+                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
                 break;
 
             case CREATEFRAME_I:
@@ -408,6 +499,7 @@ void generatorInit(instructList_T *instrList){
                 break;
 
             case WRITE_I:
+                generateWrite(instrList->activeElement->op1);
                 break;
 
             case CONCAT_I:
@@ -415,6 +507,7 @@ void generatorInit(instructList_T *instrList){
                 break;
 
             case STRLEN_I:
+                generateStrlen(instrList->activeElement->op1, instrList->activeElement->op2);
                 break;
 
             case GETCHAR_I:
@@ -446,6 +539,5 @@ void generatorInit(instructList_T *instrList){
         }
         Next(instrList);
     }
-
     generateMainEnd();
 }
