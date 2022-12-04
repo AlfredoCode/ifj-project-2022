@@ -43,7 +43,9 @@ typedef enum{
     FLOAT2INTS_I,
     INT2CHARS_I,
     STRI2INTS_I,
-    READ_I,
+    READI_I,
+    READS_I,
+    READF_I,
     WRITE_I,
     CONCAT_I,
     STRLEN_I,
@@ -80,7 +82,7 @@ int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* o
 
 // ============= GENERATION ==================
 
-void generatorInit(instructList_T *instrList);          //???????????????????
+void generatorInit(instructList_T *instrList);
 void generateProgramHead();
 
 /*Main function*/
@@ -93,7 +95,7 @@ void generateFunctionEnd();
 
 /*Built-ins*/
 // Read[s|i|f], Write, Strlen, Substring, Ord, Chr
-void generateRead(char *var, char *type);
+void generateRead(char *var, INSTRUCTIONS type);
 void generateWrite(char *symb);
 void generateStrlen(char *var, char *symb);
 void generateSubstring(); // TODO and next ones

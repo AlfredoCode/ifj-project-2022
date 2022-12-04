@@ -59,17 +59,29 @@ int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* o
 
 }
 // ======================== GENERATION ==========================
-/*Generating*/
 
 // BUILT-INS TODO
-void generateRead(char *var, char *type);
+void generateRead(char *var, INSTRUCTIONS type){
+    switch (type){
+        case READI_I:
+            printf("READ LF@%s int\n", var);             
+            break;
+        case READF_I:
+            printf("READ LF@%s float\n", var);
+            break;
+        case READS_I:
+            printf("READ LF%s string\n", var);
+            break;
+        default: break;
+    }
+}
 void generateWrite(char *symb);
 void generateStrlen(char *var, char *symb);
 void generateSubstring();
 void generateOrd();
 void generateChr();
 
-// ARITHMETIC STACK
+/*Aritmetic operations on stack*/
 void generateAdds()
 {
     printf("ADDS\n");
@@ -95,11 +107,41 @@ void generateIDivs()
     printf("IDIVS\n");
 }
 
-// RELATION STACK TODO
+/*Relation operations*/
+void generateLts(){
+    printf("LTS\n");
+}
+void generateGts(){
+    printf("GTS\n");
+}
+void generateEqs(){
+    printf("EQS\n");
+}
 
-// BOOL STACK TODO
+/*Bool operations*/
+void generateAnds(){
+    printf("ANDS\n");
+}
+void generateOrs(){
+    printf("ORS\n");
+}
+void generateNots(){
+    printf("NOTS\n");
+}
 
-// CONVERSION TODO 
+/*Conversion*/
+void generateInt2Floats(){
+    printf("INT2FLOATS\n");
+}
+void generateFloat2Ints(){
+    printf("FLOAT2INTS\n");
+}
+void generateInt2Chars(){
+    printf("INT2CHARS\n");
+}
+void generateStri2Ints(){
+    printf("STRING2INTS\n");
+}
 
 // STRING TODO
 
@@ -169,8 +211,13 @@ void generatePushs(char *symb, INSTRUCTIONS type){
             break;
     }
 }
-//void generatePops(char *var);
-//void generateClears();
+void generatePops(char *var){
+    printf("POPS LF@%s\n", var);
+}
+
+void generateClears(){
+    printf("CLEARS\n");
+}
 
 /*String convertor*/
 char* stringConvertor(char* stringBefore){
@@ -257,9 +304,11 @@ void generatorInit(instructList_T *instrList){
                 break;
 
             case POPS_I:
+                generatePops(instrList->activeElement->op1);
                 break;
 
             case CLEARS_I:
+                generateClears();
                 break;
 
             case ADDS_I:
@@ -283,36 +332,55 @@ void generatorInit(instructList_T *instrList){
                 break;
 
             case LTS_I:
+                generateLts();
                 break;
 
             case GTS_I:
+                generateGts();
                 break;
 
             case EQS_I:
+                generateEqs();
                 break;
 
             case ANDS_I:
+                generateAnds();
                 break;
 
             case ORS_I:
+                generateOrs();
                 break;
 
             case NOTS_I:
+                generateNots();
                 break;
 
             case INT2FLOATS_I:
+                generateInt2Floats();
                 break;
 
             case FLOAT2INTS_I:
+                generateFloat2Ints();
                 break;
 
             case INT2CHARS_I:
+                generateInt2Chars();
                 break;
 
             case STRI2INTS_I:
+                generateStri2Ints();
                 break;
 
-            case READ_I:
+            case READI_I:
+                generateRead(instrList->activeElement->op1, instrList->activeElement->operation);
+                break;
+
+            case READS_I:
+                generateRead(instrList->activeElement->op1, instrList->activeElement->operation);
+                break;
+
+            case READF_I:
+                generateRead(instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case WRITE_I:
@@ -355,7 +423,7 @@ void generatorInit(instructList_T *instrList){
     }
 }
 
-/*
+
 int main(){
     instrList  = (instructList_T*)malloc(sizeof(*instrList));
     if(instrList == NULL){
@@ -363,10 +431,16 @@ int main(){
         return INTERNAL_ERR;
     }
     initInstList(instrList);
-    insertInstruction(instrList, PUSHS_INT_I, "125",NULL,NULL);
+    insertInstruction(instrList, PUSHS_STRING_I, "hello worl",NULL,NULL);
     insertInstruction(instrList, PUSHS_FLOAT_I, "1.5",NULL,NULL);
-    insertInstruction(instrList, PUSHS_ID_I, "x",NULL,NULL);
+    insertInstruction(instrList, PUSHS_ID_I, "2",NULL,NULL);
+    insertInstruction(instrList, ADDS_I, NULL,NULL,NULL);
+    insertInstruction(instrList, POPS_I, "y",NULL,NULL);
+    insertInstruction(instrList, ANDS_I, NULL,NULL,NULL);
+    insertInstruction(instrList, READI_I, "kdfh",NULL,NULL);
+    
+
     generatorInit(instrList);
     return 0;
 }
-*/
+
