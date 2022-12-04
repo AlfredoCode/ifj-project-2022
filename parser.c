@@ -33,8 +33,6 @@ token_t token;
 //Statement struct
 stat_t *statement;
 
-// Instruction list
-instructList_T *instrList;
 
 //Internal variables
 int currentToken = 0;
@@ -47,6 +45,9 @@ expression_T *expression, *allTokens;
 // Symtable
 htab_t *symtable, *funTable;
 
+// Instruction list for generation
+instructList_T *iList;
+
 
 void expressionInit(expression_T *exprList){
     exprList->firstElement = NULL;
@@ -56,7 +57,7 @@ void expressionInit(expression_T *exprList){
 
 void insertExpr(expression_T *exprList, token_t *token){
 
-    expr_El newElement = (expr_El ) malloc(sizeof(newElement));
+    expr_El newElement = (expr_El) malloc(sizeof(expr_El));
 	if(newElement == NULL){
 		return; // return 99
 	}
@@ -89,7 +90,7 @@ void exprListDispose( expression_T *exprList ) {
 	firstEl = exprList->firstElement;
 	while(firstEl != NULL){
 		nextEl= firstEl->next; 	// Cyklus, který maže vždy první prvek seznamu, dokud tam nějaký prvek je
-        free(firstEl->token->string);
+        //free(firstEl->token->string);
         free(firstEl->token);
 		free(firstEl);
 		firstEl = nextEl;				// Rozhodně by to šlo vyřešit i jinak, nicméně tato možnost se mi jevila jako nejpříjemnější
@@ -172,11 +173,11 @@ int parse(){
     }
     expressionInit(expression);
 
-    instrList  = (instructList_T*)malloc(sizeof(*instrList));
-    if(instrList == NULL){
+    iList  = (instructList_T*)malloc(sizeof(*iList));
+    if(iList == NULL){
         errHandler(INTERNAL_ERR,"Malloc failure\n");
     }
-    initInstList(instrList);
+    initInstList(iList);
 
     symtable = htab_init(HTABSIZE); // Var symtable
     if(symtable == NULL){
@@ -201,6 +202,7 @@ int parse(){
 
     if(GetProlog()){    // modif was not here before
         res = prog();
+        generatorInit(iList);  
         return res;
     }
     token_res = GetToken(&token);   
@@ -441,7 +443,7 @@ int checkWhile(htab_t *localTable){
     }
     *expr_tok = token;
     insertExpr(expression, expr_tok);
-    expr_parse(localTable, expression); // modif
+    expr_parse(localTable, expression, iList); // modif
     exprListDispose(expression);
     insideWhile = true;
     res = statement_list(localTable);  // Kontrola vnitřku funkce
@@ -633,8 +635,13 @@ int functionCheck(){
     *expr_tok_semicol = token;
     insertExpr(expression, expr_tok_semicol);
     if(currentReturnType == ret_string || currentReturnType == ret_int || currentReturnType == ret_float){
-        if(expr_parse(localTable, expression) != currentReturnType){   // sending return expression to expr_parser
-            errHandler(SEM_PARAM_ERR, "Wrong return type\n");
+
+        // statement = htab_find(localTable,statement->name);    // DEBUG
+        //     printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
+        if(expr_parse(localTable, expression, iList) != currentReturnType){   // sending return expression to expr_parser
+
+            fprintf(stderr, "Wrong return type\n");
+            return SEM_PARAM_ERR;
         }
         
     }
@@ -886,7 +893,7 @@ int condiCheck(htab_t *table){
     //     expr = expr->previous;
     // }
     // putchar('\n');
-    expr_parse(table, expression);
+    expr_parse(table, expression, iList);
     
     exprListDispose(expression);
     insideIf = true;
@@ -1106,7 +1113,7 @@ int separators(htab_t *table){
             // }
             // putchar('\n');
             
-            expr_parse(table, expression);
+            expr_parse(table, expression, iList);
         
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
                      // expr_parse(expression_list, symtable);

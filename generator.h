@@ -21,7 +21,11 @@ typedef enum{
     DEFVAR_I,
     CALL_I,
     RETURN_I,
-    PUSHS_I,
+    PUSHS_INT_I,
+    PUSHS_FLOAT_I,
+    PUSHS_STRING_I,
+    PUSHS_ID_I,
+    PUSHS_NIL_I,
     POPS_I,
     CLEARS_I,
     ADDS_I,
@@ -53,6 +57,7 @@ typedef enum{
     EXIT_I,
 }INSTRUCTIONS;
 
+// ============ INSTRUCTION LIST ============
 
 typedef struct instructionElement{
     char *op1;
@@ -70,7 +75,11 @@ typedef struct instructionList{
 }instructList_T;
 
 void initInstList(instructList_T *instrList);
-int insertInstruction(instructList_T *instrList, TYPES operation, char* op1, char* op2, char* dest); //Can possibly be type of instructList_T so we can modify the value in parser and in expr_parser
+
+//Can possibly be type of instructList_T so we can modify the value in parser and in expr_parser
+int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* op1, char* op2, char* dest); 
+
+// ============= GENERATION ==================
 
 void generatorInit(instructList_T *instrList);          //???????????????????
 void generateProgramHead();
@@ -84,18 +93,13 @@ void generateFuncStart(char *funcname);
 void generateFunctionEnd();
 
 /*Built-ins*/
+// Read[s|i|f], Write, Strlen, Substring, Ord, Chr
 void generateRead(char *var, char *type);
 void generateWrite(char *symb);
 void generateStrlen(char *var, char *symb);
-// Generate built-ins
-// Reads
-// Readi
-// Readf
-// Write
-// Strlen
-// Substring
-// Ord
-// Chr
+void generateSubstring(); // TODO and next ones
+void generateOrd();
+void generateChr();
 
 /*Aritmetic operations on stack*/
 void generateAdds();
@@ -130,7 +134,8 @@ void generateGetchar(char *dest, char *op1, char *op2);
 void generateSetchar(char *dest, char *op1, char *op2);
 
 /*Stack operations*/
-void generatePushs(char *symb, TYPES type);
+
+void generatePushs(char *symb, INSTRUCTIONS type);
 void generatePops(char *var);
 void generateClears();
 
@@ -155,6 +160,12 @@ void generateMove(char *var, char *symb);
 void generateDefvar(char *var);
 
 /*String convertor*/
+
+/*
+ * @brief   converts c str to ifjcode22 str
+ * @param   string to convert
+ * @return  converted string   
+ */
 char* stringConvertor(char* stringBefore);
 
 // Functions

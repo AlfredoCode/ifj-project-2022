@@ -13,6 +13,7 @@
 #include "expr_stack.h"
 #include "symtable.h"
 #include "parser.h"
+#include "generator.h"
 
 typedef enum {
     ret_bool,
@@ -76,7 +77,7 @@ int evaluate_brackets(stack_t *stack);
  * Evaluates if concatenation expression is correct.
  * Reduces stack.
  */
-int evaluate_concatenation(stack_t *stack);
+int evaluate_concatenation(stack_t *stack, instructList_T *iList);
 
 /**
  * @brief   evaluates expression
@@ -87,7 +88,7 @@ int evaluate_concatenation(stack_t *stack);
  * Evaluates if expression is correct.
  * Reduces stack
  */
-int evaluate(stack_t *stack, htab_t *symtable);
+int evaluate(stack_t *stack, htab_t *symtable, instructList_T *iList);
 
 /**
  * @brief   gets type of last token
@@ -102,6 +103,6 @@ p_return get_last(stack_t *stack);
  * @param   dll of tokens
  * @return  final datatype
  */
-p_return expr_parse(htab_t *symTable, expression_T *list);
+p_return expr_parse(htab_t *symTable, expression_T *list, instructList_T *iList);
 
 #endif // __PREC_PARSER_H__
