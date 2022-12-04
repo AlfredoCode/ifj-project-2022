@@ -15,8 +15,7 @@
 #include "error.h"
 
 instructList_T *instrList;
-
-/*List functions*/
+// ============ INSTRUCTION LIST ============
 void initInstList(instructList_T *instrList){
     instrList->activeElement = NULL;
     instrList->firstElement = NULL;
@@ -58,6 +57,7 @@ int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* o
     return SUCCESS_ERR;
 
 }
+
 // ======================== GENERATION ==========================
 
 // BUILT-INS TODO
@@ -81,7 +81,7 @@ void generateSubstring();
 void generateOrd();
 void generateChr();
 
-/*Aritmetic operations on stack*/
+// ARITHMETIC ON STACK
 void generateAdds()
 {
     printf("ADDS\n");
@@ -107,7 +107,7 @@ void generateIDivs()
     printf("IDIVS\n");
 }
 
-/*Relation operations*/
+// RELATION
 void generateLts(){
     printf("LTS\n");
 }
@@ -118,7 +118,7 @@ void generateEqs(){
     printf("EQS\n");
 }
 
-/*Bool operations*/
+// BOOL
 void generateAnds(){
     printf("ANDS\n");
 }
@@ -129,62 +129,29 @@ void generateNots(){
     printf("NOTS\n");
 }
 
-/*Conversion*/
+// COVERSIONS
 void generateInt2Floats(){
     printf("INT2FLOATS\n");
 }
 void generateFloat2Ints(){
     printf("FLOAT2INTS\n");
 }
-void generateInt2Chars(){
-    printf("INT2CHARS\n");
-}
-void generateStri2Ints(){
-    printf("STRING2INTS\n");
-}
 
 // STRING TODO
-
-// STACK TODO
-
-// FRAME TODO
-
-// DATAFLOW TODO
-
-// MISC TODO
-
-/*Program head*/
-void generateProgramHead(){
-    printf(".IFJcode22\n");
+void generateConcat()
+{
+    printf("# STACK CONCAT\n");
+    printf("POPS GF@temp0\n");
+    printf("POPS GF@temp1\n");
+    printf("CONCAT GF@temp2 GF@temp1 GF@temp0\n");
+    printf("PUSHS GF@temp2\n");
 }
 
-void generateMove(char *var, char *symb){
-    printf("MOVE LF@%s\n", var);
-}
+void generateStrlen(char *dest, char*op);
+void generateGetchar(char *dest, char *op1, char *op2);
+void generateSetchar(char *dest, char *op1, char *op2);
 
-/*Frames and function calls*/
-void generateCreateFrame(){
-    printf("CREATEFRAME\n");
-}
-
-void generatePushFrame(){
-    printf("PUSHFRAME\n");
-}
-
-void generatePopFrame(){
-    printf("POPFRAME\n");
-}
-
-void generateDefvar(char *var){        //jak zjistim jestli ma byt lf, gf, nevbo tf
-    printf("DEFVAR LF@%s\n", var);
-}
-
-void generateCall(char *label){
-    //fce pro vytvoreni unikatniho lablu
-    printf("CALL %s\n", label);
-}
-
-/*Stack functions*/
+// STACK
 void generatePushs(char *symb, INSTRUCTIONS type){
     switch(type){
         case PUSHS_INT_I:
@@ -211,6 +178,7 @@ void generatePushs(char *symb, INSTRUCTIONS type){
             break;
     }
 }
+
 void generatePops(char *var){
     printf("POPS LF@%s\n", var);
 }
@@ -219,7 +187,70 @@ void generateClears(){
     printf("CLEARS\n");
 }
 
-/*String convertor*/
+// FRAME
+void generateCreateFrame(){
+    printf("CREATEFRAME\n");
+}
+
+void generatePushFrame(){
+    printf("PUSHFRAME\n");
+}
+
+void generatePopFrame(){
+    printf("POPFRAME\n");
+}
+
+void generateCall(char *label){
+    //fce pro vytvoreni unikatniho lablu
+    printf("CALL %s\n", label);
+}
+
+void generateReturn(); // TODO
+
+// DATAFLOW TODO
+void generateLabel(char *label);
+void generateJump(char *label);
+void generateJumpIfEqs(char *label);
+void generateJumpIfNEqs(char *label);
+void generateExit(char *number);        // 0 <= number <= 49
+
+// MISC TODO
+void generateProgramHead(){
+    printf(".IFJcode22\n");
+    printf("DEFVAR GF@temp0\n");
+    printf("DEFVAR GF@temp1\n");
+    printf("DEFVAR GF@temp2\n");
+    printf("JUMP ??main\n");
+}
+
+void generateMove(char *var, char *symb){
+    printf("MOVE LF@%s\n", var);
+}
+
+void generateDefvar(char *var){        //jak zjistim jestli ma byt lf, gf, nevbo tf
+    printf("DEFVAR LF@%s\n", var);
+}
+
+void generateType(char *var, char *symb);
+
+void generateMainStart()
+{
+    printf("# START OF MAIN\n");
+    printf("LABEL ??main\n");
+    generateCreateFrame();
+    generatePushFrame();
+}
+
+void generateMainEnd()
+{
+    generatePopFrame();
+    printf("# END OF PROGRAM\n");
+}
+
+void generateFuncStart(char *funcname);
+void generateFunctionEnd();
+
+// HELPER FUNCTIONS
 char* stringConvertor(char* stringBefore){
     size_t size = 16;
     char* retstring = malloc(size);
@@ -257,6 +288,7 @@ char* stringConvertor(char* stringBefore){
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList){
     generateProgramHead();
+    generateMainStart();
     First(instrList);
 
     while(instrList->activeElement != NULL){
@@ -363,14 +395,6 @@ void generatorInit(instructList_T *instrList){
                 generateFloat2Ints();
                 break;
 
-            case INT2CHARS_I:
-                generateInt2Chars();
-                break;
-
-            case STRI2INTS_I:
-                generateStri2Ints();
-                break;
-
             case READI_I:
                 generateRead(instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
@@ -387,6 +411,7 @@ void generatorInit(instructList_T *instrList){
                 break;
 
             case CONCAT_I:
+                generateConcat();
                 break;
 
             case STRLEN_I:
@@ -421,26 +446,6 @@ void generatorInit(instructList_T *instrList){
         }
         Next(instrList);
     }
+
+    generateMainEnd();
 }
-
-
-int main(){
-    instrList  = (instructList_T*)malloc(sizeof(*instrList));
-    if(instrList == NULL){
-        fprintf(stderr,"Malloc failure\n");
-        return INTERNAL_ERR;
-    }
-    initInstList(instrList);
-    insertInstruction(instrList, PUSHS_STRING_I, "hello worl",NULL,NULL);
-    insertInstruction(instrList, PUSHS_FLOAT_I, "1.5",NULL,NULL);
-    insertInstruction(instrList, PUSHS_ID_I, "2",NULL,NULL);
-    insertInstruction(instrList, ADDS_I, NULL,NULL,NULL);
-    insertInstruction(instrList, POPS_I, "y",NULL,NULL);
-    insertInstruction(instrList, ANDS_I, NULL,NULL,NULL);
-    insertInstruction(instrList, READI_I, "kdfh",NULL,NULL);
-    
-
-    generatorInit(instrList);
-    return 0;
-}
-
