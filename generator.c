@@ -14,6 +14,8 @@
 #include "generator.h"
 #include "error.h"
 
+//HELPFUL VARIABLES
+int labelcnt = 0;
 
 instructList_T *instrList;
 // ============ INSTRUCTION LIST ============
@@ -76,13 +78,9 @@ void generateRead(char *var, INSTRUCTIONS type){
         default: break;
     }
 }
-
+//TODO OPRAVA MUZE SE VYPISOVAT I KONSTANTA
 void generateWrite(char *symb){
     printf("WRITE LF@%s\n", symb);
-}
-
-void generateStrlen(char *var, char *symb){
-    printf("STRLEN LF@%s LF@%s", var, symb);        //může být symb aji string@algo? --> přidat instrukce strlen_id, strlen_konst
 }
 
 //TODO
@@ -156,7 +154,14 @@ void generateConcat()
     printf("PUSHS GF@temp2\n");
 }
 
-void generateStrlen(char *dest, char*op);
+void generateStrlen(char *var, char *symb, INSTRUCTIONS type){
+    if(type == STRLENVAR_I){
+        printf("STRLEN LF@%s LF@%s", var, symb); 
+    }else if(type == STRLENKONST_I){
+        printf("STRLEN LF@%s string@%s", var, stringConvertor(symb));
+    }
+}
+
 void generateGetchar(char *dest, char *op1, char *op2);
 void generateSetchar(char *dest, char *op1, char *op2);
 
@@ -223,6 +228,8 @@ void generateLabel(char *label)
 {
     printf("LABEL ??%s\n", label);
 }
+void UniqueLabel(label);
+
 void generateJump(char *label);
 void generateJumpIfEqs(char *label);
 
@@ -354,6 +361,12 @@ char* stringConvertor(char* stringBefore){
     }
     return retstring;
 }
+
+void UniqueLabel(char *labelbefore){
+    printf("LABEL ??%s%d\n", labelbefore, labelcnt);
+    labelcnt++;
+}
+
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList, htab_list *symList){
     generateProgramHead();
@@ -415,9 +428,11 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 break;
 
             case PUSHFRAME_I:
+                generatePushFrame();
                 break;
 
             case POPFRAME_I:
+                generatePopFrame();
                 break;
 
             case DEFVAR_I:
@@ -536,8 +551,12 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 generateConcat();
                 break;
 
-            case STRLEN_I:
-                generateStrlen(instrList->activeElement->op1, instrList->activeElement->op2);
+            case STRLENVAR_I:
+                generateStrlen(instrList->activeElement->op1, instrList->activeElement->op2, instrList->activeElement->operation);
+                break;
+
+            case STRLENKONST_I:
+                generateStrlen(instrList->activeElement->op1, instrList->activeElement->op2, instrList->activeElement->operation);
                 break;
 
             case GETCHAR_I:

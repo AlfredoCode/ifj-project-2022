@@ -61,7 +61,8 @@ typedef enum{
     READF_I,
     WRITE_I,
     CONCAT_I,
-    STRLEN_I,
+    STRLENVAR_I,
+    STRLENKONST_I,
     GETCHAR_I,
     SETCHAR_I,
     TYPE_I,
@@ -96,10 +97,9 @@ int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* o
 
 // ============= GENERATION ==================
 // BUILT-INS
-// Read[s|i|f], Write, Strlen, Substring, Ord, Chr
+// Read[s|i|f], Write, Substring, Ord, Chr
 void generateRead(char *var, INSTRUCTIONS type);
 void generateWrite(char *symb);
-void generateStrlen(char *var, char *symb);
 void generateSubstring(); // TODO and next ones
 void generateOrd();
 void generateChr();
@@ -134,7 +134,7 @@ void generateFloat2Ints();
 
 // STRING
 void generateConcat(); // Made to work like *S functions
-void generateStrlen(char *dest, char *op);
+void generateStrlen(char *dest, char *op, INSTRUCTIONS type);
 void generateGetchar(char *dest, char *op1, char *op2);
 void generateSetchar(char *dest, char *op1, char *op2);
 
@@ -174,7 +174,7 @@ void generatorInit(instructList_T *instrList, htab_list *symList);
 
 
 // HELPER FUNCTIONS
-void UniqueLabel(int labelnmbr,char *idk);
+void UniqueLabel(char *labelbefore);
 
 /*
  * @brief   converts c str to ifjcode22 str
