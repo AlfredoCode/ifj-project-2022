@@ -99,7 +99,7 @@ int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* o
 // BUILT-INS
 // Read[s|i|f], Write, Substring, Ord, Chr
 void generateRead(char *var, INSTRUCTIONS type);
-void generateWrite(char *symb);
+void generateWrite();
 void generateSubstring(); // TODO and next ones
 void generateOrd();
 void generateChr();

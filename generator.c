@@ -16,8 +16,8 @@
 
 //HELPFUL VARIABLES
 int labelcnt = 0;
-
 instructList_T *instrList;
+
 // ============ INSTRUCTION LIST ============
 void initInstList(instructList_T *instrList){
     instrList->activeElement = NULL;
@@ -78,9 +78,33 @@ void generateRead(char *var, INSTRUCTIONS type){
         default: break;
     }
 }
-//TODO OPRAVA MUZE SE VYPISOVAT I KONSTANTA
-void generateWrite(char *symb){
-    printf("WRITE LF@%s\n", symb);
+
+void generateWriteFun()
+{
+    printf("\nLABEL ??write\n");
+    printf("CREATEFRAME\n");
+    printf("PUSHFRAME\n");
+
+    printf("DEFVAR LF@amount\n");
+    printf("DEFVAR LF@arg\n");
+
+    printf("POPS LF@amount\n");
+
+    printf("JUMPIFEQ write?whileEnd LF@amount int@0\n");
+    printf("LABEL write?while\n");
+    printf("POPS LF@arg\n");
+    printf("WRITE LF@arg\n");
+    printf("SUB LF@amount LF@amount int@1\n");
+    printf("JUMPIFNEQ write?while LF@amount  int@0\n");
+    printf("LABEL write?whileEnd\n");
+
+    printf("POPFRAME\n");
+    printf("RETURN\n\n");
+}
+
+void generateWrite()
+{
+    printf("CALL ??write");
 }
 
 //TODO
@@ -370,6 +394,7 @@ void UniqueLabel(char *labelbefore){
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList, htab_list *symList){
     generateProgramHead();
+    generateWriteFun();
     generateMainStart();
     First(instrList);
 
