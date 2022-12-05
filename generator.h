@@ -31,6 +31,9 @@ typedef enum{
     PUSHFRAME_I,
     POPFRAME_I,
     DEFVAR_I,
+    DEFVAR_LOC_I,
+    FUNC_S_I,
+    FUNC_E_I,
     CALL_I,
     RETURN_I,
     PUSHS_INT_I,
@@ -159,6 +162,7 @@ void generateProgramHead();
 void generateMove(char *var, char *symb, INSTRUCTIONS type);
 
 void generateDefvar(char *var);
+void generateLocDefVar(stat_t *data);
 void generateType(char *var, char *symb);
 void generateMainStart();
 void generateMainEnd();

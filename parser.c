@@ -21,6 +21,7 @@
 
 
 int token_res = 0;
+char *currentPOP = "";
 
 // TODO MAKE IT STATIC BOI
 bool insideIf = false;
@@ -206,6 +207,7 @@ int parse(){
     if(symtable == NULL){
         return INTERNAL_ERR;
     }
+    insertInstruction(iList, DEFVAR_LOC_I, NULL, NULL, NULL);
     funTable = htab_init(HTABSIZE); // Function symtable
     if(funTable == NULL){
         return INTERNAL_ERR;
@@ -217,7 +219,7 @@ int parse(){
     }
     initSymList(sym_list);
     insertSymtable(funTable, sym_list);
-
+    insertSymtable(symtable, sym_list);
     builtinInit(funTable);
     
     statement = (stat_t *)malloc(sizeof(*statement));
@@ -501,6 +503,7 @@ int functionCheck(){
         return INTERNAL_ERR;
     }
     insertSymtable(localTable, sym_list);
+    
     token_res = GetToken(&token);   // function <ID>
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -513,7 +516,8 @@ int functionCheck(){
     if(statementFun != NULL){
         errHandler(SEM_FUNC_ERR,"SEMANTIC ERROR ---> Function redefinition <---\n");
     }
-
+    insertInstruction(iList, FUNC_S_I, NULL, NULL, token.string);
+    insertInstruction(iList, DEFVAR_LOC_I, NULL, NULL, NULL);
     statementFun = htab_lookup_add(funTable, token.string);   // add  func identifier to symtable
 
     statementFun->type = t_fun;
@@ -688,6 +692,7 @@ int functionCheck(){
     if(token.type != R_BRAC){
         errHandler(SYNTAX_ERR, "Syntax error ---> MISSING RIGHT BRACKET AFTER RETURN STATEMENT <---\n");
     }
+    insertInstruction(iList, FUNC_E_I, NULL, NULL, NULL);
     // printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
     insideFunc = false;
     return statement_list(symtable);
@@ -753,7 +758,7 @@ int funcParams(htab_t *localTable, stat_t *statementIn){
             // SEMANTIC
             statementIn = htab_lookup_add(localTable, token.string);  // ADD PARAM TO LOCAL VAR TABLE
             statementIn->type = statement->type;
-            
+            insertInstruction(iList, POPS_I, token.string, NULL, NULL);
             
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
@@ -929,7 +934,8 @@ int condiCheck(htab_t *table){
     // }
     // putchar('\n');
     expr_parse(table, expression, iList);
-    
+    insertInstruction(iList, PUSHS_INT_I, "1", NULL, NULL); // CONDITIONAL JUMP BASED ON STACK VALUE
+    insertInstruction(iList, JUMPIFNEQS_I, NULL, NULL, NULL);
     exprListDispose(expression);
     insideIf = true;
     res = statement_list(table);  // Kontrola vnitřku funkce
@@ -956,7 +962,7 @@ int elseCheck(htab_t *localTable){
     if(token.keyword != ELSE){               // Kontrola tokenu else
         errHandler(SYNTAX_ERR,"Syntax error ---> MISSING ELSE <---\n");
     }
-
+    insertInstruction(iList, LABEL_I, NULL, NULL, "else"); // TODO UNIQUE ELSE LABEL
     token_res = GetToken(&token);  
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -985,8 +991,10 @@ int expression_check(htab_t *table){
     if(!((token.type == ID) || (token.type == KEYWORD))){
         errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
     }
-    
+    currentPOP = malloc(sizeof(char));
     statement = htab_lookup_add(table, token.string);   // add  identifier to symtable
+    currentPOP = realloc(currentPOP, strlen(token.string)*sizeof(char));
+    strcpy(currentPOP, token.string);
 
     token_res = GetToken(&token);
     if(!token_res){
@@ -995,7 +1003,7 @@ int expression_check(htab_t *table){
     if(token.type == ASSIG){
         // ZAVOLAT EXPRESSION PARSER
         res = statement_list_inside(table);
-
+        
         return res;  
     }
     // TODO $x; UNDEF VAR
@@ -1150,7 +1158,7 @@ int separators(htab_t *table){
             // putchar('\n');
             
             expr_parse(table, expression, iList);
-            
+            insertInstruction(iList, POPS_I, currentPOP, NULL, NULL); // HOW DO I SET THE DEST???   NEEDS TO BE FIXED ASAP
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
                      // expr_parse(expression_list, symtable);
             // EXPRESSION LIST DISPOSE
@@ -1158,7 +1166,7 @@ int separators(htab_t *table){
              
             // statement = htab_find(symtable,statement->name);    // DEBUG
             // printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
-
+            free(currentPOP);
             exprListDispose(expression);
             return statement_list(table); // $x=$y; || $x=5; || $x = $y.$z;
         case R_PAR:

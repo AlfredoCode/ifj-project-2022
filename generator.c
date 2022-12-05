@@ -214,16 +214,22 @@ void generateCall(char *label){
     printf("CALL %s\n", label);
 }
 
-void generateReturn(); // TODO
+void generateReturn(){
+    printf("RETURN\n");
+}
 
 // DATAFLOW TODO
 void generateLabel(char *label)
 {
-    printf("LABEL %s\n", label);
+    printf("LABEL ??%s\n", label);
 }
 void generateJump(char *label);
 void generateJumpIfEqs(char *label);
-void generateJumpIfNEqs(char *label);
+
+
+void generateJumpIfNEqs(char *label){
+    printf("JUMPIFNEQS %s\n",label);
+}
 void generateExit(char *number);        // 0 <= number <= 49
 
 // MISC TODO
@@ -281,6 +287,11 @@ void generateDefvar(char *var){        //jak zjistim jestli ma byt lf, gf, nevbo
     printf("DEFVAR LF@%s\n", var);
 }
 
+void generateLocDefVar(stat_t *data){
+    // printf("DEFVAR LF@%s\n", data->name); 
+    generateDefvar(data->name);
+}
+
 void generateType(char *var, char *symb);
 
 void generateMainStart()
@@ -297,8 +308,16 @@ void generateMainEnd()
     printf("# END OF PROGRAM\n");
 }
 
-void generateFuncStart(char *funcname);
-void generateFunctionEnd();
+void generateFuncStart(char *funcname){
+     generateLabel(funcname);
+     generateCreateFrame();
+     generatePushFrame();
+
+}
+void generateFunctionEnd(){
+    generatePopFrame();
+    generateReturn();
+}
 
 // HELPER FUNCTIONS
 char* stringConvertor(char* stringBefore){
@@ -402,6 +421,13 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 break;
 
             case DEFVAR_I:
+                break;
+
+            case DEFVAR_LOC_I:
+                symList->activeElement = symList->activeElement->next;
+                if(symList->activeElement != NULL){
+                    htab_for_each(symList->activeElement, generateLocDefVar);    // We have to start from index 1, because on index 0 is funTable
+                }
                 break;
 
             case CALL_I:
@@ -526,14 +552,24 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
             case LABEL_I:
                 generateLabel(instrList->activeElement->dest);
                 break;
+            case FUNC_S_I:
+                generateFuncStart(instrList->activeElement->dest);
+                break;
+            
+            case FUNC_E_I:
+                generateFunctionEnd();
+                break;
 
             case JUMP_I:
                 break;
 
             case JUMPIFEQS_I:
+
+                
                 break;
 
             case JUMPIFNEQS_I:
+                generateJumpIfNEqs("else");  // TODO UNIQUE LABEL ELSE
                 break;
 
             case EXIT_I:
