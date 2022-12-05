@@ -101,8 +101,9 @@ p_return get_last(stack_t *stack);
  * @brief   main expr_parser component
  * @param   symbol htab
  * @param   dll of tokens
+ * @param   variable to return to
  * @return  final datatype
  */
-p_return expr_parse(htab_t *symTable, expression_T *list, instructList_T *iList);
+p_return expr_parse(htab_t *symTable, expression_T *list, instructList_T *iList, char* retVar);
 
 #endif // __PREC_PARSER_H__

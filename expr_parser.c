@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "expr_parser.h"
 #include "expr_stack.h"
@@ -438,7 +439,7 @@ p_return get_last(stack_t *stack)
     return ret_uhoh;
 }
 
-p_return expr_parse(htab_t *symtable, expression_T *list, instructList_T *iList)
+p_return expr_parse(htab_t *symtable, expression_T *list, instructList_T *iList, char* retVal)
 {
     // Stack init
     stack_t *stack = stackInit();
@@ -505,6 +506,9 @@ p_return expr_parse(htab_t *symtable, expression_T *list, instructList_T *iList)
     p_return ret = get_last(stack);
     // Since I am doing everything on floats, if I should end up with int I need to end up with int
     if (ret == ret_int) insertInstruction(iList, FLOAT2INTS_I, NULL, NULL, NULL);
+    char *retV = malloc(strlen(retVal) +1);
+    strcpy(retV, retVal);
+    if (retVal) insertInstruction(iList, POPS_I, retV, NULL, NULL);
     stackClear(stack);
     return ret;
 }

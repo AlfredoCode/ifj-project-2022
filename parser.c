@@ -475,7 +475,7 @@ int checkWhile(htab_t *localTable){
     }
     *expr_tok = token;
     insertExpr(expression, expr_tok);
-    expr_parse(localTable, expression, iList); // modif
+    expr_parse(localTable, expression, iList, NULL); // modif
     exprListDispose(expression);
     insideWhile = true;
     res = statement_list(localTable);  // Kontrola vnitřku funkce
@@ -677,7 +677,7 @@ int functionCheck(){
 
         // statement = htab_find(localTable,statement->name);    // DEBUG
         //     printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
-        if(expr_parse(localTable, expression, iList) != currentReturnType){   // sending return expression to expr_parser
+        if(expr_parse(localTable, expression, iList, NULL) != currentReturnType){   // sending return expression to expr_parser
 
             fprintf(stderr, "Wrong return type\n");
             return SEM_PARAM_ERR;
@@ -933,7 +933,7 @@ int condiCheck(htab_t *table){
     //     expr = expr->previous;
     // }
     // putchar('\n');
-    expr_parse(table, expression, iList);
+    expr_parse(table, expression, iList, NULL);
     insertInstruction(iList, PUSHS_INT_I, "1", NULL, NULL); // CONDITIONAL JUMP BASED ON STACK VALUE
     insertInstruction(iList, JUMPIFNEQS_I, NULL, NULL, NULL);
     exprListDispose(expression);
@@ -1157,8 +1157,7 @@ int separators(htab_t *table){
             // }
             // putchar('\n');
             
-            expr_parse(table, expression, iList);
-            insertInstruction(iList, POPS_I, currentPOP, NULL, NULL); // HOW DO I SET THE DEST???   NEEDS TO BE FIXED ASAP
+            expr_parse(table, expression, iList, currentPOP);
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
                      // expr_parse(expression_list, symtable);
             // EXPRESSION LIST DISPOSE
