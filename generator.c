@@ -87,7 +87,14 @@ void generateWrite()
 
 //TODO
 void generateSubstring();
-void generateOrd();
+
+void generateOrd(){
+    generateLabel("Ord");
+    generatePushs("0", PUSHS_INT_I);
+    printf("STRI2INTS\n");
+    generateReturn();
+}
+
 void generateChr();
 
 // ARITHMETIC ON STACK
@@ -373,6 +380,7 @@ char* stringConvertor(char* stringBefore){
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList, htab_list *symList){
     generateProgramHead();
+    generateOrd();
     generateMainStart();
     First(instrList);
 
@@ -548,6 +556,10 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
 
             case WRITE_I:
                 generateWrite(instrList->activeElement->op1);
+                break;
+                
+            case ORD_I:
+                generateCall("??Ord");
                 break;
 
             case CONCAT_I:

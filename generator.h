@@ -60,6 +60,7 @@ typedef enum{
     READS_I,
     READF_I,
     WRITE_I,
+    ORD_I,
     CONCAT_I,
     STRLENVAR_I,
     STRLENKONST_I,
