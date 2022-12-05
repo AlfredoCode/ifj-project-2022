@@ -238,9 +238,8 @@ void generatePopFrame(){
     printf("POPFRAME\n");
 }
 
-void generateCall(char *label){
-    //fce pro vytvoreni unikatniho lablu
-    printf("CALL %s\n", label);
+void generateCall(char *funcname){
+    printf("CALL %s\n", funcname);
 }
 
 void generateReturn(){
@@ -252,7 +251,11 @@ void generateLabel(char *label)
 {
     printf("LABEL ??%s\n", label);
 }
-void UniqueLabel(label);
+
+void UniqueLabel(char *labelbefore){
+    printf("LABEL ??%s%d\n", labelbefore, labelcnt);
+    labelcnt++;
+}
 
 void generateJump(char *label);
 void generateJumpIfEqs(char *label);
@@ -261,7 +264,9 @@ void generateJumpIfEqs(char *label);
 void generateJumpIfNEqs(char *label){
     printf("JUMPIFNEQS %s\n",label);
 }
-void generateExit(char *number);        // 0 <= number <= 49
+void generateExit(char *number){
+    printf("EXIT int@%d\n", atoi(number));
+}
 
 // MISC TODO
 void generateProgramHead(){
@@ -314,7 +319,7 @@ void generateMove(char *var, char *symb, INSTRUCTIONS type){
     }
 }
 
-void generateDefvar(char *var){        //jak zjistim jestli ma byt lf, gf, nevbo tf
+void generateDefvar(char *var){
     printf("DEFVAR LF@%s\n", var);
 }
 
@@ -386,10 +391,7 @@ char* stringConvertor(char* stringBefore){
     return retstring;
 }
 
-void UniqueLabel(char *labelbefore){
-    printf("LABEL ??%s%d\n", labelbefore, labelcnt);
-    labelcnt++;
-}
+
 
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList, htab_list *symList){
@@ -617,6 +619,7 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 break;
 
             case EXIT_I:
+                generateExit(instrList->activeElement->op1);
                 break;
 
             default: 
