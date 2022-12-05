@@ -165,7 +165,7 @@ token_res = GetToken(&token);       // levá závorka
 /********************************PARSING SECTION********************************************************/
 
 void builtinInit(htab_t *funTable){
-    stat_t *newStat = (stat_t*)malloc(sizeof(newStat));
+    stat_t *newStat = (stat_t*)malloc(sizeof(stat_t));
     if(newStat == NULL){
         exit(INTERNAL_ERR);
     }

@@ -79,32 +79,10 @@ void generateRead(char *var, INSTRUCTIONS type){
     }
 }
 
-void generateWriteFun()
-{
-    printf("\nLABEL ??write\n");
-    printf("CREATEFRAME\n");
-    printf("PUSHFRAME\n");
-
-    printf("DEFVAR LF@amount\n");
-    printf("DEFVAR LF@arg\n");
-
-    printf("POPS LF@amount\n");
-
-    printf("JUMPIFEQ write?whileEnd LF@amount int@0\n");
-    printf("LABEL write?while\n");
-    printf("POPS LF@arg\n");
-    printf("WRITE LF@arg\n");
-    printf("SUB LF@amount LF@amount int@1\n");
-    printf("JUMPIFNEQ write?while LF@amount  int@0\n");
-    printf("LABEL write?whileEnd\n");
-
-    printf("POPFRAME\n");
-    printf("RETURN\n\n");
-}
-
 void generateWrite()
 {
-    printf("CALL ??write");
+    printf("POPS GF@temp0\n");
+    printf("WRITE GF@temp0\n");
 }
 
 //TODO
@@ -252,7 +230,7 @@ void generateLabel(char *label)
 {
     printf("LABEL ??%s\n", label);
 }
-void UniqueLabel(label);
+void UniqueLabel(char *label);
 
 void generateJump(char *label);
 void generateJumpIfEqs(char *label);
@@ -394,7 +372,6 @@ void UniqueLabel(char *labelbefore){
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList, htab_list *symList){
     generateProgramHead();
-    generateWriteFun();
     generateMainStart();
     First(instrList);
 
