@@ -153,7 +153,9 @@ void generateReturn();
 
 // DATAFLOW
 void generateLabel(char *label);
+void generateLabelEnd(char *label);
 void generateJump(char *label);
+void generateJumpEnd(char *label);
 void generateJumpIfEqs(char *label);
 void generateJumpIfNEqs(char *label);
 void generateExit(char *number);        // 0 <= number <= 49

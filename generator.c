@@ -236,12 +236,20 @@ void generateLabel(char *label)
 {
     printf("LABEL ??%s\n", label);
 }
+void generateLabelEnd(char *label){
+    printf("LABEL ??%s_end\n", label);
+}
 void UniqueLabel(char *labelbefore){
     printf("LABEL ??%s%d\n", labelbefore, labelcnt);
     labelcnt++;
 }
 
-void generateJump(char *label);
+void generateJump(char *label){
+    printf("JUMP ??%s\n", label);
+}
+void generateJumpEnd(char *label){
+    printf("JUMP ??%s_end\n", label);
+}
 void generateJumpIfEqs(char *label);
 
 
@@ -457,6 +465,7 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 break;
 
             case CALL_I:
+                generateCall(instrList->activeElement->op1);
                 break;
 
             case RETURN_I:
@@ -587,14 +596,19 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 generateLabel(instrList->activeElement->dest);
                 break;
             case FUNC_S_I:
+                printf("# ----FUNCTION START\n");
+                generateJumpEnd(instrList->activeElement->dest);
                 generateFuncStart(instrList->activeElement->dest);
                 break;
             
             case FUNC_E_I:
                 generateFunctionEnd();
+                generateLabelEnd(instrList->activeElement->dest);
+                printf("# ----FUNCTION END\n");
                 break;
 
             case JUMP_I:
+                generateJump(instrList->activeElement->dest);
                 break;
 
             case JUMPIFEQS_I:

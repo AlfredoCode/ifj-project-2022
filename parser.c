@@ -21,7 +21,7 @@
 
 
 int token_res = 0;
-char *currentPOP = "";
+char *currentPOP = NULL;
 
 // TODO MAKE IT STATIC BOI
 bool insideIf = false;
@@ -324,6 +324,7 @@ int statement_list(htab_t *localTable){
             if(funcName == NULL){
                 errHandler(SEM_FUNC_ERR, "Semantic Error ---> FUNCTION NOT DEFINED <---\n");
             }
+            char *currFuncName = token.string;
             token_res = GetToken(&token);  
             if(!token_res){
                 errHandler(LEX_ERR,"Lexical error\n");
@@ -342,6 +343,7 @@ int statement_list(htab_t *localTable){
                 if(token.type != SEMICOL){
                     errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
                 }
+                insertInstruction(iList, CALL_I, currFuncName, NULL, NULL);
                 res = statement_list(localTable);
                 if(res != SUCCESS_ERR){
                     return res;
@@ -379,6 +381,7 @@ int builtinParams(){
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
+    insertInstruction(iList, PUSHS_NIL_I, NULL, NULL, NULL);    // PUSHES NIL TO STACK SO WE KNOW WHERE TO STOP
     switch(token.type){
         case R_PAR: // NO PARAM 
             if(multipleParams){
@@ -387,7 +390,7 @@ int builtinParams(){
             }
             return SUCCESS_ERR;
         case DOLLAR:
-            token_res = GetToken(&token);   // type $ <ID>
+            token_res = GetToken(&token);   // $ <ID>
             if(!token_res){
                 errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
             }
@@ -395,8 +398,8 @@ int builtinParams(){
                 errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER AFTER $ BUILTIN <---\n");
             }
             // SEMANTIC
-           
-
+            insertInstruction(iList, PUSHS_ID_I, token.string, NULL, NULL);
+            
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
                 errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
@@ -412,7 +415,15 @@ int builtinParams(){
                     return SYNTAX_ERR;
             }
         case INT_T: case STRING_T: case FLOAT_T:
-            
+            if(token.type == INT_T){
+                insertInstruction(iList, PUSHS_INT_I, token.string, NULL, NULL);
+            }
+            else if(token.type == STRING_T){
+                insertInstruction(iList, PUSHS_STRING_I, token.string, NULL, NULL);
+            }
+            else{
+                insertInstruction(iList, PUSHS_FLOAT_I, token.string, NULL, NULL);
+            }
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
                 errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
@@ -475,7 +486,7 @@ int checkWhile(htab_t *localTable){
     }
     *expr_tok = token;
     insertExpr(expression, expr_tok);
-    expr_parse(localTable, expression, iList, NULL); // modif
+    expr_parse(localTable, expression, iList, NULL); // modif not poping
     exprListDispose(expression);
     insideWhile = true;
     res = statement_list(localTable);  // Kontrola vnitřku funkce
@@ -516,6 +527,7 @@ int functionCheck(){
     if(statementFun != NULL){
         errHandler(SEM_FUNC_ERR,"SEMANTIC ERROR ---> Function redefinition <---\n");
     }
+    char *currentFuncName = token.string;
     insertInstruction(iList, FUNC_S_I, NULL, NULL, token.string);
     insertInstruction(iList, DEFVAR_LOC_I, NULL, NULL, NULL);
     statementFun = htab_lookup_add(funTable, token.string);   // add  func identifier to symtable
@@ -676,8 +688,8 @@ int functionCheck(){
     if(currentReturnType == ret_string || currentReturnType == ret_int || currentReturnType == ret_float){
 
         // statement = htab_find(localTable,statement->name);    // DEBUG
-        //     printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
-        if(expr_parse(localTable, expression, iList, NULL) != currentReturnType){   // sending return expression to expr_parser
+        //     printf("name is %s, value is %s\n",statement->name, statement->value);  
+        if(expr_parse(localTable, expression, iList, currentPOP) != currentReturnType){   // sending return expression to expr_parser
 
             fprintf(stderr, "Wrong return type\n");
             return SEM_PARAM_ERR;
@@ -692,7 +704,7 @@ int functionCheck(){
     if(token.type != R_BRAC){
         errHandler(SYNTAX_ERR, "Syntax error ---> MISSING RIGHT BRACKET AFTER RETURN STATEMENT <---\n");
     }
-    insertInstruction(iList, FUNC_E_I, NULL, NULL, NULL);
+    insertInstruction(iList, FUNC_E_I, NULL, NULL, currentFuncName);
     // printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
     insideFunc = false;
     return statement_list(symtable);
@@ -933,7 +945,7 @@ int condiCheck(htab_t *table){
     //     expr = expr->previous;
     // }
     // putchar('\n');
-    expr_parse(table, expression, iList, NULL);
+    expr_parse(table, expression, iList, NULL);   // not poping
     insertInstruction(iList, PUSHS_INT_I, "1", NULL, NULL); // CONDITIONAL JUMP BASED ON STACK VALUE
     insertInstruction(iList, JUMPIFNEQS_I, NULL, NULL, NULL);
     exprListDispose(expression);
@@ -992,10 +1004,10 @@ int expression_check(htab_t *table){
         errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
     }
     currentPOP = malloc(sizeof(char));
+   
     statement = htab_lookup_add(table, token.string);   // add  identifier to symtable
     currentPOP = realloc(currentPOP, strlen(token.string)*sizeof(char));
     strcpy(currentPOP, token.string);
-
     token_res = GetToken(&token);
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -1003,6 +1015,7 @@ int expression_check(htab_t *table){
     if(token.type == ASSIG){
         // ZAVOLAT EXPRESSION PARSER
         res = statement_list_inside(table);
+        insertInstruction(iList, POPS_I, currentPOP, NULL, NULL);
         
         return res;  
     }
@@ -1048,7 +1061,7 @@ int statement_list_inside(htab_t *table){
     if(expr_tok == NULL){
         return INTERNAL_ERR;
     }
-   
+    stat_t *funcName;
     switch(token.type){
         
         case DOLLAR:    // $ <ID> <SEPARATOR_PICK>  
@@ -1101,10 +1114,17 @@ int statement_list_inside(htab_t *table){
             res = separators(table);
             return res;
         case ID:    //$x = foo();   TODO FUNCTION NOT DEFINED
+        
+            funcName = htab_find(funTable, token.string);   // Was function defined before??
+            if(funcName == NULL){
+                errHandler(SEM_FUNC_ERR, "Semantic Error ---> FUNCTION NOT DEFINED <---\n");
+            }
+            char *currFuncName = token.string;
             token_res = GetToken(&token);  
             if(!token_res){
                 errHandler(LEX_ERR,"Lexical error\n");
             }
+
             if(token.type == L_PAR){
                 res = builtinParams();
                 if(res != SUCCESS_ERR){
@@ -1118,6 +1138,7 @@ int statement_list_inside(htab_t *table){
                 if(token.type != SEMICOL){
                     errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
                 }
+                insertInstruction(iList, CALL_I, currFuncName, NULL, NULL);
                 res = statement_list(table);
                 if(res != SUCCESS_ERR){
                     return res;
