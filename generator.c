@@ -58,7 +58,44 @@ int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* o
 	}
 	instrList->lastElement = newElement;	
     return SUCCESS_ERR;
+}
 
+int insertInstructionT(instructList_T *iList, instructElem instruction)
+{
+    instruction->previous = iList->lastElement;
+    instruction->next = NULL;
+	if (iList->lastElement != NULL) {
+		iList->lastElement->next = instruction;
+	} else {
+		iList->firstElement  = instruction;
+	}
+	iList->lastElement = instruction;
+    return SUCCESS_ERR;
+}
+
+instructElem popInstruction(instructList_T *iList)
+{
+    // Cant pop from empty stack
+    if (!iList->lastElement) return NULL;
+
+    // "Remove" active element ptr if I pop the element
+    if (iList->activeElement == iList->lastElement) iList->activeElement = NULL;
+
+    // instruction to pop
+    instructElem instruction = iList->lastElement;
+
+    // If the list has one item in it
+    if (iList->firstElement == iList->lastElement){
+        iList->firstElement = NULL;
+        iList->lastElement = NULL;
+
+        return instruction;
+    }
+
+    iList->lastElement = iList->lastElement->previous;
+    iList->lastElement->next = NULL;
+
+    return instruction;
 }
 
 // ======================== GENERATION ==========================
@@ -398,6 +435,40 @@ char* stringConvertor(char* stringBefore){
     return retstring;
 }
 
+void insertFunctionCall(instructList_T *iList, char* funName)
+{
+    if (strcmp(funName, "write")){
+        // I have gotten something thats not write
+        insertInstruction(iList, CALL_I, funName, NULL, NULL);
+        return;
+    }
+
+    // I have gotten the write call, so I must flip the argx
+    // so I do not print in reverse order.
+    instructList_T *tmp = malloc (sizeof(instructList_T));
+    initInstList(tmp);
+    
+    // PUSHS nil@nil is the "last" arg
+    while(iList->lastElement->operation != PUSHS_NIL_I){
+        // I save the instructions in different stack
+        insertInstructionT(tmp, popInstruction(iList));
+    } 
+
+    // Push the instructions back on stack in reverse order
+    instructElem ptr = tmp->firstElement;
+    while (ptr){
+        insertInstruction(iList, ptr->operation, ptr->op1, ptr->op2, ptr->dest);
+        ptr = ptr->next;
+    }
+
+    // All good, we can finally call write
+    insertInstruction(iList, CALL_I, "write", NULL, NULL);
+    // Not leaving garbage behind
+    while(tmp->lastElement){
+        free(popInstruction(tmp));
+    }
+    free(tmp);
+}
 
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList, htab_list *symList){
