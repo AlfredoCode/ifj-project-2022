@@ -179,6 +179,17 @@ void generatorInit(instructList_T *instrList, htab_list *symList);
 // HELPER FUNCTIONS
 void UniqueLabel(char *labelbefore);
 
+/**
+ * @brief   inserts function call to iList
+ * @param   iList to insert to
+ * @param   function name
+ *
+ * Inserts call label to instruction funName
+ * If funName is write, it reverses the arguments on stack then
+ * calls write.
+ */
+void insertFunctionCall(instructList_T *iList, char* funName);
+
 /*
  * @brief   converts c str to ifjcode22 str
  * @param   string to convert

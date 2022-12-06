@@ -344,7 +344,7 @@ int statement_list(htab_t *localTable){
                 if(token.type != SEMICOL){
                     errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
                 }
-                insertInstruction(iList, CALL_I, currFuncName, NULL, NULL);
+                insertFunctionCall(iList, currFuncName);
                 res = statement_list(localTable);
                 if(res != SUCCESS_ERR){
                     return res;
