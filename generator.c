@@ -81,8 +81,19 @@ void generateRead(char *var, INSTRUCTIONS type){
 
 void generateWrite()
 {
+    printf("LABEL ??write\n");
+    printf("LABEL write?while\n");
     printf("POPS GF@temp0\n");
+    printf("JUMPIFEQ write?whileEnd GF@temp0 nil@nil\n");
     printf("WRITE GF@temp0\n");
+    printf("JUMP write?while\n");
+    printf("LABEL write?whileEnd\n");
+    printf("RETURN\n");
+}
+
+void generateWriteCall()
+{
+    printf("CALL ??write\n");
 }
 
 //TODO
@@ -224,7 +235,7 @@ void generatePopFrame(){
 }
 
 void generateCall(char *funcname){
-    printf("CALL %s\n", funcname);
+    printf("CALL ??%s\n", funcname);
 }
 
 void generateReturn(){
@@ -364,9 +375,13 @@ char* stringConvertor(char* stringBefore){
             if (stringBefore[i + 1] == 110) {
                 // newline
                 snprintf(helpString, 5, "\\010");
+                // skip next char
+                i++;
             } else if (stringBefore[i + 1] == 116) {
                 // tab
                 snprintf(helpString, 5, "\\009");
+                // skip next char
+                i++;
             } else {
                 snprintf(helpString, 5, "\\0%d", stringBefore[i]);
             }
@@ -384,11 +399,11 @@ char* stringConvertor(char* stringBefore){
 }
 
 
-
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList, htab_list *symList){
     generateProgramHead();
     generateOrd();
+    generateWrite();
     generateMainStart();
     First(instrList);
 
@@ -564,7 +579,7 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 break;
 
             case WRITE_I:
-                generateWrite(instrList->activeElement->op1);
+                generateWriteCall();
                 break;
                 
             case ORD_I:

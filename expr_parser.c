@@ -288,6 +288,7 @@ int evaluate(stack_t *stack, htab_t *symtable, instructList_T *iList)
             switch (id->type){
                 case t_int:
                     top->symbol = term_int;
+                    insertInstruction(iList, INT2FLOATS_I, NULL, NULL, NULL);
                     break;
 
                 case t_float:
