@@ -689,7 +689,9 @@ int functionCheck(){
 
         // statement = htab_find(localTable,statement->name);    // DEBUG
         //     printf("name is %s, value is %s\n",statement->name, statement->value);  
-        if(expr_parse(localTable, expression, iList, currentPOP) != currentReturnType){   // sending return expression to expr_parser
+        
+        
+        if(expr_parse(localTable, expression, iList, NULL) != currentReturnType){   // sending return expression to expr_parser
 
             fprintf(stderr, "Wrong return type\n");
             return SEM_PARAM_ERR;
@@ -1012,13 +1014,10 @@ int expression_check(htab_t *table){
         errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type == ASSIG){
-        char *passPOP = malloc(sizeof(char)* strlen(currentPOP));
-        strcpy(passPOP, currentPOP);
+        
         // ZAVOLAT EXPRESSION PARSER
         res = statement_list_inside(table);
-        insertInstruction(iList, POPS_I, passPOP, NULL, NULL);
-        
-
+        // insertInstruction(iList, POPS_I, passPOP, NULL, NULL);
         
         return res;  
     }
@@ -1141,7 +1140,16 @@ int statement_list_inside(htab_t *table){
                 if(token.type != SEMICOL){
                     errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
                 }
+                char *passPOP;
+                if(currentPOP){
+                    passPOP = malloc(sizeof(char)* strlen(currentPOP));
+                    strcpy(passPOP, currentPOP);
+                }
+                else{
+                    passPOP = NULL;
+                }
                 insertInstruction(iList, CALL_I, currFuncName, NULL, NULL);
+                insertInstruction(iList, POPS_I, passPOP, NULL, NULL);
                 insertInstruction(iList, CLEARS_I, NULL, NULL, NULL);
                 res = statement_list(table);
                 if(res != SUCCESS_ERR){
@@ -1181,8 +1189,15 @@ int separators(htab_t *table){
             //     expr = expr->previous;
             // }
             // putchar('\n');
-            
-            expr_parse(table, expression, iList, currentPOP);
+            char *passPOP;
+            if(currentPOP){
+            passPOP = malloc(sizeof(char)* strlen(currentPOP));
+            strcpy(passPOP, currentPOP);
+            }
+            else{
+                passPOP = NULL;
+            }
+            expr_parse(table, expression, iList, passPOP);
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
                      // expr_parse(expression_list, symtable);
             // EXPRESSION LIST DISPOSE
