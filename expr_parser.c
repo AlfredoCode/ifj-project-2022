@@ -512,7 +512,7 @@ p_return expr_parse(htab_t *symtable, expression_T *list, instructList_T *iList,
     if (retVal){
         char *retV = malloc(strlen(retVal) + 1);
         strcpy(retV, retVal);
-        // insertInstruction(iList, POPS_I, retV, NULL, NULL);
+        insertInstruction(iList, POPS_I, retV, NULL, NULL);
     }
     stackClear(stack);
     return ret;
