@@ -36,6 +36,7 @@ typedef struct statement {
     stat_type type;
     char* name;
     char* value;
+    int index;
 } stat_t;
 
 typedef struct htab_item {

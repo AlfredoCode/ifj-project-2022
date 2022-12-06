@@ -154,6 +154,7 @@ stat_t *htab_lookup_add(htab_t *t, htab_key_t name)
 
     ptr->statement = statement;
     ptr->next = t->arr_ptr[index];
+    ptr->statement->type = 99;
     t->arr_ptr[index] = ptr;
 
 

@@ -53,7 +53,7 @@ int checkIfStat(struct htab *table);
 int checkIfOperators();
 int elseCheck(struct htab *table);
 int functionCheck();
-int funcParams(struct htab *localTab, stat_t *statementIn);
+int funcParams(struct htab *localTab, stat_t *statementIn, int index);
 int checkWhile(struct htab *localTab);
 int builtinParams();
 

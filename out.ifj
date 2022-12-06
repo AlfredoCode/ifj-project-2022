@@ -19,29 +19,23 @@ RETURN
 LABEL ??main
 CREATEFRAME
 PUSHFRAME
-DEFVAR LF@x
-DEFVAR LF@y
-DEFVAR LF@z
 # ----FUNCTION START
-JUMP ??bar_end
-LABEL ??bar
+JUMP ??hlavni_program_end
+LABEL ??hlavni_program
 CREATEFRAME
 PUSHFRAME
-PUSHS float@0x1.4p+2
-FLOAT2INTS
+DEFVAR LF@year
+PUSHS nil@nil
+PUSHS string@\010
+PUSHS LF@year
+PUSHS string@Hello\032from\032IFJ
+CALL ??write
 POPFRAME
 RETURN
-LABEL ??bar_end
+LABEL ??hlavni_program_end
 # ----FUNCTION END
 PUSHS nil@nil
-CALL ??bar
-POPS LF@z
-CLEARS
-PUSHS float@0x1.4p+2
-FLOAT2INTS
-POPS LF@x
-PUSHS float@0x1p+1
-FLOAT2INTS
-POPS LF@y
+PUSHS int@22
+CALL ??hlavni_program
 POPFRAME
 # END OF PROGRAM

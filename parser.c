@@ -331,7 +331,7 @@ int statement_list(htab_t *localTable){
             }
             if(token.type == L_PAR){
                 insertInstruction(iList, PUSHS_NIL_I, NULL, NULL, NULL);    // PUSHES NIL TO STACK SO WE KNOW WHERE TO STOP
-                res = builtinParams();
+                res = builtinParams(0);
                 if(res != SUCCESS_ERR){
                     errHandler(SYNTAX_ERR,"Syntax error\n");// ADD SEMICOL TO LL ON ITS OWN!!!
                 }
@@ -550,7 +550,7 @@ int functionCheck(){
     if(token.type != L_PAR){
         errHandler(SYNTAX_ERR, "Syntax error ---> MISSING LEFT PARENTHESIS IN FUNCTION <---\n");
     }
-    res = funcParams(localTable, statement); // Parametry funkce
+    res = funcParams(localTable, statement, 0); // Parametry funkce
     if(res != SUCCESS_ERR){
         errHandler(res, "Syntax error ---> Wrong parameters in function <---\n");
     }
@@ -618,6 +618,10 @@ int functionCheck(){
             return SUCCESS_ERR;
         }
         if(token.type != KEYWORD && token.keyword != RETURN){
+            if(!(currentReturnType == ret_float || currentReturnType == ret_int || currentReturnType == ret_string)){
+                insertInstruction(iList, FUNC_E_I, NULL, NULL, currentFuncName);
+                return SUCCESS_ERR;
+            }
             return SEM_PARAM_ERR;   // NO RETURN FOUND
         }
         return res;
@@ -626,6 +630,7 @@ int functionCheck(){
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
+    
     if(currentReturnType == ret_float || currentReturnType == ret_int || currentReturnType == ret_string){
         token_t *expr_tok;
         switch(token.type){
@@ -712,10 +717,10 @@ int functionCheck(){
     return statement_list(symtable);
 }
 
-int funcParams(htab_t *localTable, stat_t *statementIn){
+int funcParams(htab_t *localTable, stat_t *statementIn, int index){
     int res = SYNTAX_ERR;
     static bool multipleParams = false;
-    
+    index++;
     token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> )
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -771,6 +776,9 @@ int funcParams(htab_t *localTable, stat_t *statementIn){
             }
             // SEMANTIC
             statementIn = htab_lookup_add(localTable, token.string);  // ADD PARAM TO LOCAL VAR TABLE
+            if(statementIn->type != 99){
+                errHandler(SEM_PARAM_ERR, "Semantic error PARAMS REDEFINITION\n");
+            }
             statementIn->type = statement->type;
             // insertInstruction(iList, POPS_I, token.string, NULL, NULL);
             
@@ -783,7 +791,7 @@ int funcParams(htab_t *localTable, stat_t *statementIn){
                     return SUCCESS_ERR;
                 case COMMA:
                     multipleParams = true;
-                    return funcParams(localTable, statement);
+                    return funcParams(localTable, statement, index);
                 default:
                     return SYNTAX_ERR;
             }
@@ -1148,7 +1156,7 @@ int statement_list_inside(htab_t *table){
                 else{
                     passPOP = NULL;
                 }
-                insertInstruction(iList, CALL_I, currFuncName, NULL, NULL);
+                insertFunctionCall(iList, currFuncName);
                 insertInstruction(iList, POPS_I, passPOP, NULL, NULL);
                 insertInstruction(iList, CLEARS_I, NULL, NULL, NULL);
                 res = statement_list(table);

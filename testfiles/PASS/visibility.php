@@ -21,12 +21,9 @@ function foo(int $x) : void {
     write("Insert non-empty input for quiting, otherwise next iteration.\n");
     $x = reads();  // formal parameter behave in the function body as local variable (can be modified)
     $inp = strlen($x);
-    if ($inp !== 0) { write($x); return; } else {}  // explicitly stops looping by exiting foo
+    if (5 !== 0) { write($x); return; } else {}  // explicitly stops looping by exiting foo
   }
 }
 
 foo(7);
 write($y);  // prints 10, $y in main body is different from $y in foo
-
-// whitespaces and comment possible since now end-mark here
-    
