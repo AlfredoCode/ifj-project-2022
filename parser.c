@@ -770,7 +770,7 @@ int funcParams(htab_t *localTable, stat_t *statementIn){
             // SEMANTIC
             statementIn = htab_lookup_add(localTable, token.string);  // ADD PARAM TO LOCAL VAR TABLE
             statementIn->type = statement->type;
-            insertInstruction(iList, POPS_I, token.string, NULL, NULL);
+            // insertInstruction(iList, POPS_I, token.string, NULL, NULL);
             
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
@@ -1003,19 +1003,22 @@ int expression_check(htab_t *table){
     if(!((token.type == ID) || (token.type == KEYWORD))){
         errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
     }
-    currentPOP = malloc(sizeof(char));
    
     statement = htab_lookup_add(table, token.string);   // add  identifier to symtable
-    currentPOP = realloc(currentPOP, strlen(token.string)*sizeof(char));
+    currentPOP = malloc(strlen(token.string)*sizeof(char));
     strcpy(currentPOP, token.string);
     token_res = GetToken(&token);
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
     if(token.type == ASSIG){
+        char *passPOP = malloc(sizeof(char)* strlen(currentPOP));
+        strcpy(passPOP, currentPOP);
         // ZAVOLAT EXPRESSION PARSER
         res = statement_list_inside(table);
-        insertInstruction(iList, POPS_I, currentPOP, NULL, NULL);
+        insertInstruction(iList, POPS_I, passPOP, NULL, NULL);
+        
+
         
         return res;  
     }
@@ -1113,8 +1116,7 @@ int statement_list_inside(htab_t *table){
             insertExpr(expression, expr_tok);
             res = separators(table);
             return res;
-        case ID:    //$x = foo();   TODO FUNCTION NOT DEFINED
-        
+        case ID:    
             funcName = htab_find(funTable, token.string);   // Was function defined before??
             if(funcName == NULL){
                 errHandler(SEM_FUNC_ERR, "Semantic Error ---> FUNCTION NOT DEFINED <---\n");
@@ -1140,6 +1142,7 @@ int statement_list_inside(htab_t *table){
                     errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER <---\n");
                 }
                 insertInstruction(iList, CALL_I, currFuncName, NULL, NULL);
+                insertInstruction(iList, CLEARS_I, NULL, NULL, NULL);
                 res = statement_list(table);
                 if(res != SUCCESS_ERR){
                     return res;
@@ -1150,7 +1153,7 @@ int statement_list_inside(htab_t *table){
             break;
         default:
             errHandler(SYNTAX_ERR, "Syntax error\n");
-
+                
     }
     // How did you get there?
     return res;
@@ -1221,6 +1224,7 @@ int separators(htab_t *table){
  * struct na ukládání symtables, kde bude název fce, ke které patří
  * pops instruction after expr_parse
  * How to generate inside of function before main??
+ * CURRENT_POP could be deleted
  * 
  */
 
