@@ -27,7 +27,7 @@ void initInstList(instructList_T *instrList){
 }
 
 
-void First(instructList_T *instrList ) {
+void First(instructList_T *instrList ){
 	instrList->activeElement = instrList->firstElement;
 }
 
@@ -96,6 +96,24 @@ instructElem popInstruction(instructList_T *iList)
     iList->lastElement->next = NULL;
 
     return instruction;
+}
+
+void Dispose(instructList_T *instrList){
+	while(instrList->firstElement != NULL){				
+		instructElem tmpElementPtr;
+		tmpElementPtr = instrList->firstElement;
+		if(instrList->firstElement == instrList->activeElement){
+			instrList->activeElement = NULL;
+		}
+		if(instrList->firstElement == instrList->lastElement){
+			instrList->firstElement = NULL;
+			instrList->lastElement = NULL;
+		}else{
+			instrList->firstElement = tmpElementPtr->next;
+			instrList->firstElement->previous = NULL;
+		}
+		free(tmpElementPtr);
+	}
 }
 
 // ======================== GENERATION ==========================
@@ -287,9 +305,11 @@ void generateLabel(char *label)
 void generateLabelEnd(char *label){
     printf("LABEL ??%s_end\n", label);
 }
-void UniqueLabel(char *labelbefore){
-    printf("LABEL ??%s%d\n", labelbefore, labelcnt);
+char *UniqueLabel(char *labelbefore){
+    char *labelafter = (char *) malloc(strlen(labelbefore) + sizeof(labelcnt) + 1);
+    sprintf(labelafter, "%s%d", labelbefore, labelcnt);
     labelcnt++;
+    return labelafter;
 }
 
 void generateJump(char *label){
@@ -481,51 +501,51 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
     while(instrList->activeElement != NULL){
         switch(instrList->activeElement->operation){
             case MOVEI2TF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case MOVEF2TF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case MOVES2TF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case MOVENIL2TF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case MOVELF2TF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case MOVEI2LF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case MOVEF2LF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case MOVES2LF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case MOVENIL2LF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case MOVETF2LF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case MOVELF2LF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case MOVETF2TF_I:
-                generateMove(instrList->activeElement->op1,instrList->activeElement->op2, instrList->activeElement->operation);
+                generateMove(instrList->activeElement->dest,instrList->activeElement->op1, instrList->activeElement->operation);
                 break;
 
             case CREATEFRAME_I:
@@ -714,6 +734,9 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 break;
         }
         Next(instrList);
+    }
+    if(instrList->activeElement == NULL){
+        Dispose(instrList);
     }
     generateMainEnd();
 }
