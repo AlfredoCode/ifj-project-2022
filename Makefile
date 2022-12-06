@@ -18,7 +18,7 @@ all: expr_stack.o expr_parser.o  error.o scanner.o parser.o symtable.o  main.o g
 
 run: all
 	@./ifj22 < $(file) > out.ifj
-	@./ic22int.exe out.ifj
+	@./ic22int out.ifj
 
 pack:
 	tar -cvzf $(packageName).tgz *.c *.h Makefile rozdeleni dokumentace.pdf
