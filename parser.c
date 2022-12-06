@@ -330,6 +330,7 @@ int statement_list(htab_t *localTable){
                 errHandler(LEX_ERR,"Lexical error\n");
             }
             if(token.type == L_PAR){
+                insertInstruction(iList, PUSHS_NIL_I, NULL, NULL, NULL);    // PUSHES NIL TO STACK SO WE KNOW WHERE TO STOP
                 res = builtinParams();
                 if(res != SUCCESS_ERR){
                     errHandler(SYNTAX_ERR,"Syntax error\n");// ADD SEMICOL TO LL ON ITS OWN!!!
@@ -381,7 +382,6 @@ int builtinParams(){
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
-    insertInstruction(iList, PUSHS_NIL_I, NULL, NULL, NULL);    // PUSHES NIL TO STACK SO WE KNOW WHERE TO STOP
     switch(token.type){
         case R_PAR: // NO PARAM 
             if(multipleParams){
@@ -1126,6 +1126,7 @@ int statement_list_inside(htab_t *table){
             }
 
             if(token.type == L_PAR){
+                insertInstruction(iList, PUSHS_NIL_I, NULL, NULL, NULL);    // PUSHES NIL TO STACK SO WE KNOW WHERE TO STOP
                 res = builtinParams();
                 if(res != SUCCESS_ERR){
                     errHandler(SYNTAX_ERR, "Syntax error\n"); // ADD SEMICOL TO LL ON ITS OWN!!!
