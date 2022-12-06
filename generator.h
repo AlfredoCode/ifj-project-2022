@@ -92,6 +92,9 @@ typedef struct instructionList{
 }instructList_T;
 
 void initInstList(instructList_T *instrList);
+void First(instructList_T *instrList );
+void Next(instructList_T *instrList);
+void Dispose(instructList_T *instrList);
 
 //Can possibly be type of instructList_T so we can modify the value in parser and in expr_parser
 int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* op1, char* op2, char* dest); 
@@ -177,7 +180,7 @@ void generatorInit(instructList_T *instrList, htab_list *symList);
 
 
 // HELPER FUNCTIONS
-void UniqueLabel(char *labelbefore);
+char *UniqueLabel(char *labelbefore);
 
 /*
  * @brief   converts c str to ifjcode22 str
