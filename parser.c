@@ -422,14 +422,19 @@ int checkWhile(htab_t *localTable){
 
     res = checkIfStat(localTable);    // CHECK RIGHT SIDE OF CONDITION IN WHILE
     if(res != SUCCESS_ERR){
+        if(token.type == L_BRAC){
+            goto ONLY_OP_W;
+        }
         return res;
     }
     
-    insertInstruction(iList, LABEL_I, NULL, NULL, label);     // GENERATE ELSE LABEL  
+    
     token_res = GetToken(&token);  
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
+    ONLY_OP_W:
+    insertInstruction(iList, LABEL_I, NULL, NULL, label);     // GENERATE ELSE LABEL  
     if(token.type != L_BRAC){               // L_BRAC CHECK {
         errHandler(SYNTAX_ERR,"Syntax error ---> MISSING LEFT BRACKET <---\n");
     }
@@ -880,6 +885,9 @@ int condiCheck(htab_t *table){
     }
     res = checkIfStat(table);    // CHECK RIGHT SIDE OF CONDITION IN IF
     if(res != SUCCESS_ERR){
+        if(token.type == L_BRAC){
+            goto ONLY_OP;
+        }
         return res;
     }
 
@@ -887,9 +895,11 @@ int condiCheck(htab_t *table){
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
+    ONLY_OP:
     if(token.type != L_BRAC){               // L_BRAC CHECK {
         errHandler(SYNTAX_ERR,"Syntax error ---> MISSING LEFT BRACKET <---\n");
     }
+    
     token_t *expr_tok2 = (token_t*) malloc(sizeof(*expr_tok2));
     if(expr_tok2 == NULL){
         return INTERNAL_ERR;

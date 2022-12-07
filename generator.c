@@ -463,9 +463,17 @@ void generateCondiCheck(){
     // STRING -> STRING@ -> EQS NOTS 
     printf("LABEL ??condiString\n");
     printf("JUMPIFNEQ ??condiNil GF@temp1 string@string\n");
+    printf("PUSHS string@0\n");
+    printf("JUMPIFEQS ??strCONV\n");
     printf("PUSHS string@\n");
     printf("EQS\n");
     printf("NOTS\n");
+    printf("JUMP ??EndcondiCheck\n");
+
+    //strCONV
+    printf("LABEL ??strCONV\n");
+    printf("PUSHS bool@true\n");
+    printf("CLEARS\n");
     printf("JUMP ??EndcondiCheck\n");
     //NIL
     printf("LABEL ??condiNil\n");
