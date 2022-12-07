@@ -121,8 +121,8 @@ int arithmetic_check(stack_t *stack)
     if (tok1->symbol == term_str) {
         if (tok2->symbol == term_str || tok2->symbol == term_null) {
             // Remove top two terms
-            stackPop(stack);
-            stackPop(stack);
+            free(stackPop(stack));
+            free(stackPop(stack));
 
             // Change top item symbol to str
             // I only care about the symbol now anyways
@@ -141,16 +141,16 @@ int arithmetic_check(stack_t *stack)
             stackPeek(stack, 2)->symbol = term_null;
         }
         // Just pop the two tokens
-        stackPop(stack);
-        stackPop(stack);
+        free(stackPop(stack));
+        free(stackPop(stack));
 
         return 0;
 
     } else if (tok2->symbol == term_null) {
         // Copy the type of the first token
         tok2->symbol = tok1->symbol;
-        stackPop(stack);
-        stackPop(stack);
+        free(stackPop(stack));
+        free(stackPop(stack));
         
         return 0;
     }
@@ -167,8 +167,8 @@ int arithmetic_check(stack_t *stack)
         }
 
         // Pop the two items that are not needed anymore
-        stackPop(stack);
-        stackPop(stack);
+        free(stackPop(stack));
+        free(stackPop(stack));
 
         return 0;
     }
@@ -184,8 +184,8 @@ int evaluate_bool(stack_t *stack)
 
     // null is valid too
     if (tok1->symbol == term_null || tok2->symbol == term_null) {
-        stackPop(stack);
-        stackPop(stack);
+        free(stackPop(stack));
+        free(stackPop(stack));
         
         stackPeek(stack, 0)->symbol = term_bool;
 
@@ -196,8 +196,8 @@ int evaluate_bool(stack_t *stack)
     if (tok1->symbol == term_str) {
         if (tok2->symbol == term_str) {
             // same as in line 87
-            stackPop(stack);
-            stackPop(stack); 
+            free(stackPop(stack));
+            free(stackPop(stack));
 
             stackPeek(stack, 0)->symbol = term_bool;
 
@@ -210,8 +210,8 @@ int evaluate_bool(stack_t *stack)
     // Much easier, are both numbers? Great, its a bool.
     if ((tok1->symbol == term_float || tok1->symbol == term_int)
             && (tok2->symbol == term_float || tok2->symbol == term_int)) {
-        stackPop(stack);
-        stackPop(stack);
+        free(stackPop(stack));
+        free(stackPop(stack));
 
         stackPeek(stack, 0)->symbol = term_bool;
         
@@ -228,9 +228,9 @@ int evaluate_brackets(stack_t *stack)
     stack_token_t *tok = stackPeek(stack, 1);
 
     // Pop both brackets and the middle one (the one I saved)
+    free(stackPop(stack));
     stackPop(stack);
-    stackPop(stack);
-    stackPop(stack);
+    free(stackPop(stack));
 
     // Return the thing between brackets back
     stackPush(stack, tok->token);
@@ -246,8 +246,8 @@ int evaluate_concatenation(stack_t *stack)
 
     // Null checks, again
     if (tok1->symbol == term_null || tok2->symbol == term_null){
-        stackPop(stack);
-        stackPop(stack);
+        free(stackPop(stack));
+        free(stackPop(stack));
         
         // already the token on top, so why not
         tok2->symbol = term_str;
@@ -261,8 +261,8 @@ int evaluate_concatenation(stack_t *stack)
     }
 
     // Just need to pop the first two, since the third one is already a term_str
-    stackPop(stack);
-    stackPop(stack);
+    free(stackPop(stack));
+    free(stackPop(stack));
 
     return 0;
 }
