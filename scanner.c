@@ -58,6 +58,32 @@ bool GetProlog(){
                         if (isspace(c)){
                             return true;
                         }
+                        if (c == '/'){
+                            c = getchar();
+                            if(c == '*'){
+                                bool end_cycle = false;
+                                bool star = false;
+                                while(!end_cycle){
+                                    c = getchar();
+                                    if (c == '*'){
+                                        star = true;
+                                    }
+                                    else if (c == '/' && star){
+                                        end_cycle = true;
+                                    }
+                                    else{
+                                        star = false;
+                                    }
+                                }
+                                return true;
+                            }
+                            else if (c == '/'){
+                                while(c != '\n'){
+                                    c = getchar();
+                                }
+                                return true;
+                            }
+                        }
                     }
                 }
             }
