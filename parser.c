@@ -279,14 +279,16 @@ int statement_list(htab_t *localTable){
     switch(token.type){
         case EOF_T: // FOUND ?>     
 
-            free(expression);
+            // free(expression);
             free(allTokens);
             
             return SUCCESS_ERR;
         case DOLLAR:    // $ <ID> <SEPARATOR_PICK>  
             res = expression_check(localTable);
-
-            return res;
+            if(res != SUCCESS_ERR){
+                return res;
+            }
+            return statement_list(localTable);
         case KEYWORD: 
             //  SEMANTIC - if, function, else, while, return only, otherwise SYNTAX_ERR
             switch(token.keyword){
@@ -298,7 +300,10 @@ int statement_list(htab_t *localTable){
                         errHandler(SYNTAX_ERR,"Correct, we do not want nested functions\n"); //TODO WHICH ERROR IS THIS?
                     }
                     res = functionCheck();
-                    return res;
+                    if(res != SUCCESS_ERR){
+                        return res;
+                    }
+                    return statement_list(localTable);
                 case WHILE:
                     res = checkWhile(localTable);
                     return res;
@@ -354,8 +359,9 @@ int statement_list(htab_t *localTable){
             }
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            p_return *ret_type;
+            p_return *ret_type = malloc(sizeof(p_return));
             res = separators(localTable, ret_type);
+
             return res;
         default:
             if((insideIf && token.type == R_BRAC) || (insideWhile && token.type == R_BRAC)){
@@ -659,10 +665,14 @@ int functionCheck(){
                 }
                 *expr_tok = token;
                 insertExpr(expression, expr_tok);
+                // p_return *ret_type = malloc(sizeof(p_return));
+                // separators(localTable, ret_type);
+                // return SUCCESS_ERR;
                 token_res = GetToken(&token);   // Looking for semicol;
                 if(!token_res){
                     errHandler(LEX_ERR,"Lexical error\n");
                 }
+                
                 break;
             case KEYWORD:
                 if(token.keyword == NULL_K){
@@ -1179,10 +1189,10 @@ int statement_list_inside(htab_t *table, p_return *ret_type){
                 insertFunctionCall(iList, currFuncName);
                 insertInstruction(iList, POPS_I, passPOP, NULL, NULL);
                 insertInstruction(iList, CLEARS_I, NULL, NULL, NULL);
-                res = statement_list(table);
-                if(res != SUCCESS_ERR){
-                    return res;
-                }
+                // res = statement_list(table);
+                // if(res != SUCCESS_ERR){
+                //     return res;
+                // }
                 return res;  
             }
             errHandler(SYNTAX_ERR, "Syntax error\n");
@@ -1236,7 +1246,8 @@ int separators(htab_t *table, p_return *ret_type){
             // printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
             free(currentPOP);
             exprListDispose(expression);
-            return statement_list(table); // $x=$y; || $x=5; || $x = $y.$z;
+            // return statement_list(table); // $x=$y; || $x=5; || $x = $y.$z;
+            return SUCCESS_ERR;
         case R_PAR:
             *expr_tok = token;
             insertExpr(expression, expr_tok);
@@ -1290,6 +1301,13 @@ int separators(htab_t *table, p_return *ret_type){
  * string --> srovnat s "" pokud false
  * bool --> srovnat s bool@false
  * nil --> false
+ * 
+ * 
+ * 
+ * 
+ * RET WRONG TYPE 4 - vracím 2, očekává 4
+ * SQUARE ROOT - WRONG GEN mby
+ * MUltiple statements, Single statement - err 2, should be 0
  * 
  */
 
