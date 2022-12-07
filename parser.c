@@ -25,7 +25,6 @@
 int token_res = 0;
 char *currentPOP = NULL;
 
-// TODO MAKE IT STATIC BOI
 bool insideIf = false;
 bool insideFunc = false;
 bool insideWhile = false;
@@ -51,8 +50,8 @@ instructList_T *iList;
 
 
 int declareCheck(){
-    // SEMANTIC  - Podívat se do tabulky symbolů, zda je ID rovno 'declare'
-    token_res = GetToken(&token);       // levá závorka
+    
+    token_res = GetToken(&token);       // LEFT PARENTHESIS
     if(!token_res){
         errHandler(LEX_ERR, "Lexical error\n");
     }
@@ -67,9 +66,9 @@ int declareCheck(){
     if(token.type != ID){
         errHandler(SYNTAX_ERR, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
     }
-    // SEMANTIC - MRKNI DO SYMTABLE NA HODNOTU ID
+    
 
-    token_res = GetToken(&token);   // rovná se
+    token_res = GetToken(&token);   // EQUALS
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
@@ -84,9 +83,8 @@ int declareCheck(){
     if(token.type != INT_T){
         errHandler(SYNTAX_ERR, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
     }
-    // SEMANTIC - MRKNI DO SYMTABLE NA HODNOTU INT
 
-    token_res = GetToken(&token);   // pravá závorka
+    token_res = GetToken(&token);   // RIGHT PARENTHESIS
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
@@ -94,7 +92,7 @@ int declareCheck(){
         errHandler(SYNTAX_ERR, "Syntax error ---> WRONG DECLARE FORMAT <---\n");
     }
 
-    token_res = GetToken(&token);   // středník
+    token_res = GetToken(&token);   // SEMICOL
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
@@ -168,10 +166,10 @@ int parse(){
         errHandler(INTERNAL_ERR,"Malloc failure\n");
     }
 
-    if(GetProlog()){    // modif was not here before
+    if(GetProlog()){    // CHECKS PROLOG 
         res = prog();
         if(res == SUCCESS_ERR){
-            generatorInit(iList, sym_list);
+            generatorInit(iList, sym_list); // GENERATE
         }
         return res;
     }
@@ -220,7 +218,7 @@ int statement_list(htab_t *localTable){
     token_res = GetToken(&token);  
     if(!token_res){
         if(insideIf || insideWhile || insideFunc){
-            errHandler(SYNTAX_ERR,"Syntax error ---> EOF inside If statement <---\n");     // DONT ASK ME
+            errHandler(SYNTAX_ERR,"Syntax error ---> EOF inside If statement <---\n");    
         }
         errHandler(LEX_ERR,"Lexical error\n");
     }
@@ -239,15 +237,14 @@ int statement_list(htab_t *localTable){
             return statement_list(localTable);
 
         case KEYWORD: 
-            //  SEMANTIC - if, function, else, while, return only, otherwise SYNTAX_ERR
             switch(token.keyword){
                 case IF:
                     res = condiCheck(localTable);
                     return res;
 
                 case FUNCTION:
-                    if(insideFunc){ // Vnořené funkce nechceme
-                        errHandler(SYNTAX_ERR,"Correct, we do not want nested functions\n"); //TODO WHICH ERROR IS THIS?
+                    if(insideFunc){ // WE DO NOT WANT NESTED FUNCTIONS
+                        errHandler(SYNTAX_ERR,"Correct, we do not want nested functions\n"); 
                     }
                     res = functionCheck();
                     if(res != SUCCESS_ERR){
@@ -267,7 +264,7 @@ int statement_list(htab_t *localTable){
                     return SYNTAX_ERR;
             }
         case ID:
-            funcName = htab_find(funTable, token.string);   // Was function defined before??
+            funcName = htab_find(funTable, token.string);   // WAS FUNCTION DEFINED BEFORE?
             if(funcName == NULL){
                 errHandler(SEM_FUNC_ERR, "Semantic Error ---> FUNCTION NOT DEFINED <---\n");
             }
@@ -278,9 +275,9 @@ int statement_list(htab_t *localTable){
             }
             if(token.type == L_PAR){
                 insertInstruction(iList, PUSHS_NIL_I, NULL, NULL, NULL);    // PUSHES NIL TO STACK SO WE KNOW WHERE TO STOP
-                res = builtinParams(0);
+                res = builtinParams();
                 if(res != SUCCESS_ERR){
-                    errHandler(SYNTAX_ERR,"Syntax error\n");// ADD SEMICOL TO LL ON ITS OWN!!!
+                    errHandler(SYNTAX_ERR,"Syntax error\n");
                 }
                 
                 token_res = GetToken(&token);  
@@ -338,7 +335,7 @@ int builtinParams(){
         case DOLLAR:
             token_res = GetToken(&token);   // $ <ID>
             if(!token_res){
-                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
+                errHandler(LEX_ERR,"Lexical error\n");  // LOOKING FOR ID
             }
             if(token.type != ID){
                 errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER AFTER $ BUILTIN <---\n");
@@ -348,7 +345,7 @@ int builtinParams(){
             
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
-                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
+                errHandler(LEX_ERR,"Lexical error\n"); 
             }
             switch(token.type){
                 case R_PAR:
@@ -374,7 +371,7 @@ int builtinParams(){
             }
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
-                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
+                errHandler(LEX_ERR,"Lexical error\n"); 
             }
             switch(token.type){
                 case R_PAR:
@@ -382,7 +379,7 @@ int builtinParams(){
 
                 case COMMA:
                     multipleParams = true;
-                    return builtinParams();
+                    return builtinParams();     //bar(string $y,...)
 
                 default:
                     return SYNTAX_ERR;
@@ -403,7 +400,7 @@ int checkWhile(htab_t *localTable){
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
-    if(token.type != L_PAR){                   // Kontrola (
+    if(token.type != L_PAR){                   // L_PAR CHECK (
         errHandler(SYNTAX_ERR,"Syntax error ---> MISSING LEFT PARENTHESIS <---\n");
     }
     expr_tok = (token_t*) malloc(sizeof(*expr_tok));
@@ -412,12 +409,12 @@ int checkWhile(htab_t *localTable){
     }
     *expr_tok = token;
     insertExpr(expression, expr_tok);
-    res = checkIfStat(localTable);    // Zkontroluj levou stranu vyrazu v ifu
+    res = checkIfStat(localTable);    // CHECK LEFT SIDE OF CONDITION IN WHILE
     if(res != SUCCESS_ERR){
         return res;
     }
 
-    res = checkIfStat(localTable);    // Zkontroluj pravou stranu vyrazu v ifu
+    res = checkIfStat(localTable);    // CHECK RIGHT SIDE OF CONDITION IN WHILE
     if(res != SUCCESS_ERR){
         return res;
     }
@@ -427,7 +424,7 @@ int checkWhile(htab_t *localTable){
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
-    if(token.type != L_BRAC){               // Kontrola {
+    if(token.type != L_BRAC){               // L_BRAC CHECK {
         errHandler(SYNTAX_ERR,"Syntax error ---> MISSING LEFT BRACKET <---\n");
     }
     expr_tok = (token_t*) malloc(sizeof(*expr_tok));
@@ -436,14 +433,14 @@ int checkWhile(htab_t *localTable){
     }
     *expr_tok = token;
     insertExpr(expression, expr_tok);
-    expr_parse(localTable, expression, iList, NULL); // modif not poping
+    expr_parse(localTable, expression, iList, NULL); 
     exprListDispose(expression);
     
     insertInstruction(iList, GENERATE_WHILE_I, NULL, NULL, label); // CHECK CONDITION AND JUMP ON AFTER ELSE IF NECESARY
     insideWhile = true;
-    res = statement_list(localTable);  // Kontrola vnitřku funkce
-    insertInstruction(iList, JUMP_I, NULL, NULL, label);     // GENERATE ELSE LABEL  
-    insertInstruction(iList, LABEL_END_I, NULL, NULL, label);     // GENERATE ELSE LABEL  
+    res = statement_list(localTable);  // INSIDE WHILE CHECK
+    insertInstruction(iList, JUMP_I, NULL, NULL, label);     // GENERATE AFTER WHILE JUMP  
+    insertInstruction(iList, LABEL_END_I, NULL, NULL, label);     // GENERATE AFTER WHILE LABEL  
 
     if(res != SUCCESS_ERR){
         return res;
@@ -488,15 +485,13 @@ int functionCheck(){
 
     statementFun->type = t_fun;
     statementFun->name = token.string;
-    // statementFun->value = ??
 
     stat_t *statement;
     statement = (stat_t*) malloc(sizeof(*statement));
     if(statement == NULL){
         return INTERNAL_ERR;
     }
-    // printf("type is %d and name is %s\n", statement->type, statement->name);    // DEBUG
-    // -----------------------
+
     token_res = GetToken(&token);   // function <ID> (
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -504,7 +499,7 @@ int functionCheck(){
     if(token.type != L_PAR){
         errHandler(SYNTAX_ERR, "Syntax error ---> MISSING LEFT PARENTHESIS IN FUNCTION <---\n");
     }
-    res = funcParams(localTable, statement, 0); // Parametry funkce
+    res = funcParams(localTable, statement, 0); // FUNC PARAMS
     if(res != SUCCESS_ERR){
         errHandler(res, "Syntax error ---> Wrong parameters in function <---\n");
     }
@@ -521,7 +516,7 @@ int functionCheck(){
         errHandler(LEX_ERR,"Lexical error\n");
     }
 
-    if(token.type != KEYWORD){  // OR IT CAN BE TYPE TOKEN
+    if(token.type != KEYWORD){  
         token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): ?type
         if(!token_res){
             errHandler(LEX_ERR,"Lexical error\n");
@@ -531,7 +526,7 @@ int functionCheck(){
         }
     }
 
-    switch(token.keyword){   // Co za keyword jsme dostali?
+    switch(token.keyword){   
         case STRING: 
             currentReturnType = ret_string;
             statementFun->value = "s";
@@ -551,10 +546,9 @@ int functionCheck(){
             break;
             
         default:
-            return SYNTAX_ERR;  // while, if apod..
+            return SYNTAX_ERR;  // while, if etc..
     }
     
-    //  int currentReturnType if token.type == TYPE TODO
     token_res = GetToken(&token);   // function <ID> ( <FUNC_PARAMS> ): type {
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -605,7 +599,7 @@ int functionCheck(){
                 }
                 break;
 
-            case INT_T: case FLOAT_T: case STRING_T:    // Teoreticky muzu vratit 5+5 apod, ale to ted neresme
+            case INT_T: case FLOAT_T: case STRING_T:    
                 expr_tok = (token_t*) malloc(sizeof(*expr_tok));
                 if(expr_tok == NULL){
                     return INTERNAL_ERR;
@@ -659,7 +653,6 @@ int functionCheck(){
         errHandler(SYNTAX_ERR, "Syntax error ---> MISSING RIGHT BRACKET AFTER RETURN STATEMENT <---\n");
     }
     insertInstruction(iList, FUNC_E_I, NULL, NULL, currentFuncName);
-    // printf("name is %s, value is %s\n",statement->name, statement->value);                      // DEBUG
     insideFunc = false;
     return statement_list(symtable);
 }
@@ -710,7 +703,7 @@ int funcParams(htab_t *localTable, stat_t *statementIn, int index){
             
             token_res = GetToken(&token);   // type $
             if(!token_res){
-                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
+                errHandler(LEX_ERR,"Lexical error\n"); 
             }
             if(token.type != DOLLAR){
                 errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED $ <---\n");
@@ -718,7 +711,7 @@ int funcParams(htab_t *localTable, stat_t *statementIn, int index){
 
             token_res = GetToken(&token);   // type $ <ID>
             if(!token_res){
-                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
+                errHandler(LEX_ERR,"Lexical error\n");  // LOOKING FOR ID
             }
             if(token.type != ID){
                 errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER AFTER TYPE IN FUCNTION <---\n");
@@ -732,7 +725,7 @@ int funcParams(htab_t *localTable, stat_t *statementIn, int index){
             
             token_res = GetToken(&token);   // type <ID>,   OR type <ID>)
             if(!token_res){
-                errHandler(LEX_ERR,"Lexical error\n");  // Hledáme ID
+                errHandler(LEX_ERR,"Lexical error\n"); 
             }
             switch(token.type){
                 case R_PAR:
@@ -807,7 +800,7 @@ int checkIfStat(htab_t *table){
             
         case KEYWORD:
             if(token.keyword != NULL_K){
-                return SYNTAX_ERR;  //TODO WHICH EXIT CODE IS THIS
+                return SYNTAX_ERR;  
             }
             *expr_tok = token;
             insertExpr(expression, expr_tok);
@@ -844,6 +837,7 @@ int checkIfOperators(){
     }
     switch(token.type){
         case EQ: 
+        case R_PAR:
         case NOT_EQ:
         case LESS:
         case LESS_EQ:
@@ -852,7 +846,6 @@ int checkIfOperators(){
             *expr_tok = token;
             insertExpr(expression, expr_tok);
             return SUCCESS_ERR;
-
         default:
             return res;
     }
@@ -870,16 +863,16 @@ int condiCheck(htab_t *table){
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
-    if(token.type != L_PAR){                   // Kontrola (
+    if(token.type != L_PAR){                   // L_PAR CHECK (
         errHandler(res,"Syntax error ---> MISSING LEFT PARENTHESIS <---\n");
     }
     *expr_tok = token;
     insertExpr(expression, expr_tok);
-    res = checkIfStat(table);    // Zkontroluj levou stranu vyrazu v ifu
+    res = checkIfStat(table);    // CHECK LEFT SIDE OF CONDITION IN IF
     if(res != SUCCESS_ERR){
         return res;
     }
-    res = checkIfStat(table);    // Zkontroluj pravou stranu vyrazu v ifu
+    res = checkIfStat(table);    // CHECK RIGHT SIDE OF CONDITION IN IF
     if(res != SUCCESS_ERR){
         return res;
     }
@@ -888,7 +881,7 @@ int condiCheck(htab_t *table){
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
-    if(token.type != L_BRAC){               // Kontrola {
+    if(token.type != L_BRAC){               // L_BRAC CHECK {
         errHandler(SYNTAX_ERR,"Syntax error ---> MISSING LEFT BRACKET <---\n");
     }
     token_t *expr_tok2 = (token_t*) malloc(sizeof(*expr_tok2));
@@ -897,11 +890,11 @@ int condiCheck(htab_t *table){
     }
     *expr_tok2 = token;
     insertExpr(expression, expr_tok2);
-    expr_parse(table, expression, iList, NULL);   // not poping
+    expr_parse(table, expression, iList, NULL);  
     insertInstruction(iList, GENERATE_IF_I, NULL, NULL, label); // CHECK CONDITION AND JUMP ON AFTER ELSE IF NECESARY
     exprListDispose(expression);
     insideIf = true;
-    res = statement_list(table);  // Kontrola vnitřku funkce
+    res = statement_list(table);  // INSIDE IF CHECK
     if(res != SUCCESS_ERR){
         return res;
     }
@@ -923,18 +916,18 @@ int elseCheck(htab_t *localTable){
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
-    if(token.keyword != ELSE){               // Kontrola tokenu else
+    if(token.keyword != ELSE){               // WE NEED ELSE TOKEN STRICTLY
         errHandler(SYNTAX_ERR,"Syntax error ---> MISSING ELSE <---\n");
     }
     token_res = GetToken(&token);  
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
-    if(token.type != L_BRAC){               // Kontrola {
+    if(token.type != L_BRAC){               // L_BRAC CHECK {
         errHandler(SYNTAX_ERR,"Syntax error ---> MISSING LEFT BRACKET <---\n");
     }
     insideIf = true;
-    res = statement_list(localTable); // Kontrola těla else
+    res = statement_list(localTable); // ELSE INSIDE CHECK
     if(res != SUCCESS_ERR){
         return res;
     }
@@ -963,40 +956,17 @@ int expression_check(htab_t *table){
     p_return *ret_type = malloc(sizeof(p_return));
     if(token.type == ASSIG){
         
-        // ZAVOLAT EXPRESSION PARSER
         res = statement_list_inside(table, ret_type);
-        statement->type = *ret_type;
+        statement->type = (int)*ret_type;
         return res;  
     }
-    // TODO $x; UNDEF VAR
     return res;
 }
 
-int expression_check_inside(htab_t *table){
-    int res = SUCCESS_ERR;
 
-    token_res = GetToken(&token);  
-    if(!token_res){
-        errHandler(LEX_ERR,"Lexical error\n");
-    }
-    p_return *ret_type;
-    switch(token.type){
-        case ID:
-        case INT_T:
-        case FLOAT_T:
-        case STRING_T:
-            res = separators(table, ret_type);
-            return res;
-
-        default:
-            return SYNTAX_ERR;
-    }
-    return res;
-}
 
 int statement_list_inside(htab_t *table, p_return *ret_type){
     int res = SUCCESS_ERR;
-
     token_res = GetToken(&token);  
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -1016,7 +986,6 @@ int statement_list_inside(htab_t *table, p_return *ret_type){
             if(token.type != ID){
                 return SYNTAX_ERR;
             }
-            // statement->value = token.string;    // value of statement of variable   TODO
             *expr_tok = token;
             insertExpr(expression, expr_tok);
             res = separators(table, ret_type);
@@ -1030,7 +999,6 @@ int statement_list_inside(htab_t *table, p_return *ret_type){
         case INT_T: 
         case FLOAT_T: 
         case STRING_T:
-            // statement->value = token.string;    // value of statement of number // TODO
             if(token.type == INT_T){
                 statement->type = t_int;
             }
@@ -1047,7 +1015,7 @@ int statement_list_inside(htab_t *table, p_return *ret_type){
 
         case KEYWORD:
             if(token.keyword != NULL_K){
-                return SYNTAX_ERR;  // TODO WHICH ERR IS THIS?
+                return SYNTAX_ERR;  
             }
             *expr_tok = token;
             insertExpr(expression, expr_tok);
@@ -1081,7 +1049,7 @@ int statement_list_inside(htab_t *table, p_return *ret_type){
                 insertInstruction(iList, PUSHS_NIL_I, NULL, NULL, NULL);    // PUSHES NIL TO STACK SO WE KNOW WHERE TO STOP
                 res = builtinParams();
                 if(res != SUCCESS_ERR){
-                    errHandler(SYNTAX_ERR, "Syntax error\n"); // ADD SEMICOL TO LL ON ITS OWN!!!
+                    errHandler(SYNTAX_ERR, "Syntax error\n");
                 }
                 token_res = GetToken(&token);  
                 if(!token_res){
@@ -1115,7 +1083,6 @@ int statement_list_inside(htab_t *table, p_return *ret_type){
 
 int separators(htab_t *table, p_return *ret_type){
     int res = SUCCESS_ERR;
-
     token_res = GetToken(&token);
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -1139,11 +1106,8 @@ int separators(htab_t *table, p_return *ret_type){
                 passPOP = NULL;
             }
             *ret_type = expr_parse(table, expression, iList, passPOP);
-            // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
-            // EXPRESSION LIST DISPOSE
             free(currentPOP);
             exprListDispose(expression);
-            // return statement_list(table); // $x=$y; || $x=5; || $x = $y.$z;
             return SUCCESS_ERR;
 
         case R_PAR:
@@ -1167,43 +1131,9 @@ int separators(htab_t *table, p_return *ret_type){
 /**TODO LIST
  * 
  * FREE ALL TOKENS AFTER THE COMPILATION IS DONE
- * SEMANTIC ACTIONS
  * DOPSAT EPSILON DO SEPARATORU V LL
  * VOLÁNÍ FUNKCÍ V LL
- * while(null) if(null) atd
- * what if $x = func() what type is $x? it is not t_str, t_int etc
- * errHandler for returns
- * struct na ukládání symtables, kde bude název fce, ke které patří
- * pops instruction after expr_parse
- * How to generate inside of function before main??
- * CURRENT_POP could be deleted
- * 
- * podminka
- * telo ifu
- * jump afterelse
- * label else
- * telo else
- * label afterelse
- * 
- * 
- * 
- * 
- * pop vršek stacku 
- * na vršek stacku zavolat type
- * case přepsat do if else
- * case type
- * int, float, string, bool
- * int --> srovnat s 0 pokud false
- * float ---> srovna s 0.0 pokud false
- * string --> srovnat s "" pokud false
- * bool --> srovnat s bool@false
- * nil --> false
- * 
- * 
- * 
- * 
  * RET WRONG TYPE 4 - vracím 2, očekává 4
- * SQUARE ROOT - WRONG GEN mby
  * MUltiple statements, Single statement - err 2, should be 0
  * 
  */
