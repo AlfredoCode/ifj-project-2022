@@ -447,6 +447,8 @@ int builtinParams(){
 
 int checkWhile(htab_t *localTable){
     int res = SYNTAX_ERR;
+    char *label = UniqueLabel("WHILE");
+
     token_res = GetToken(&token);  
     token_t *expr_tok;
     if(!token_res){
@@ -472,7 +474,7 @@ int checkWhile(htab_t *localTable){
         return res;
     }
     
-    
+    insertInstruction(iList, LABEL_I, NULL, NULL, label);     // GENERATE ELSE LABEL  
     token_res = GetToken(&token);  
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -488,8 +490,13 @@ int checkWhile(htab_t *localTable){
     insertExpr(expression, expr_tok);
     expr_parse(localTable, expression, iList, NULL); // modif not poping
     exprListDispose(expression);
+    
+    insertInstruction(iList, GENERATE_WHILE_I, NULL, NULL, label); // CHECK CONDITION AND JUMP ON AFTER ELSE IF NECESARY
     insideWhile = true;
     res = statement_list(localTable);  // Kontrola vnitřku funkce
+    insertInstruction(iList, JUMP_I, NULL, NULL, label);     // GENERATE ELSE LABEL  
+    insertInstruction(iList, LABEL_END_I, NULL, NULL, label);     // GENERATE ELSE LABEL  
+
     if(res != SUCCESS_ERR){
         return res;
     }
@@ -913,6 +920,7 @@ int checkIfOperators(){
 }
 
 int condiCheck(htab_t *table){
+    char * label = UniqueLabel("ELSE");
     int res = SYNTAX_ERR;
     token_res = GetToken(&token);  
     token_t *expr_tok = (token_t*) malloc(sizeof(*expr_tok));
@@ -956,8 +964,10 @@ int condiCheck(htab_t *table){
     // }
     // putchar('\n');
     expr_parse(table, expression, iList, NULL);   // not poping
-    insertInstruction(iList, PUSHS_INT_I, "1", NULL, NULL); // CONDITIONAL JUMP BASED ON STACK VALUE
-    insertInstruction(iList, JUMPIFNEQS_I, NULL, NULL, NULL);
+    // insertInstruction(iList, PUSHS_INT_I, "1", NULL, NULL); // CONDITIONAL JUMP BASED ON STACK VALUE
+    // insertInstruction(iList, JUMPIFNEQS_I, NULL, NULL, NULL);
+    
+    insertInstruction(iList, GENERATE_IF_I, NULL, NULL, label); // CHECK CONDITION AND JUMP ON AFTER ELSE IF NECESARY
     exprListDispose(expression);
     insideIf = true;
     res = statement_list(table);  // Kontrola vnitřku funkce
@@ -966,11 +976,13 @@ int condiCheck(htab_t *table){
     }
     
     insideIf = false;
+    insertInstruction(iList, JUMP_END_I, NULL, NULL, label);    // IF NOT TRUE, JUMP ON ELSE
+    insertInstruction(iList, LABEL_I, NULL, NULL, label);     // GENERATE ELSE LABEL  
     res = elseCheck(table);
     if(res != SUCCESS_ERR){
         errHandler(res,"Syntax error ---> WRONG ELSE FORMAT <---\n");
     }
-
+    insertInstruction(iList, LABEL_END_I, NULL, NULL, label); // GENERATE LABEL AFTER ELSE
     return statement_list(table);
     
 }
@@ -984,7 +996,6 @@ int elseCheck(htab_t *localTable){
     if(token.keyword != ELSE){               // Kontrola tokenu else
         errHandler(SYNTAX_ERR,"Syntax error ---> MISSING ELSE <---\n");
     }
-    insertInstruction(iList, LABEL_I, NULL, NULL, "else"); // TODO UNIQUE ELSE LABEL
     token_res = GetToken(&token);  
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
@@ -1248,6 +1259,27 @@ int separators(htab_t *table){
  * pops instruction after expr_parse
  * How to generate inside of function before main??
  * CURRENT_POP could be deleted
+ * 
+ * podminka
+ * telo ifu
+ * jump afterelse
+ * label else
+ * telo else
+ * label afterelse
+ * 
+ * 
+ * 
+ * 
+ * pop vršek stacku 
+ * na vršek stacku zavolat type
+ * case přepsat do if else
+ * case type
+ * int, float, string, bool
+ * int --> srovnat s 0 pokud false
+ * float ---> srovna s 0.0 pokud false
+ * string --> srovnat s "" pokud false
+ * bool --> srovnat s bool@false
+ * nil --> false
  * 
  */
 

@@ -68,9 +68,13 @@ typedef enum{
     SETCHAR_I,
     TYPE_I,
     LABEL_I,
+    LABEL_END_I,
     JUMP_I,
     JUMPIFEQS_I,
+    JUMP_END_I,
     JUMPIFNEQS_I,
+    GENERATE_IF_I,
+    GENERATE_WHILE_I,
     EXIT_I,
 }INSTRUCTIONS;
 
@@ -157,11 +161,14 @@ void generateReturn();
 // DATAFLOW
 void generateLabel(char *label);
 void generateLabelEnd(char *label);
+void generateElseEnd(char *label);
 void generateJump(char *label);
 void generateJumpEnd(char *label);
+void generateElseJumpEnd(char *label);
 void generateJumpIfEqs(char *label);
 void generateJumpIfNEqs(char *label);
 void generateExit(char *number);        // 0 <= number <= 49
+void generateConditions(char *label);
 
 // MISC
 void generateProgramHead();
