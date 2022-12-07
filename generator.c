@@ -143,6 +143,9 @@ void generateNots(){
 // COVERSIONS
 void generateInt2Floats()
 {
+    printf("\n#INT2FLOATS\n");
+    printf("#FLOATVAL\n");
+    printf("LABEL floatval\n");
     printf("LABEL int2floats\n");
     printf("POPS GF@temp0\n");
     printf("TYPE GF@temp1 GF@temp0\n");
@@ -160,6 +163,9 @@ void callInt2Floats()
 
 void generateFloat2Ints()
 {
+    printf("\n#FLOAT2INTS\n");
+    printf("#INTVAL\n");
+    printf("LABEL intval\n");
     printf("LABEL float2ints\n");
     printf("POPS GF@temp0\n");
     printf("TYPE GF@temp1 GF@temp0\n");
@@ -173,6 +179,21 @@ void generateFloat2Ints()
 void callFloat2Ints()
 {
     printf("CALL float2ints\n");
+}
+
+void generateStrval()
+{
+    printf("\n#STRVAL\n");
+    printf("LABEL strval\n");
+    printf("POPS GF@temp0\n");
+    printf("TYPE GF@temp1 GF@temp0\n");
+    printf("JUMPIFNEQ strval?notnil GF@temp1 string@nil\n");
+    printf("PUSHS string@\n");
+    printf("JUMP strval?end\n");
+    printf("LABEL strval?notnil\n");
+    printf("PUSHS GF@temp0\n");
+    printf("LABEL strval?end\n");
+    printf("RETURN\n");
 }
 
 // STRING
@@ -507,6 +528,7 @@ char* stringConvertor(char* stringBefore){
     for (size_t i = 0; i < strlen(stringBefore); i++){
         if (
                 stringBefore[i] <= 32 ||
+                stringBefore[i] == 34 ||
                 stringBefore[i] == 35
            ) {
             snprintf(helpString, 5, "\\0%d", stringBefore[i]);
@@ -523,6 +545,7 @@ char* stringConvertor(char* stringBefore){
                 i++;
             } else {
                 snprintf(helpString, 5, "\\0%d", stringBefore[i]);
+                i++;
             }
         } else {
             snprintf(helpString, 5, "%c", stringBefore[i]);

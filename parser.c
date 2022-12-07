@@ -125,6 +125,10 @@ void builtinInit(htab_t *funTable){
     newStat->value = "is";  //returns int, takes string
     newStat = htab_lookup_add(funTable, "chr");
     newStat->value = "si";
+    newStat = htab_lookup_add(funTable, "floatval");
+    newStat->value = "fi";
+    newStat = htab_lookup_add(funTable, "intval");
+    newStat->value = "if";
 }
 
 int parse(){
