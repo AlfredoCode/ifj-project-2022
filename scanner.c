@@ -22,7 +22,7 @@ int isKeyword(char *str){
         return IF;
     }
     if(strcmp(str, "int") == 0){
-        return INT;   // MODIFIED
+        return INT;  
     }
     if(strcmp(str, "null") == 0){
         return NULL_K;
@@ -42,7 +42,7 @@ int isKeyword(char *str){
     return -1;
 }
 
-bool GetProlog(/*idk=dohodnut sa*/){
+bool GetProlog(){
     int c;
     c = getchar();
     if(c == '<'){
@@ -99,7 +99,7 @@ bool GetToken(token_t *token){
                 token->type = DOLLAR;
                 return true;
             }
-            if(c == ','){   // MODIFIED
+            if(c == ','){ 
                 token->type = COMMA;
                 return true;
             }
@@ -186,7 +186,6 @@ bool GetToken(token_t *token){
             return true;
         }
         if(state == LINE_COM_S){
-
             if (c == '\n' || c == EOF){
                 state = S;
             }
@@ -353,7 +352,7 @@ bool GetToken(token_t *token){
                 str_index++;
                 continue;
             }
-            if(c == 'n' || c == 't' || c == '"' || c == '\\'){
+            if(c == 'n' || c == 't' || c == '"' || c == '\\' || c == '$'){
                 state = STRING_START;
                 if(str_index >= str_size){
                     str_size += 64;
@@ -443,7 +442,6 @@ bool GetToken(token_t *token){
                 continue;
             }
             str[str_index] = '\0';
-            // token->integer = (int)strtol(str, NULL, 10); // modif
             token->string = str;
             token->type = INT_T;
             
@@ -506,7 +504,6 @@ bool GetToken(token_t *token){
             }
             else{
                 str[str_index] = '\0';
-                // token->decimal = strtod(str, NULL);
                 token->string = str;
                 token->type = FLOAT_T;
                 ungetc(c, stdin);
@@ -537,7 +534,6 @@ bool GetToken(token_t *token){
             }
             else{
                 str[str_index] = '\0';
-                // token->decimal = strtod(str, NULL); // modif
                 token->string = str;
                 token->type = FLOAT_T;
                 ungetc(c, stdin);
@@ -547,4 +543,3 @@ bool GetToken(token_t *token){
         return false;
     }
 }
-
