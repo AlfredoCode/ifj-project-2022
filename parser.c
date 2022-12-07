@@ -976,6 +976,9 @@ int expression_check(htab_t *table){
         statement->type = (int)*ret_type;
         return res;  
     }
+    if(token.type == SEMICOL){
+        errHandler(SEM_UNDEF_VAR_ERR, "Variable not defined\n");
+    }
     return res;
 }
 
