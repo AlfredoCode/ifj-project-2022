@@ -207,7 +207,7 @@ int parse(){
     if(symtable == NULL){
         return INTERNAL_ERR;
     }
-    insertInstruction(iList, DEFVAR_LOC_I, NULL, NULL, NULL);
+    insertInstruction(iList, DEFVAR_LOC_I, NULL, NULL, "main");
     funTable = htab_init(HTABSIZE); // Function symtable
     if(funTable == NULL){
         return INTERNAL_ERR;
@@ -529,7 +529,7 @@ int functionCheck(){
     }
     char *currentFuncName = token.string;
     insertInstruction(iList, FUNC_S_I, NULL, NULL, token.string);
-    insertInstruction(iList, DEFVAR_LOC_I, NULL, NULL, NULL);
+    insertInstruction(iList, DEFVAR_LOC_I, NULL, NULL, "local");
     statementFun = htab_lookup_add(funTable, token.string);   // add  func identifier to symtable
 
     statementFun->type = t_fun;
