@@ -136,7 +136,7 @@ void generateRead(char *var, INSTRUCTIONS type){
 
 void generateWrite()
 {
-    printf("LABEL ??write\n");
+    printf("LABEL write\n");
     printf("LABEL write?while\n");
     printf("POPS GF@temp0\n");
     printf("JUMPIFEQ write?whileEnd GF@temp0 nil@nil\n");
@@ -148,7 +148,7 @@ void generateWrite()
 
 void generateWriteCall()
 {
-    printf("CALL ??write\n");
+    printf("CALL write\n");
 }
 
 //TODO
@@ -290,7 +290,7 @@ void generatePopFrame(){
 }
 
 void generateCall(char *funcname){
-    printf("CALL ??%s\n", funcname);
+    printf("CALL %s\n", funcname);
 }
 
 void generateReturn(){
@@ -300,23 +300,26 @@ void generateReturn(){
 // DATAFLOW TODO
 void generateLabel(char *label)
 {
-    printf("LABEL ??%s\n", label);
+    printf("LABEL %s\n", label);
 }
 void generateLabelEnd(char *label){
-    printf("LABEL ??%s_end\n", label);
+    printf("LABEL %s_end\n", label);
 }
+
+
+
 char *UniqueLabel(char *labelbefore){
-    char *labelafter = (char *) malloc(strlen(labelbefore) + sizeof(labelcnt) + 1);
+    char *labelafter = (char *) malloc(strlen(labelbefore) + sizeof(labelcnt) + 3);
     sprintf(labelafter, "%s%d", labelbefore, labelcnt);
     labelcnt++;
     return labelafter;
 }
 
 void generateJump(char *label){
-    printf("JUMP ??%s\n", label);
+    printf("JUMP %s\n", label);
 }
 void generateJumpEnd(char *label){
-    printf("JUMP ??%s_end\n", label);
+    printf("JUMP %s_end\n", label);
 }
 void generateJumpIfEqs(char *label);
 
@@ -334,7 +337,7 @@ void generateProgramHead(){
     printf("DEFVAR GF@temp0\n");
     printf("DEFVAR GF@temp1\n");
     printf("DEFVAR GF@temp2\n");
-    printf("JUMP ??main\n");
+    printf("JUMP main\n");
 }
 
 void generateMove(char *var, char *symb, INSTRUCTIONS type){
@@ -383,6 +386,56 @@ void generateDefvar(char *var){
     printf("DEFVAR LF@%s\n", var);
 }
 
+void generateCondiCheck(){
+    printf("LABEL ??condiCheck\n");
+    printf("POPS GF@temp0\n");
+    printf("TYPE GF@temp1 GF@temp0\n");
+    printf("PUSHS GF@temp0\n");
+    // SWITCH TEMP_1
+
+    // INT -> INT@0 ---> EQS, NOTS
+
+    printf("JUMPIFNEQ ??condiFloat GF@temp1 string@int\n");
+    printf("PUSHS int@0\n");
+    printf("EQS\n");
+    printf("NOTS\n");
+    printf("JUMP ??EndcondiCheck\n");
+    // FLOAT -> FLOAT@0.0 EQS NOTS
+    printf("LABEL ??condiFloat\n");
+    printf("JUMPIFNEQ ??condiString GF@temp1 string@float\n");
+    printf("PUSHS float@0x0.0p+0\n");
+    printf("EQS\n");
+    printf("NOTS\n");
+    printf("JUMP ??EndcondiCheck\n");
+    
+    // STRING -> STRING@ -> EQS NOTS 
+    printf("LABEL ??condiString\n");
+    printf("JUMPIFNEQ ??condiNil GF@temp1 string@string\n");
+    printf("PUSHS string@\n");
+    printf("EQS\n");
+    printf("NOTS\n");
+    printf("JUMP ??EndcondiCheck\n");
+    //NIL
+    printf("LABEL ??condiNil\n");
+    printf("JUMPIFNEQ ??EndcondiCheck GF@temp1 string@nil\n");
+    printf("CLEARS\n");
+    printf("PUSHS bool@false\n");
+    // BOOL --> ret
+    printf("LABEL ??EndcondiCheck\n");
+    printf("RETURN\n");
+
+}
+
+void generateConditions(char *label){
+    printf("CALL ??condiCheck\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS %s\n",label);
+}
+void generateConditionsW(char *label){
+    printf("CALL ??condiCheck\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS %s_end\n",label);
+}
 void generateLocDefVar(stat_t *data){
     // printf("DEFVAR LF@%s\n", data->name); 
     generateDefvar(data->name);
@@ -393,7 +446,7 @@ void generateType(char *var, char *symb);
 void generateMainStart()
 {
     printf("# START OF MAIN\n");
-    printf("LABEL ??main\n");
+    printf("LABEL main\n");
     generateCreateFrame();
     generatePushFrame();
 }
@@ -495,6 +548,7 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
     generateProgramHead();
     generateOrd();
     generateWrite();
+    generateCondiCheck();
     generateMainStart();
     First(instrList);
 
@@ -674,7 +728,7 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 break;
                 
             case ORD_I:
-                generateCall("??Ord");
+                generateCall("Ord");
                 break;
 
             case CONCAT_I:
@@ -701,6 +755,9 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
             case LABEL_I:
                 generateLabel(instrList->activeElement->dest);
                 break;
+            case LABEL_END_I:
+                generateLabelEnd(instrList->activeElement->dest);
+                break;
             case FUNC_S_I:
                 printf("# ----FUNCTION START\n");
                 generateJumpEnd(instrList->activeElement->dest);
@@ -716,6 +773,10 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
             case JUMP_I:
                 generateJump(instrList->activeElement->dest);
                 break;
+            
+            case JUMP_END_I:
+                generateJumpEnd(instrList->activeElement->dest);
+                break;
 
             case JUMPIFEQS_I:
 
@@ -723,9 +784,14 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 break;
 
             case JUMPIFNEQS_I:
-                generateJumpIfNEqs("else");  // TODO UNIQUE LABEL ELSE
+                generateJumpIfNEqs(instrList->activeElement->dest);  
                 break;
-
+            case GENERATE_IF_I:
+                generateConditions(instrList->activeElement->dest);
+                break;
+            case GENERATE_WHILE_I:
+                generateConditionsW(instrList->activeElement->dest);
+                break;
             case EXIT_I:
                 generateExit(instrList->activeElement->op1);
                 break;
