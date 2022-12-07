@@ -3,7 +3,7 @@
  * Name:       parser.h                                *
  * Authors:    xsafar27                                * 
  *             xhofma11                                *
- * Last modif: 10/29/2022                              *
+ * Last modif: 12/07/2022                              *
  * =================================================== *
  */
 

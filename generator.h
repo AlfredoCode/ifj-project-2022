@@ -4,7 +4,7 @@
  * Authors:    xsafar27                                *
  *             xhofma11                                *
  *             xjadrn03                                *
- * Last modif: 11/28/2022                              *
+ * Last modif: 12/07/2022                              *
  * =================================================== *
  */
 
@@ -108,7 +108,7 @@ int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* o
 // Read[s|i|f], Write, Substring, Ord, Chr
 void generateRead();
 void generateWrite();
-void generateSubstring(); // TODO and next ones
+void generateSubstring();
 void generateOrd();
 void generateChr();
 
@@ -143,8 +143,6 @@ void generateFloat2Ints();
 // STRING
 void generateConcat(); // Made to work like *S functions
 void generateStrlen();
-void generateGetchar(char *dest, char *op1, char *op2);
-void generateSetchar(char *dest, char *op1, char *op2);
 
 // STACK
 void generatePushs(char *symb, INSTRUCTIONS type);

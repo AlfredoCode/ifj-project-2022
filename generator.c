@@ -4,7 +4,7 @@
  * Authors:    xsafar27                                * 
  *             xhofma11                                *
  *             xjadrn03                                *
- * Last modif: 11/28/2022                              *
+ * Last modif: 12/07/2022                              *
  * =================================================== *
  */
 
@@ -194,6 +194,11 @@ void generateAdds()
     printf("ADDS\n");
 }
 
+void callAdds()
+{
+    printf("CALL ?adds\n");
+}
+
 void generateSubs()
 {
     printf("SUBS\n");
@@ -364,9 +369,6 @@ void generateSubstr()
     printf("RETURN\n");
 }
 
-void generateGetchar(char *dest, char *op1, char *op2);
-void generateSetchar(char *dest, char *op1, char *op2);
-
 // STACK
 void generatePushs(char *symb, INSTRUCTIONS type){
     switch(type){
@@ -424,7 +426,7 @@ void generateReturn(){
     printf("RETURN\n");
 }
 
-// DATAFLOW TODO
+// DATAFLOW 
 void generateLabel(char *label)
 {
     printf("LABEL %s\n", label);
@@ -458,7 +460,7 @@ void generateExit(char *number){
     printf("EXIT int@%d\n", atoi(number));
 }
 
-// MISC TODO
+// MISC
 void generateProgramHead(){
     printf(".IFJcode22\n");
     printf("DEFVAR GF@temp0\n");
