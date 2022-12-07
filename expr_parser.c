@@ -1,6 +1,6 @@
 /*
  * =================================================== *
- * Name:       expr_parse.c                            *
+ * Name:       expr_parser.c                           *
  * Authors:    xsafar27                                * 
  *             xhofma11                                * 
  * Last modif: 12/07/2022                              *
@@ -14,9 +14,9 @@
 
 #include "expr_parser.h"
 #include "expr_stack.h"
+#include "expr_list.h"
 #include "error.h"
 #include "scanner.h"
-// #include "parser.h"
 #include "symtable.h"
 
 // Global table for parsing
@@ -42,17 +42,6 @@ const char prec_table [19][19] = {
 /* NUL */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
 /*  $  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', 'X', '<', '<', '<', '<', '<', '$'},
 };
-
-
-expr_El getExpr(expression_T *exprList){
-    if(exprList->activeElement == NULL){
-        exprList->activeElement = exprList->lastElement;
-        return exprList->activeElement; 
-    }
-    exprList->activeElement = exprList->activeElement->previous;
-    return exprList->activeElement;
-}
-
 
 p_symbol tokenToTerminal(token_t *token)
 {
@@ -519,7 +508,6 @@ p_return expr_parse(htab_t *symtable, expression_T *list, instructList_T *iList,
     p_return ret = get_last(stack);
     // Since I am doing everything on floats, if I should end up with int I need to end up with int
     if (ret == ret_int) insertInstruction(iList, FLOAT2INTS_I, NULL, NULL, NULL);
- 
     
     if (retVal){
         char *retV = malloc(strlen(retVal) + 1);

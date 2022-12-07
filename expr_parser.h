@@ -1,44 +1,20 @@
 /*
  * =================================================== *
- * Name:       prec_parser.h                           *
+ * Name:       expr_parser.h                           *
  * Authors:    xsafar27                                *
  *             xhofma11                                *
  * Last modif: 12/07/2022                              *
  * =================================================== *
  */
 
-#ifndef __PREC_PARSER_H__
-#define __PREC_PARSER_H__
+#ifndef __EXPR_PARSER_H__
+#define __EXPR_PARSER_H__
 
 #include "scanner.h"
 #include "expr_stack.h"
 #include "symtable.h"
-// #include "parser.h"
 #include "generator.h"
-
-
-
-
-
-
-
-// Used for storing expression tokens
-typedef struct exprElement{
-    token_t *token;
-    struct exprElement *next;
-    struct exprElement *previous;
-}*expr_El;
-
-typedef struct {
-	expr_El firstElement;
-    expr_El lastElement;
-    expr_El activeElement;
-} expression_T;
-
-void expressionInit(expression_T *exprList);
-expr_El getExpr(expression_T *exprList);
-void insertExpr(expression_T *exprList, token_t *token);
-void exprListDispose( expression_T *exprList );
+#include "expr_list.h"
 
 typedef enum {
     ret_bool,
@@ -131,4 +107,4 @@ p_return get_last(stack_t *stack);
  */
 p_return expr_parse(htab_t *symTable, expression_T *list, instructList_T *iList, char* retVar);
 
-#endif // __PREC_PARSER_H__
+#endif // __EXPR_PARSER_H__
