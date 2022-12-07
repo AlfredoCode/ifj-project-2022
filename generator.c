@@ -463,18 +463,11 @@ void generateCondiCheck(){
     // STRING -> STRING@ -> EQS NOTS 
     printf("LABEL ??condiString\n");
     printf("JUMPIFNEQ ??condiNil GF@temp1 string@string\n");
-    printf("PUSHS string@0\n");
-    printf("JUMPIFEQS ??strCONV\n");
     printf("PUSHS string@\n");
     printf("EQS\n");
     printf("NOTS\n");
     printf("JUMP ??EndcondiCheck\n");
 
-    //strCONV
-    printf("LABEL ??strCONV\n");
-    printf("PUSHS bool@true\n");
-    printf("CLEARS\n");
-    printf("JUMP ??EndcondiCheck\n");
     //NIL
     printf("LABEL ??condiNil\n");
     printf("JUMPIFNEQ ??EndcondiCheck GF@temp1 string@nil\n");
@@ -497,7 +490,6 @@ void generateConditionsW(char *label){
     printf("JUMPIFNEQS %s_end\n",label);
 }
 void generateLocDefVar(stat_t *data){
-    // printf("DEFVAR LF@%s\n", data->name); 
     generateDefvar(data->name);
 }
 
