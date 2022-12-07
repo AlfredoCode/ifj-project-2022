@@ -8,7 +8,7 @@
  * =================================================== *
  */
 
-#include "scanner.h"    // TYPES
+#include "scanner.h"    
 #include "symtable.h"
 #include "ins_list.h"
 
@@ -29,7 +29,7 @@ void generateAdds();
 void generateSubs();
 void generateMuls();
 void generateDivs();
-void generateIDivs(); // Kinda obsolete?
+void generateIDivs();
 
 // RELATION
 // < > ===
@@ -77,11 +77,13 @@ void generateJumpIfEqs(char *label);
 void generateJumpIfNEqs(char *label);
 void generateExit(char *number);        // 0 <= number <= 49
 void generateConditions(char *label);
+void generateConditionsW(char *label);
+void generateCondiCheck();
+
 
 // MISC
 void generateProgramHead();
 void generateMove(char *var, char *symb, INSTRUCTIONS type);
-
 void generateDefvar(char *var);
 void generateLocDefVar(stat_t *data);
 void generateType(char *var, char *symb);
@@ -93,9 +95,9 @@ void generateFunctionEnd();
 // MAIN GENERATE FUNCTION
 
 /**
- * @brief   
- * @param   
- * @param   
+ * @brief   passes through instrList and prints its content depending on operation of instrlist elements.
+ * @param   intstrList to be printed
+ * @param   symList that stores variables of functions
  */
 void generatorInit(instructList_T *instrList, htab_list *symList);
 
@@ -103,9 +105,9 @@ void generatorInit(instructList_T *instrList, htab_list *symList);
 // HELPER FUNCTIONS
 
 /**
- * @brief   
- * @param   
- * @return  
+ * @brief   makes unique name for label
+ * @param   label that needs to be rewrite to be unique 
+ * @return  label that has unique name 
  */
 char *UniqueLabel(char *labelbefore);
 

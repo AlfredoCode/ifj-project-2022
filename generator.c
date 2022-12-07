@@ -65,9 +65,6 @@ void generateWriteCall()
     printf("CALL write\n");
 }
 
-//TODO
-void generateSubstring();
-
 void generateOrd(){
     printf("\n#ORD\n");
     printf("LABEL ord\n");
@@ -178,7 +175,7 @@ void callFloat2Ints()
     printf("CALL float2ints\n");
 }
 
-// STRING TODO
+// STRING
 void generateConcat()
 {
     printf("# STACK CONCAT\n");
@@ -338,7 +335,7 @@ void generateLabelEnd(char *label){
 }
 
 
-
+// UNIQUE LABEL FOR IF-ELSE AND WHILE
 char *UniqueLabel(char *labelbefore){
     char *labelafter = (char *) malloc(strlen(labelbefore) + sizeof(labelcnt) + 3);
     sprintf(labelafter, "%s%d", labelbefore, labelcnt);
@@ -346,13 +343,16 @@ char *UniqueLabel(char *labelbefore){
     return labelafter;
 }
 
+// JUMPS
 void generateJump(char *label){
     printf("JUMP %s\n", label);
 }
 void generateJumpEnd(char *label){
     printf("JUMP %s_end\n", label);
 }
-void generateJumpIfEqs(char *label);
+void generateJumpIfEqs(char *label){
+    printf("JUMPIFEQS %s\n",label);
+}
 
 
 void generateJumpIfNEqs(char *label){
@@ -471,8 +471,6 @@ void generateLocDefVar(stat_t *data){
     // printf("DEFVAR LF@%s\n", data->name); 
     generateDefvar(data->name);
 }
-
-void generateType(char *var, char *symb);
 
 void generateMainStart()
 {
@@ -635,7 +633,6 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
     generateSubstr();
     generateMainStart();
     First(instrList);
-
     while(instrList->activeElement != NULL){
         switch(instrList->activeElement->operation){
             case MOVEI2TF_I:
@@ -851,19 +848,21 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 break;
 
             case JUMPIFEQS_I:
-
-                
+                generateJumpIfEqs(instrList->activeElement->dest);
                 break;
 
             case JUMPIFNEQS_I:
                 generateJumpIfNEqs(instrList->activeElement->dest);  
                 break;
+
             case GENERATE_IF_I:
                 generateConditions(instrList->activeElement->dest);
                 break;
+
             case GENERATE_WHILE_I:
                 generateConditionsW(instrList->activeElement->dest);
                 break;
+
             case EXIT_I:
                 generateExit(instrList->activeElement->op1);
                 break;

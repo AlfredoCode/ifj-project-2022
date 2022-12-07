@@ -91,37 +91,37 @@ typedef struct instructionList{
 }instructList_T;
 
 /**
- * @brief   
- * @param
+ * @brief   initializes instrList before its usage
+ * @param   instrList to be initialized
  */
 void initInstList(instructList_T *instrList);
 
 /**
- * @brief   
- * @param   
+ * @brief   set first element of instrList as active
+ * @param   instrList in which is needed to set first element as active
  */
 void First(instructList_T *instrList);
 
 /**
- * @brief   
- * @param
+ * @brief   moves activity of an element to the next one
+ * @param   instrList in which is needed to move activity 
  */
 void Next(instructList_T *instrList);
 
 /**
- * @brief   
- * @param   
+ * @brief   clears the instrList and frees memory that was using
+ * @param   instrList that has to be cleared
  */
 void Dispose(instructList_T *instrList);
 
 /**
- * @brief   
- * @param   
- * @param
- * @param   
- * @param   
- * @param
- * @return  
+ * @brief   inserts new element to instrList
+ * @param   instrList to be insert in
+ * @param   operation from enum INSTRUCTION
+ * @param   op1 is first operand that the operation uses
+ * @param   op2 is second operad that the operation uses
+ * @param   dest is operand in which is stored the result of operation
+ * @return  number of error code
  */
 int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* op1, char* op2, char* dest); 
 
