@@ -1134,6 +1134,17 @@ int statement_list_inside(htab_t *table, p_return *ret_type){
             return res;
         case ID:    
             funcName = htab_find(funTable, token.string);   // Was function defined before??
+            switch(funcName->value[0]){
+                case 'S': case 's':
+                    *ret_type = ret_string;
+                    break;
+                case 'I': case 'i':
+                    *ret_type = ret_int;
+                    break;
+                case 'F': case 'f':
+                    *ret_type = ret_float;
+                    break;
+            }
             if(funcName == NULL){
                 errHandler(SEM_FUNC_ERR, "Semantic Error ---> FUNCTION NOT DEFINED <---\n");
             }
@@ -1206,6 +1217,7 @@ int separators(htab_t *table, p_return *ret_type){
             //     expr = expr->previous;
             // }
             // putchar('\n');
+           
             char *passPOP;
             if(currentPOP){
             passPOP = malloc(sizeof(char)* strlen(currentPOP));
