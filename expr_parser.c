@@ -15,7 +15,7 @@
 #include "expr_stack.h"
 #include "error.h"
 #include "scanner.h"
-#include "parser.h"
+// #include "parser.h"
 #include "symtable.h"
 
 // Global table for parsing
@@ -41,6 +41,17 @@ const char prec_table [19][19] = {
 /* NUL */{ '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', 'X', '>', 'X', 'X', 'X', 'X', 'X', '>'},
 /*  $  */{ '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', 'X', '<', '<', '<', '<', '<', '$'},
 };
+
+
+expr_El getExpr(expression_T *exprList){
+    if(exprList->activeElement == NULL){
+        exprList->activeElement = exprList->lastElement;
+        return exprList->activeElement; 
+    }
+    exprList->activeElement = exprList->activeElement->previous;
+    return exprList->activeElement;
+}
+
 
 p_symbol tokenToTerminal(token_t *token)
 {

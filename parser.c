@@ -77,14 +77,7 @@ void insertExpr(expression_T *exprList, token_t *token){
 
 }
 
-expr_El getExpr(expression_T *exprList){
-    if(exprList->activeElement == NULL){
-        exprList->activeElement = exprList->lastElement;
-        return exprList->activeElement; 
-    }
-    exprList->activeElement = exprList->activeElement->previous;
-    return exprList->activeElement;
-}
+
 void exprListDispose( expression_T *exprList ) {
 	expr_El firstEl;
 	expr_El nextEl;	// Deklarace dvou pomocných prvků typu ListElementPtr
@@ -361,7 +354,8 @@ int statement_list(htab_t *localTable){
             }
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = separators(localTable);
+            p_return *ret_type;
+            res = separators(localTable, ret_type);
             return res;
         default:
             if((insideIf && token.type == R_BRAC) || (insideWhile && token.type == R_BRAC)){
@@ -622,13 +616,11 @@ int functionCheck(){
             return res;
         }
         if(!(currentReturnType == ret_float || currentReturnType == ret_int || currentReturnType == ret_string)){  // VOID FUNCTION WITHOUT RETURN STATEMENT
+            insertInstruction(iList, FUNC_E_I, NULL, NULL, currentFuncName);
             return SUCCESS_ERR;
         }
+      
         if(token.type != KEYWORD && token.keyword != RETURN){
-            if(!(currentReturnType == ret_float || currentReturnType == ret_int || currentReturnType == ret_string)){
-                insertInstruction(iList, FUNC_E_I, NULL, NULL, currentFuncName);
-                return SUCCESS_ERR;
-            }
             return SEM_PARAM_ERR;   // NO RETURN FOUND
         }
         return res;
@@ -782,10 +774,14 @@ int funcParams(htab_t *localTable, stat_t *statementIn, int index){
                 errHandler(SYNTAX_ERR, "Syntax error ---> EXPECTED IDENTIFIER AFTER TYPE IN FUCNTION <---\n");
             }
             // SEMANTIC
-            statementIn = htab_lookup_add(localTable, token.string);  // ADD PARAM TO LOCAL VAR TABLE
-            if(statementIn->type != 99){
-                errHandler(SEM_PARAM_ERR, "Semantic error PARAMS REDEFINITION\n");
+            if(htab_find(localTable, token.string)){
+                errHandler(SEM_PARAM_ERR, "Semantic error PARAMS REDEFINITION\n"); 
             }
+            statementIn = htab_lookup_add(localTable, token.string);  // ADD PARAM TO LOCAL VAR TABLE
+            // if(statementIn->type != 99){
+            //     errHandler(SEM_PARAM_ERR, "Semantic error PARAMS REDEFINITION\n");
+            // }
+            
             statementIn->type = statement->type;
             // insertInstruction(iList, POPS_I, token.string, NULL, NULL);
             
@@ -1032,12 +1028,13 @@ int expression_check(htab_t *table){
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
+    p_return *ret_type = malloc(sizeof(p_return));
     if(token.type == ASSIG){
         
         // ZAVOLAT EXPRESSION PARSER
-        res = statement_list_inside(table);
+        res = statement_list_inside(table, ret_type);
         // insertInstruction(iList, POPS_I, passPOP, NULL, NULL);
-        
+        statement->type = *ret_type;
         return res;  
     }
     // TODO $x; UNDEF VAR
@@ -1056,12 +1053,13 @@ int expression_check_inside(htab_t *table){
     if(!token_res){
         errHandler(LEX_ERR,"Lexical error\n");
     }
+    p_return *ret_type;
     switch(token.type){
         case ID:
         case INT_T:
         case FLOAT_T:
         case STRING_T:
-            res = separators(table);
+            res = separators(table, ret_type);
             return res;
         default:
             return SYNTAX_ERR;
@@ -1070,7 +1068,7 @@ int expression_check_inside(htab_t *table){
 }
 
 
-int statement_list_inside(htab_t *table){
+int statement_list_inside(htab_t *table, p_return *ret_type){
     int res = SUCCESS_ERR;
 
     token_res = GetToken(&token);  
@@ -1097,7 +1095,7 @@ int statement_list_inside(htab_t *table){
             *expr_tok = token;
             insertExpr(expression, expr_tok);
             // printf("%s is last, %s is first\n",expression->lastElement->token->string, expression->firstElement->token->string);    // DEBUG
-            res = separators(table);
+            res = separators(table, ret_type);
             
                 
             
@@ -1106,7 +1104,7 @@ int statement_list_inside(htab_t *table){
         
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            return statement_list_inside(table);
+            return statement_list_inside(table, ret_type);
         case INT_T: 
         case FLOAT_T: 
         case STRING_T:
@@ -1124,7 +1122,7 @@ int statement_list_inside(htab_t *table){
             }
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = separators(table);
+            res = separators(table, ret_type);
             return res;
         case KEYWORD:
             if(token.keyword != NULL_K){
@@ -1132,7 +1130,7 @@ int statement_list_inside(htab_t *table){
             }
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = separators(table);
+            res = separators(table, ret_type);
             return res;
         case ID:    
             funcName = htab_find(funTable, token.string);   // Was function defined before??
@@ -1186,7 +1184,7 @@ int statement_list_inside(htab_t *table){
     return res;
 }
 
-int separators(htab_t *table){
+int separators(htab_t *table, p_return *ret_type){
     int res = SUCCESS_ERR;
 
     token_res = GetToken(&token);
@@ -1216,7 +1214,7 @@ int separators(htab_t *table){
             else{
                 passPOP = NULL;
             }
-            expr_parse(table, expression, iList, passPOP);
+            *ret_type = expr_parse(table, expression, iList, passPOP);
             // SEMANTIC CHECK - IS EXPRESSION SEMANTICALLY CORRECT? for example $x = 5.5.5.5;
                      // expr_parse(expression_list, symtable);
             // EXPRESSION LIST DISPOSE
@@ -1230,12 +1228,12 @@ int separators(htab_t *table){
         case R_PAR:
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            return separators(table);
+            return separators(table, ret_type);
         case KONKAT: case DIV: case ADD: case SUB: case MUL:    // $x=$y.<IFSTAT> || $x=$y+<IFSTAT> etc.
             
             *expr_tok = token;
             insertExpr(expression, expr_tok);
-            res = statement_list_inside(table);
+            res = statement_list_inside(table, ret_type);
             return res;
         default:
             errHandler(SYNTAX_ERR, "Syntax Error\n");

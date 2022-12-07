@@ -12,8 +12,32 @@
 #include "scanner.h"
 #include "expr_stack.h"
 #include "symtable.h"
-#include "parser.h"
+// #include "parser.h"
 #include "generator.h"
+
+
+
+
+
+
+
+// Used for storing expression tokens
+typedef struct exprElement{
+    token_t *token;
+    struct exprElement *next;
+    struct exprElement *previous;
+}*expr_El;
+
+typedef struct {
+	expr_El firstElement;
+    expr_El lastElement;
+    expr_El activeElement;
+} expression_T;
+
+void expressionInit(expression_T *exprList);
+expr_El getExpr(expression_T *exprList);
+void insertExpr(expression_T *exprList, token_t *token);
+void exprListDispose( expression_T *exprList );
 
 typedef enum {
     ret_bool,

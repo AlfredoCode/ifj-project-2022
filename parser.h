@@ -11,27 +11,11 @@
 #define __PARSER_H__
 #include "scanner.h"
 #include "symtable.h"
-
-
-// Used for storing expression tokens
-typedef struct exprElement{
-    token_t *token;
-    struct exprElement *next;
-    struct exprElement *previous;
-}*expr_El;
-
-typedef struct {
-	expr_El firstElement;
-    expr_El lastElement;
-    expr_El activeElement;
-} expression_T;
+#include "expr_parser.h"
 
 
 
-void expressionInit(expression_T *exprList);
-expr_El getExpr(expression_T *exprList);
-void insertExpr(expression_T *exprList, token_t *token);
-void exprListDispose( expression_T *exprList );
+
 
 
 
@@ -43,10 +27,10 @@ int prog(); // Entry point to LL grammar rules
 int parse();
 int declareCheck();
 int statement_list(struct htab *localTab);
-int statement_list_inside(struct htab *table);
+int statement_list_inside(struct htab *table, p_return *ret_type);
 int expression_check(struct htab *table);
 int expression_check_inside(struct htab *table);
-int separators(struct htab *table);
+int separators(struct htab *table, p_return *ret_type);
 
 int condiCheck(struct htab *table);
 int checkIfStat(struct htab *table);
