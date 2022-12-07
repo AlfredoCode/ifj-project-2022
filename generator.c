@@ -119,23 +119,35 @@ void Dispose(instructList_T *instrList){
 // ======================== GENERATION ==========================
 
 // BUILT-INS TODO
-void generateRead(char *var, INSTRUCTIONS type){
-    switch (type){
-        case READI_I:
-            printf("READ LF@%s int\n", var);             
-            break;
-        case READF_I:
-            printf("READ LF@%s float\n", var);
-            break;
-        case READS_I:
-            printf("READ LF%s string\n", var);
-            break;
-        default: break;
-    }
+void generateRead(){
+    printf("\n#READI\n");
+    printf("LABEL readi\n");
+    printf("READ GF@temp0 int\n");
+    printf("PUSHS GF@temp0\n"); 
+    printf("RETURN\n\n");
+
+    printf("\n#READS\n");
+    printf("LABEL reads\n");
+    printf("READ GF@temp0 string\n");
+    printf("PUSHS GF@temp0\n"); 
+    printf("RETURN\n\n");
+
+    printf("\n#READF\n");
+    printf("LABEL readf\n");
+    printf("READ GF@temp0 float\n");
+    printf("PUSHS GF@temp0\n"); 
+    printf("RETURN\n\n");
+
+    printf("\n#READB\n");
+    printf("LABEL readb\n");
+    printf("READ GF@temp0 bool\n");
+    printf("PUSHS GF@temp0\n"); 
+    printf("RETURN\n\n");
 }
 
 void generateWrite()
 {
+    printf("\n#WRITE\n");
     printf("LABEL write\n");
     printf("LABEL write?while\n");
     printf("POPS GF@temp0\n");
@@ -143,7 +155,7 @@ void generateWrite()
     printf("WRITE GF@temp0\n");
     printf("JUMP write?while\n");
     printf("LABEL write?whileEnd\n");
-    printf("RETURN\n");
+    printf("RETURN\n\n");
 }
 
 void generateWriteCall()
@@ -155,13 +167,26 @@ void generateWriteCall()
 void generateSubstring();
 
 void generateOrd(){
-    generateLabel("Ord");
-    generatePushs("0", PUSHS_INT_I);
+    printf("\n#ORD\n");
+    printf("LABEL ord\n");
+    printf("POPS GF@temp0\n");
+    printf("JUMPIFEQ ordEmpty GF@temp0 string@\n"); 
+    printf("PUSHS GF@temp0\n");
+    printf("PUSHS int@0\n");
     printf("STRI2INTS\n");
-    generateReturn();
+    printf("JUMP ordEnd\n");
+    printf("LABEL ordEmpty\n");
+    printf("PUSHS int@0\n");
+    printf("LABEL ordEnd\n");
+    printf("RETURN\n\n");
 }
 
-void generateChr();
+void generateChr(){
+    printf("\n#CHR\n");
+    printf("LABEL chr\n");
+    printf("INT2CHARS\n");
+    printf("RETURN\n\n");
+}
 
 // ARITHMETIC ON STACK
 void generateAdds()
@@ -212,11 +237,38 @@ void generateNots(){
 }
 
 // COVERSIONS
-void generateInt2Floats(){
+void generateInt2Floats()
+{
+    printf("LABEL int2floats\n");
+    printf("POPS GF@temp0\n");
+    printf("TYPE GF@temp1 GF@temp0\n");
+    printf("PUSHS GF@temp0\n");
+    printf("JUMPIFNEQ ?i2fend GF@temp1 string@int\n");
     printf("INT2FLOATS\n");
+    printf("LABEL ?i2fend\n");
+    printf("RETURN\n");
 }
-void generateFloat2Ints(){
+
+void callInt2Floats()
+{
+    printf("CALL int2floats\n");
+}
+
+void generateFloat2Ints()
+{
+    printf("LABEL float2ints\n");
+    printf("POPS GF@temp0\n");
+    printf("TYPE GF@temp1 GF@temp0\n");
+    printf("PUSHS GF@temp0\n");
+    printf("JUMPIFNEQ ?f2iend GF@temp1 string@float\n");
     printf("FLOAT2INTS\n");
+    printf("LABEL ?f2iend\n");
+    printf("RETURN\n");
+}
+
+void callFloat2Ints()
+{
+    printf("CALL float2ints\n");
 }
 
 // STRING TODO
@@ -229,12 +281,33 @@ void generateConcat()
     printf("PUSHS GF@temp2\n");
 }
 
-void generateStrlen(char *var, char *symb, INSTRUCTIONS type){
-    if(type == STRLENVAR_I){
-        printf("STRLEN LF@%s LF@%s", var, symb); 
-    }else if(type == STRLENKONST_I){
-        printf("STRLEN LF@%s string@%s", var, stringConvertor(symb));
-    }
+void generateStrlen()
+{
+    printf("\n#STRLEN\n");
+    printf("LABEL strlen\n");
+    printf("POPS GF@temp0\n");
+    printf("STRLEN GF@temp1 GF@temp0\n");
+    printf("PUSHS GF@temp1\n");
+    printf("RETURN\n");
+}
+
+void generateSubstr()
+{
+    printf("\n#SUBSTR\n");
+    printf("LABEL substr\n");
+    printf("CREATEFRAME\n");
+    printf("PUSHFRAME\n");
+
+    printf("DEFVAR LF@j\n");
+    printf("DEFVAR LF@i\n");
+    printf("DEFVAR LF@str\n");
+
+    printf("POPS LF@j\n");
+    printf("POPS LF@i\n");
+    printf("POPS LF@str\n");
+    
+    printf("POPFRAME\n");
+    printf("RETURN\n");
 }
 
 void generateGetchar(char *dest, char *op1, char *op2);
@@ -593,9 +666,15 @@ void popInstructions(htab_t *htab)
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList, htab_list *symList){
     generateProgramHead();
-    generateOrd();
+    generateRead();
     generateWrite();
+    generateInt2Floats();
+    generateFloat2Ints();
+    generateOrd();
+    generateChr();
+    generateStrlen();
     generateCondiCheck();
+    generateSubstr();
     generateMainStart();
     First(instrList);
 
@@ -754,32 +833,17 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
                 break;
 
             case INT2FLOATS_I:
-                generateInt2Floats();
+                callInt2Floats();
                 break;
 
             case FLOAT2INTS_I:
-                generateFloat2Ints();
-                break;
-
-            case READI_I:
-                generateRead(instrList->activeElement->op1, instrList->activeElement->operation);
-                break;
-
-            case READS_I:
-                generateRead(instrList->activeElement->op1, instrList->activeElement->operation);
-                break;
-
-            case READF_I:
-                generateRead(instrList->activeElement->op1, instrList->activeElement->operation);
+                callFloat2Ints();
                 break;
 
             case WRITE_I:
                 generateWriteCall();
                 break;
                 
-            case ORD_I:
-                generateCall("Ord");
-                break;
 
             case CONCAT_I:
                 generateConcat();

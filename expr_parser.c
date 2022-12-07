@@ -410,7 +410,7 @@ int evaluate(stack_t *stack, htab_t *symtable, instructList_T *iList)
             break;
 
         case sym_neq:
-            insertInstruction(iList, LTS_I, NULL, NULL, NULL);
+            insertInstruction(iList, EQS_I, NULL, NULL, NULL);
             insertInstruction(iList, NOTS_I, NULL, NULL, NULL);
             evaluate_bool(stack);
             break;

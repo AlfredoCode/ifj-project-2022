@@ -106,7 +106,7 @@ int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* o
 // ============= GENERATION ==================
 // BUILT-INS
 // Read[s|i|f], Write, Substring, Ord, Chr
-void generateRead(char *var, INSTRUCTIONS type);
+void generateRead();
 void generateWrite();
 void generateSubstring(); // TODO and next ones
 void generateOrd();
@@ -142,7 +142,7 @@ void generateFloat2Ints();
 
 // STRING
 void generateConcat(); // Made to work like *S functions
-void generateStrlen(char *dest, char *op, INSTRUCTIONS type);
+void generateStrlen();
 void generateGetchar(char *dest, char *op1, char *op2);
 void generateSetchar(char *dest, char *op1, char *op2);
 
