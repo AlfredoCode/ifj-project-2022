@@ -96,17 +96,6 @@ size_t htab_size(const htab_t * t);
 size_t htab_bucket_count(const htab_t * t);
 
 /**
- * @brief Resizes htab
- * @param t htab
- * @param newn new size
- * 
- * Resizes t to size newn, re-hashing every item.
- * Passed pointer will point to the new htab
- * Unused due to segfaults :(
- */
-void htab_resize(htab_t *t, size_t newn);
-
-/**
  * @brief Finds item in htab
  * @param t htab
  * @param key key to search

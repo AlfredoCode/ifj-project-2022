@@ -59,7 +59,6 @@ htab_t *htab_init(size_t n)
     if(!htab) errHandler(INTERNAL_ERR, "Failed to malloc htab in htab_init.c\n");
 
     htab->arr_ptr = items;
-    
 
     for(size_t i = 0; i < n; i++){
         htab->arr_ptr[i] = NULL;    // easier foreach if all is default null
@@ -81,32 +80,6 @@ size_t htab_bucket_count(const htab_t *t)
     return t->arr_size;
 }
 
-/*
- * Somehow, this thing segfaults no matter what I try.
- * Lets hope we wont need to resize the htab.
- */
-/* 
-void htab_resize(htab_t *t, size_t newn)
-{
-    htab_t *newTab = htab_init(newn);
-    if(newTab == NULL){
-        return;
-    }
-    
-    htab_item_t *currentPtr;
-
-    for(int i = 0; i < t->arr_size; i++){
-        currentPtr = t->arr_ptr[i];
-        while(currentPtr){
-            htab_pair_t *newPair = htab_lookup_add(newTab, currentPtr->pair.key);
-            newPair->value = currentPtr->pair.value;
-            currentPtr = currentPtr->next;
-        }
-    }
-    
-    free(t);
-    *t = *newTab;
-} */
 
 stat_t *htab_find(htab_t *t, htab_key_t key)
 {
@@ -138,7 +111,6 @@ stat_t *htab_lookup_add(htab_t *t, htab_key_t name)
     ptr = malloc(sizeof(htab_item_t));
     if (!ptr) errHandler(INTERNAL_ERR, "Failed to malloc ptr in htab_lookup_add\n");
     
-
     stat_t *statement = malloc(sizeof(stat_t));
 
     statement->name = malloc(strlen(name) + 1);
@@ -148,14 +120,7 @@ stat_t *htab_lookup_add(htab_t *t, htab_key_t name)
     ptr->next = t->arr_ptr[index];
     t->arr_ptr[index] = ptr;
 
-
     t->size++;
-
-    /*
-    if ((t->size / t->arr_size) > AVG_MAX){
-        htab_resize(t, t->arr_size*2);
-    }
-    */
 
     return ptr->statement;
 }
@@ -180,15 +145,7 @@ bool htab_erase(htab_t *t, htab_key_t name)
             free(item);
 
             t->size--;
-
-            /*
-            if ((t->size / t->arr_size) < AVG_MIN){
-              if (t->arr_size > 1){
-                  htab_resize(t, t->arr_size/2);
-              }
-            }
-            */
-        return true;
+            return true;
         }
         prev = item;
         item = item->next;
