@@ -527,9 +527,7 @@ char* stringConvertor(char* stringBefore){
 
     for (size_t i = 0; i < strlen(stringBefore); i++){
         if (
-                stringBefore[i] <= 32 ||
-                stringBefore[i] == 34 ||
-                stringBefore[i] == 35
+                stringBefore[i] <= 32
            ) {
             snprintf(helpString, 5, "\\0%d", stringBefore[i]);
         } else if (stringBefore[i] == 92) { 
@@ -544,8 +542,7 @@ char* stringConvertor(char* stringBefore){
                 // skip next char
                 i++;
             } else {
-                snprintf(helpString, 5, "\\0%d", stringBefore[i]);
-                i++;
+                snprintf(helpString, 5, "\\0%d", stringBefore[++i]);
             }
         } else {
             snprintf(helpString, 5, "%c", stringBefore[i]);
@@ -649,6 +646,7 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
     generateWrite();
     generateInt2Floats();
     generateFloat2Ints();
+    generateStrval();
     generateOrd();
     generateChr();
     generateStrlen();
