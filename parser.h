@@ -14,53 +14,48 @@
 #include "symtable.h"
 #include "expr_parser.h"
 
+
 /**
- * @brief   
- * @return  
+ * @brief   CHECKS IF DECLARE IS PRESENT AND CONTINUES WITH PARSING      
+ * @return  TRUE IF NO ERROR OCCURED OTHERWISE FALSE
  */
 int prog();
 
 /**
- * @brief   
- * @return  
+ * @brief INITIALIZES SYMTABLES ETC, CHECKS PROLOG AND JUMPS INTO FIRST RULE OF LL
+ * @return  TRUE IF PARSING WAS SUCCESSFULL, OTHERWISE FALSE
  */
 int parse();
 
 /**
- * @brief   
- * @return  
+ * @brief   CHECKS IF SEQUENCE OF TOKENS IS WHAT WE EXPECT FROM DECLARE FORMAT
+ * @return  TRUE IF SEQUENCE WAS COMPLETED SUCCESFULLY OTHERWISE FALSE
  */
 int declareCheck();
 
+
 /**
- * @brief   
- * @param   
- * @param   
- * @return  
+ * @brief   CHECKS IF EXPECTED TOKENS ARE PRESENT, THEY ARE PART OF LARGER STATEMENTS, STARTS TO DIVE DEEPER INTO LL
+ * @param table - local/main symtable so we can define our vars
+ * @param ret_type - we have to set the return type of variable for example $x = 5;  
+ * @return  TRUE IF PARSING WAS SUCCESSFULL, OTHERWISE FALSE
  */
 int statement_list(struct htab *localTab);
 
 /**
- * @brief
- * @param
- * @param
- * @return
+ * @brief THESE ARE THE STATEMENTS ASSIGNED TO VAR FOR EXAMPLE <ID> = 5 + 5 - 2;
+ * @param table - local/main symtable so we can define our vars
+ * @param ret_type - we have to set the return type of variable for example $x = 5;    
+ * @return  TRUE IF PARSING WAS SUCCESSFULL, OTHERWISE FALSE
  */
 int statement_list_inside(struct htab *table, p_return *ret_type);
 
 /**
- * @brief   
- * @param   
- * @return  
+ * @brief ASSIGNMENTS TO VAR ARE MANAGED HERE, SYMTABLE ADDITIONS ETC  
+ * @param  table - ACCEPTS local/main symtable
+ * @return TRUE IF PARSING WAS SUCCESSFULL, OTHERWISE FALSE 
  */
 int expression_check(struct htab *table);
-
-/**
- * @brief   
- * @param   
- * @return   
- */
-int expression_check_inside(struct htab *table);
 
 /**
  * @brief   
