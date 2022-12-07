@@ -547,23 +547,4 @@ bool GetToken(token_t *token){
         return false;
     }
 }
-/*
-int main(void){
-    token_t token;
-    while(true){
-        bool rc = GetToken(&token);
-        if (rc == false){
-            printf("Lexikalni chyba\n");
-        }else {
-            printf("Token type: %d\n", token.type);
-        }
-        if (token.string != NULL){
-            printf("Token str: %s\n", token.string);
-        }
-        if (token.type == EOF_T){
-            break;
-        }
-    }
-    return 0;
-}
-*/
+

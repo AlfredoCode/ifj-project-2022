@@ -10,100 +10,10 @@
 
 #include "scanner.h"    // TYPES
 #include "symtable.h"
+#include "ins_list.h"
 
 #ifndef __GENERATOR_H__
 #define __GENERATOR_H__
-
-typedef enum{
-    MOVEI2TF_I,
-    MOVEF2TF_I,
-    MOVES2TF_I,
-    MOVENIL2TF_I,
-    MOVELF2TF_I,
-    MOVETF2TF_I,
-    MOVEI2LF_I,
-    MOVEF2LF_I,
-    MOVES2LF_I,
-    MOVENIL2LF_I,
-    MOVETF2LF_I,
-    MOVELF2LF_I,
-    CREATEFRAME_I,
-    PUSHFRAME_I,
-    POPFRAME_I,
-    DEFVAR_I,
-    DEFVAR_LOC_I,
-    FUNC_S_I,
-    FUNC_E_I,
-    CALL_I,
-    RETURN_I,
-    PUSHS_INT_I,
-    PUSHS_FLOAT_I,
-    PUSHS_STRING_I,
-    PUSHS_ID_I,
-    PUSHS_NIL_I,
-    POPS_I,
-    CLEARS_I,
-    ADDS_I,
-    SUBS_I,
-    MULS_I,
-    DIVS_I,
-    IDIVS_I,
-    LTS_I,
-    GTS_I,
-    EQS_I,
-    ANDS_I,
-    ORS_I,
-    NOTS_I,
-    INT2FLOATS_I,
-    FLOAT2INTS_I,
-    READI_I,
-    READS_I,
-    READF_I,
-    WRITE_I,
-    ORD_I,
-    CONCAT_I,
-    STRLENVAR_I,
-    STRLENKONST_I,
-    GETCHAR_I,
-    SETCHAR_I,
-    TYPE_I,
-    LABEL_I,
-    LABEL_END_I,
-    JUMP_I,
-    JUMPIFEQS_I,
-    JUMP_END_I,
-    JUMPIFNEQS_I,
-    GENERATE_IF_I,
-    GENERATE_WHILE_I,
-    EXIT_I,
-}INSTRUCTIONS;
-
-// ============ INSTRUCTION LIST ============
-
-typedef struct instructionElement{
-    char *op1;
-    char *op2;
-    char *dest;
-    INSTRUCTIONS operation;               
-    struct instructionElement *next;
-    struct instructionElement *previous;
-}*instructElem;
-
-typedef struct instructionList{
-    instructElem firstElement;
-    instructElem lastElement;
-    instructElem activeElement;
-}instructList_T;
-
-void initInstList(instructList_T *instrList);
-void First(instructList_T *instrList );
-void Next(instructList_T *instrList);
-void Dispose(instructList_T *instrList);
-
-//Can possibly be type of instructList_T so we can modify the value in parser and in expr_parser
-int insertInstruction(instructList_T *instrList, INSTRUCTIONS operation, char* op1, char* op2, char* dest); 
-
-// ============= GENERATION ==================
 // BUILT-INS
 // Read[s|i|f], Write, Substring, Ord, Chr
 void generateRead();
@@ -181,10 +91,22 @@ void generateFuncStart(char *funcname);
 void generateFunctionEnd();
 
 // MAIN GENERATE FUNCTION
+
+/**
+ * @brief   
+ * @param   
+ * @param   
+ */
 void generatorInit(instructList_T *instrList, htab_list *symList);
 
 
 // HELPER FUNCTIONS
+
+/**
+ * @brief   
+ * @param   
+ * @return  
+ */
 char *UniqueLabel(char *labelbefore);
 
 /**

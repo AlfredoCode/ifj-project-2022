@@ -100,10 +100,24 @@ typedef struct{
     KEYWORDS keyword;
 } token_t;
 
-// returns KEYWORD if keyword, -1 if not
+/**
+ * @brief   checkf if string is keyword
+ * @param   string to check
+ * @return  KEYWORD, or -1 if not
+ */
 int isKeyword(char *string);
 
+/**
+ * @brief
+ * @return
+ */
 bool GetProlog();
+
+/**
+ * @brief
+ * @param
+ * @return
+ */
 bool GetToken(token_t *token);
 
 #endif // __SCANNER_H__

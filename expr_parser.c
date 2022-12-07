@@ -239,7 +239,7 @@ int evaluate_brackets(stack_t *stack)
     return 0;
 }
 
-int evaluate_concatenation(stack_t *stack, instructList_T *iList)
+int evaluate_concatenation(stack_t *stack)
 {
     stack_token_t *tok1 = stackPeek(stack, 0);
     stack_token_t *tok2 = stackPeek(stack, 2);
@@ -361,7 +361,7 @@ int evaluate(stack_t *stack, htab_t *symtable, instructList_T *iList)
         // sym_con
         case sym_con:
             insertInstruction(iList, CONCAT_I, NULL, NULL, NULL);
-            evaluate_concatenation(stack, iList);
+            evaluate_concatenation(stack);
             break;
         
         // sym_rbr

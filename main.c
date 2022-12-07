@@ -6,11 +6,9 @@
  * =================================================== *
  */
 
-
 #include "scanner.h"
 #include "parser.h"
 #include "error.h"
-
 
 int main(){
     int err_code = 0;

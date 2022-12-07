@@ -78,12 +78,13 @@ int evaluate_brackets(stack_t *stack);
  * Evaluates if concatenation expression is correct.
  * Reduces stack.
  */
-int evaluate_concatenation(stack_t *stack, instructList_T *iList);
+int evaluate_concatenation(stack_t *stack);
 
 /**
  * @brief   evaluates expression
  * @param   stack to evaluate on
  * @param   htab to check vars in
+ * @param   iList to add instructions to
  * @return  1 if error, 0 otherwise
  *
  * Evaluates if expression is correct.
@@ -103,6 +104,8 @@ p_return get_last(stack_t *stack);
  * @param   symbol htab
  * @param   dll of tokens
  * @param   variable to return to
+ * @param   iList to add instructions to
+ * @param   variable to generate pop to
  * @return  final datatype
  */
 p_return expr_parse(htab_t *symTable, expression_T *list, instructList_T *iList, char* retVar);

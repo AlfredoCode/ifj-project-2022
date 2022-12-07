@@ -16,7 +16,6 @@
 
 #include <string.h>     // size_t
 #include <stdbool.h>    // bool
-// #include "parser.h"
 
 typedef const char * htab_key_t;
 

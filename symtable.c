@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
-#include "error.h"
 
 #include "symtable.h"
+#include "error.h"
 
 #define AVG_MIN 3
 #define AVG_MAX 5
@@ -54,15 +54,9 @@ htab_t *htab_init(size_t n)
     htab_t *htab = (htab_t*) malloc(sizeof(htab_t));
     htab_item_t **items = (htab_item_t**) malloc(n * sizeof(htab_item_t));
 
-    if(items == NULL){
-        fprintf(stderr, "Failed to malloc items in htab_init.c");
-        exit(99);
-    }
+    if(!items) errHandler(INTERNAL_ERR, "Failed to malloc items in htab_init.c\n");
 
-    if(htab == NULL){
-        fprintf(stderr, "Failed to malloc htab in htab_init.c");
-        exit(99);
-    }
+    if(!htab) errHandler(INTERNAL_ERR, "Failed to malloc htab in htab_init.c\n");
 
     htab->arr_ptr = items;
     
@@ -142,10 +136,8 @@ stat_t *htab_lookup_add(htab_t *t, htab_key_t name)
     }
     
     ptr = malloc(sizeof(htab_item_t));
-    if (!ptr) {
-        fprintf(stderr, "Failed to alloc ptr in htab_lookup_add\n");
-        exit(99);
-    }
+    if (!ptr) errHandler(INTERNAL_ERR, "Failed to malloc ptr in htab_lookup_add\n");
+    
 
     stat_t *statement = malloc(sizeof(stat_t));
 

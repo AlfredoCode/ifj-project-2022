@@ -13,7 +13,7 @@ file = testfiles/PASS/string.php
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -g
 
 
-all: expr_stack.o expr_parser.o  error.o scanner.o parser.o symtable.o  main.o generator.o expr_list.o
+all: expr_stack.o expr_parser.o  error.o scanner.o parser.o symtable.o  main.o generator.o expr_list.o ins_list.o
 	$(CC) $(CFLAGS) $^ -o ifj22 
 
 run: all
@@ -61,6 +61,8 @@ generator.o: generator.c
 main.o: main.c
 
 generator.o: generator.c
+
+ins_list.o: ins_list.c
 
 
 # CLEANUP
