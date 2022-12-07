@@ -294,7 +294,7 @@ void generateStrlen()
 void generateSubstr()
 {
     printf("\n#SUBSTR\n");
-    printf("LABEL substr\n");
+    printf("LABEL substring\n");
     printf("CREATEFRAME\n");
     printf("PUSHFRAME\n");
 
@@ -305,7 +305,61 @@ void generateSubstr()
     printf("POPS LF@j\n");
     printf("POPS LF@i\n");
     printf("POPS LF@str\n");
+
+    printf("DEFVAR LF@amn\n");
+    printf("DEFVAR LF@out\n");
+
+    // !(i > 0)
+    printf("LT GF@temp0 LF@i INT@0\n");
+    printf("JUMPIFEQ ?substr_nul GF@temp0 bool@true\n");
+
+    // i < strlen(str)
+    printf("STRLEN GF@temp1 LF@str\n");
+    printf("LT GF@temp0 GF@temp1 LF@i\n");
+    printf("JUMPIFEQ ?substr_nul GF@temp0 bool@true\n");
+
+    // i != strlen(str)
+    printf("EQ GF@temp0 GF@temp1 LF@i\n");
+    printf("JUMPIFEQ ?substr_nul GF@temp0 bool@true\n");
+
+    // j < strlen
+    printf("LT GF@temp0 GF@temp1 LF@j\n");
+    printf("JUMPIFEQ ?substr_nul GF@temp0 bool@true\n");
+
+    // i == j
+    printf("JUMPIFEQ ?substr_empty LF@i LF@j\n");
+
+    // j > i && j > 0
+    printf("GT GF@temp0 LF@j LF@i\n");
+    printf("JUMPIFNEQ ?substr_nul GF@temp0 bool@true\n");
+
+
+    printf("SUB LF@amn LF@j LF@i\n");
+
+    printf("MOVE GF@temp2 string@\n");
+
+    printf("LABEL ?substr_while\n");
+    printf("JUMPIFEQ ?substr_whileend LF@amn int@0\n");
+
+    printf("SUB LF@amn LF@amn int@1\n");
+    printf("ADD GF@temp0 LF@amn LF@i\n");
+    printf("GETCHAR GF@temp1 LF@str GF@temp0\n");
+    printf("CONCAT GF@temp2 GF@temp1 GF@temp2\n");
+    printf("JUMP ?substr_while\n");
+
+    printf("LABEL ?substr_whileend\n");
+    printf("PUSHS GF@temp2\n");
+    printf("JUMP ?substr_end\n");
     
+    printf("LABEL ?substr_nul\n");
+    printf("PUSHS nil@nil\n");
+    printf("JUMP ?substr_end\n");
+
+    printf("LABEL ?substr_empty\n");
+    printf("PUSHS string@\n");
+    printf("JUMP ?substr_end\n");
+
+    printf("LABEL ?substr_end\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
 }
