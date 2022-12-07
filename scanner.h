@@ -108,15 +108,15 @@ typedef struct{
 int isKeyword(char *string);
 
 /**
- * @brief
- * @return
+ * @brief check if there is a prolog at the begging of the file
+ * @return true if its there, false if not
  */
 bool GetProlog();
 
 /**
- * @brief
- * @param
- * @return
+ * @brief gets a token based on read characters from source program
+ * @param token is an output parameter containing information about returned token
+ * @return true if sequence is valid, false if not
  */
 bool GetToken(token_t *token);
 
