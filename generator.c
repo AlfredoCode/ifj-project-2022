@@ -490,6 +490,53 @@ void insertFunctionCall(instructList_T *iList, char* funName)
     free(tmp);
 }
 
+void insertArg(stat_t **arr, size_t arrSize, stat_t *stat)
+{
+    for(size_t i = 0; i < arrSize; i++){
+        if (!arr[i]) {
+            arr[i] = stat;
+            return;
+        }
+        if (arr[i]->index < stat->index){
+            for (size_t j = arrSize; j --> i;){
+                arr[j] = arr[j-1];
+            }
+            arr[i] = stat;
+            return;
+        }
+    }
+}
+
+void popInstructions(htab_t *htab)
+{
+    // get arr for all args
+    size_t arrSize = htab->size;
+    stat_t **argArr = calloc(arrSize, sizeof(stat_t*));
+
+    // For each arg in htab
+    for(int i = 0; i < htab->arr_size; i++){
+        if (htab->arr_ptr[i] == NULL){
+            continue;
+        }
+
+        htab_item_t *current_ptr = htab->arr_ptr[i];
+
+        // insert it sorted into the arr
+        while(current_ptr){
+            insertArg(argArr, arrSize, current_ptr->statement);
+            current_ptr = current_ptr->next;
+        }
+    }
+    
+    // pop all items from back to front
+    // tim --> zdravim pana doktora Smrcku o/
+    for (size_t i = arrSize; i --> 0;){
+        printf("POPS LF@%s\n", argArr[i]->name);
+    }
+}
+
+
+
 /*****************************Traverse through list of instructions*****************************/
 void generatorInit(instructList_T *instrList, htab_list *symList){
     generateProgramHead();
@@ -566,8 +613,11 @@ void generatorInit(instructList_T *instrList, htab_list *symList){
             case DEFVAR_LOC_I:
                 symList->activeElement = symList->activeElement->next;
                 if(symList->activeElement != NULL){
-                    htab_for_each(symList->activeElement, generateLocDefVar);    // We have to start from index 1, because on index 0 is funTable
+                    // We have to start from index 1, because on index 0 is funTable
+                    htab_for_each(symList->activeElement, generateLocDefVar);
                 }
+                if(strcmp(instrList->activeElement->dest, "main")) 
+                    popInstructions(symList->activeElement);
                 break;
 
             case CALL_I:
