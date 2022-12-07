@@ -275,7 +275,7 @@ int statement_list(htab_t *localTable){
             }
             if(token.type == L_PAR){
                 insertInstruction(iList, PUSHS_NIL_I, NULL, NULL, NULL);    // PUSHES NIL TO STACK SO WE KNOW WHERE TO STOP
-                res = builtinParams(0);
+                res = builtinParams();
                 if(res != SUCCESS_ERR){
                     errHandler(SYNTAX_ERR,"Syntax error\n");
                 }
@@ -957,7 +957,7 @@ int expression_check(htab_t *table){
     if(token.type == ASSIG){
         
         res = statement_list_inside(table, ret_type);
-        statement->type = *ret_type;
+        statement->type = (int)*ret_type;
         return res;  
     }
     return res;
